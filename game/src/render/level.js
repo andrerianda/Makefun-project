@@ -83,7 +83,8 @@ class Batch {
   }
 }
 
-const lit = (map, extra) => new THREE.MeshLambertMaterial({ map, vertexColors: true, ...extra });
+/** A level material: its texture's own light and dark double as a height map, so seams and tiles catch the sun. */
+const lit = (map, bump, extra) => new THREE.MeshLambertMaterial({ map, vertexColors: true, bumpMap: map, bumpScale: bump, ...extra });
 const colour = (hex) => new THREE.Color(hex);
 const hash = (a, b) => ((Math.round(a * 7) * 73856093) ^ (Math.round(b * 7) * 19349663)) >>> 0;
 const WHITE = colour('#ffffff');
@@ -94,19 +95,20 @@ const LEANS = ['pots', 'anchor', 'lobsterpots', 'pipe'];
 /** Build Porto Vesper into `scene`. Returns `update(time)` for the few things that move. */
 export function buildLevel(scene, tex, kit) {
   const P = PALETTE;
-  const plaster = new Batch(lit(tex.plaster)), roof = new Batch(lit(tex.roof)), cobble = new Batch(lit(tex.cobble));
-  const flag = new Batch(lit(tex.flag)), plank = new Batch(lit(tex.plank)), site = new Batch(lit(tex.site)), stone = new Batch(lit(tex.stone));
-  const crate = new Batch(lit(tex.crate)), wood = new Batch(lit(tex.wood)), trim = new Batch(lit(tex.trim));
+  const plaster = new Batch(lit(tex.plaster, 0.5)), roof = new Batch(lit(tex.roof, 3)), cobble = new Batch(lit(tex.cobble, 3));
+  const flag = new Batch(lit(tex.flag, 2)), plank = new Batch(lit(tex.plank, 2)), site = new Batch(lit(tex.site, 2)), stone = new Batch(lit(tex.stone, 2.5));
+  const crate = new Batch(lit(tex.crate, 2)), trim = new Batch(lit(tex.trim, 0, { emissive: '#ffffff', emissiveMap: tex.glow })); // lit panes glow
   const stucco = P.stucco.map(colour), stoneTint = colour(P.stone), crateTint = colour(P.crate), plankTint = colour('#c79a6a'), woodTint = colour('#7a5334');
   const street = colour('#c2b2a2'), market = colour('#d9c8b0');
   const openAir = (x, y, z) => y > 5.9 || tile(Math.floor(x / CELL + COLS / 2), Math.floor(z / CELL + ROWS / 2)) !== '#';
   const paint = new THREE.MeshLambertMaterial({ vertexColors: true }), glow = new THREE.MeshBasicMaterial({ color: '#ffe2b0', fog: false });
+  const halos = [], at = new THREE.Vector3(); // where the lamps hang, for the haze around them
   /** Stand a kit model in the world. */
   const prop = (name, x, y, z, yaw = 0) => {
     const b = kit.build(name, paint);
     b.root.position.set(x, y, z); b.root.rotation.y = yaw;
-    if (b.glow) b.glow.children[0].material = glow;
     scene.add(b.root);
+    if (b.glow) { b.glow.children[0].material = glow; b.root.updateMatrixWorld(); b.glow.getWorldPosition(at); halos.push(at.x, at.y, at.z); }
     return b.root;
   };
 
@@ -157,7 +159,7 @@ export function buildLevel(scene, tex, kit) {
     } else if (b.kind === 'lintel') plaster.box(b, stucco[b.style], 3, roof, WHITE, 2.4);
     else if (b.kind === 'roof') {
       plank.box(b, plankTint, 1.4, roof, WHITE, 2.4);
-      for (let x = b.x0 + 2; x < b.x1; x += 4) wood.box({ x0: x - 0.15, x1: x + 0.15, y0: b.y0 - 0.35, y1: b.y0, z0: b.z0, z1: b.z1 }, woodTint, 1);
+      for (let x = b.x0 + 2; x < b.x1; x += 4) plank.box({ x0: x - 0.15, x1: x + 0.15, y0: b.y0 - 0.35, y1: b.y0, z0: b.z0, z1: b.z1 }, woodTint, 1);
     } else if (b.kind === 'crate' || b.kind === 'stack') crate.box(b, crateTint, 1.3);
     else if (b.kind === 'low') stone.box(b, stoneTint, 1.6);
     else if (STANDS[b.kind]) {
@@ -178,7 +180,7 @@ export function buildLevel(scene, tex, kit) {
   }
   prop('bell', mid, 20.6, midZ);
 
-  for (const batch of [plaster, roof, cobble, flag, plank, site, stone, crate, wood, trim]) if (batch.i.length) scene.add(batch.mesh());
+  for (const batch of [plaster, roof, cobble, flag, plank, site, stone, crate, trim]) scene.add(batch.mesh());
 
   const add = (geometry, material, x, y, z) => {
     const m = new THREE.Mesh(geometry, material);
@@ -187,11 +189,7 @@ export function buildLevel(scene, tex, kit) {
     return m;
   };
   add(new THREE.ConeGeometry(3.3, 4.2, 4), new THREE.MeshLambertMaterial({ map: tex.roof }), mid, 25.7, midZ).rotation.y = Math.PI / 4;
-  const dial = new THREE.MeshBasicMaterial({ map: label('XII', '#3a2c22', 64), transparent: true });
-  for (const s of [1, -1]) { // a clock face north and south
-    add(new THREE.CircleGeometry(1.35, 24), new THREE.MeshLambertMaterial({ color: '#f7efdc' }), mid, 16.5, s > 0 ? tz1 + 0.03 : tz0 - 0.03).rotation.y = s > 0 ? 0 : Math.PI;
-    add(new THREE.PlaneGeometry(1.2, 0.5), dial, mid, 17.3, s > 0 ? tz1 + 0.05 : tz0 - 0.05).rotation.y = s > 0 ? 0 : Math.PI;
-  }
+  for (const s of [1, -1]) add(new THREE.CircleGeometry(1.35, 24), new THREE.MeshLambertMaterial({ color: '#f7efdc' }), mid, 16.5, s > 0 ? tz1 + 0.03 : tz0 - 0.03).rotation.y = s > 0 ? 0 : Math.PI; // clock faces
 
   // Festoon bulbs and pennants strung across the lanes; the Boathouse's hanging lamps.
   const bulbs = [];
@@ -209,11 +207,21 @@ export function buildLevel(scene, tex, kit) {
     light.position.set(cellX(c), 4.1, cellZ(r));
     scene.add(light);
     add(new THREE.SphereGeometry(0.16, 10, 8), glow, cellX(c), 4.3, cellZ(r));
+    halos.push(cellX(c), 4.3, cellZ(r));
   }
 
-  // The quay: mooring posts on the sea wall, boats riding at anchor.
+  // The quay: mooring posts on the sea wall, boats riding at anchor; out in the bay, the lighthouse and the far shore.
   for (let r = 12; r < 24; r += 3) prop('bollard', cellX(36), 1.1, cellZ(r));
   const afloat = [prop('boat', cellX(38.4), 0, cellZ(13.5), 0.3), prop('rowboat', cellX(37.9), 0, cellZ(18.5), 1.3), prop('boat', cellX(39.3), 0, cellZ(22), -0.5)];
+  prop('lighthouse', 120, 0, -38); prop('shore', 0, 0, 0);
+
+  // The harbour haze catching the light: a soft additive disc around every lamp and every bulb.
+  const haze = (points, size, opacity) => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ map: tex.puff, color: '#ffb060', size, opacity, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })));
+  };
+  haze(halos, 4, 0.3); haze(bulbs, 1.1, 0.5);
 
   for (const [text, c, r, y, turn, height] of SIGNS) {
     const map = label(text, height > 1 ? 'rgba(242,162,58,0.95)' : 'rgba(250,240,220,0.9)');

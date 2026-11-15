@@ -73,10 +73,6 @@ export function makeTextures() {
       g.lineWidth = 16; g.beginPath(); g.moveTo(20, 236); g.lineTo(236, 20); g.stroke();
       g.fillStyle = 'rgba(40,30,20,0.75)'; g.font = 'bold 34px ui-monospace, monospace'; g.fillText('PV-07', 70, 150);
     }),
-    wood: paint(128, 128, (g, w, h, rng) => {
-      g.fillStyle = '#d9d2c8'; g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 70; i++) { g.fillStyle = grey(90, 0.14); g.fillRect(0, rng.int(h), w, 1 + rng.int(2)); }
-    }),
     // Six shuttered windows (three lit from inside) and two doors in one 4 x 2 atlas.
     trim: paint(512, 256, (g, w, h, rng) => {
       for (let i = 0; i < 8; i++) {
@@ -98,6 +94,12 @@ export function makeTextures() {
         }
       }
       speckle(g, w, h, rng, 600, 120, 220);
+    }, false),
+    // The same atlas in the dark: only the lit panes, which the windows give off as their own light.
+    glow: paint(512, 256, (g, w, h) => {
+      g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#ffb45a';
+      for (const i of [1, 3, 5]) g.fillRect((i % 4) * 128 + 40, (i >> 2) * 128 + 14, 48, 92);
     }, false),
     // Soft discs for sprites: smoke and dust (alpha), and a glow for flashes and lamps.
     puff: paint(64, 64, (g) => {

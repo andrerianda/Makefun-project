@@ -1,6 +1,5 @@
 // Dusk over the harbour: a gradient sky with streaks of lit cloud and the first stars, the sun low over the
-// sea, the light and fog that go with it,
-// the water, and a far shore so the town sits somewhere.
+// sea, the light and fog that go with it, and the water.
 import * as THREE from 'three';
 import { PALETTE } from '../config.js';
 
@@ -43,7 +42,7 @@ export function buildSky(scene) {
   }));
   scene.add(dome);
 
-  scene.add(new THREE.HemisphereLight('#ffd6b4', '#6a6c9c', 1.7));
+  scene.add(new THREE.HemisphereLight('#e9c3c4', '#5a5c94', 1.25));
   const sun = new THREE.DirectionalLight(P.sun, 2.9);
   sun.position.copy(SUN).multiplyScalar(90);
   sun.castShadow = true;
@@ -56,20 +55,4 @@ export function buildSky(scene) {
   const sea = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshPhongMaterial({ color: P.sea, specular: '#ffcf9a', shininess: 50 }));
   sea.rotation.x = -Math.PI / 2; sea.position.set(300, -0.9, 0);
   scene.add(sea);
-
-  // The far shore: a headland of dark cones north and south of the bay, and a lighthouse on a rock.
-  const far = new THREE.MeshLambertMaterial({ color: '#4a4468' });
-  for (let i = 0; i < 14; i++) {
-    const a = -2.4 + i * 0.36, r = 230 + (i % 3) * 30;
-    const hill = new THREE.Mesh(new THREE.ConeGeometry(60 + (i % 4) * 18, 26 + (i * 7) % 30, 7), far);
-    hill.position.set(Math.sin(a) * r - 40, 6, Math.cos(a) * r * (i % 2 ? 1 : -1));
-    scene.add(hill);
-  }
-  const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 2.2, 16, 10), new THREE.MeshLambertMaterial({ color: '#f1e6d4' }));
-  tower.position.set(120, 7, -38);
-  const lamp = new THREE.Mesh(new THREE.SphereGeometry(1.5, 10, 8), new THREE.MeshBasicMaterial({ color: '#fff0c0', fog: false }));
-  lamp.position.set(120, 16, -38);
-  const rock = new THREE.Mesh(new THREE.ConeGeometry(11, 5, 7), far);
-  rock.position.set(120, 0, -38);
-  scene.add(tower, lamp, rock);
 }

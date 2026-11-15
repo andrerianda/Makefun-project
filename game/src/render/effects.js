@@ -21,21 +21,15 @@ export function buildEffects(scene, tex, actors, camera, kit) {
   const blasts = pool(BLASTS, () => sprite(THREE.AdditiveBlending));
   const shells = pool(NADES.length * 4, (i) => new THREE.Mesh(new THREE.IcosahedronGeometry(0.07, 0), new THREE.MeshLambertMaterial({ color: NADE_TINT[i % 3] })));
   const clouds = [], fading = [puffs, blasts];
-  const fallen = pool(DROPS, () => new THREE.Group()), steel = new THREE.MeshLambertMaterial({ vertexColors: true }); // dropped rifles
+  const steel = new THREE.MeshLambertMaterial({ vertexColors: true }), fallen = pool(DROPS, () => new THREE.Group()); // kit models; dropped rifles
   const flare = new THREE.PointLight('#ffb060', 0, 22, 1.5);
   scene.add(flare);
 
   // The keg: a banded barrel with a fuse that glows faster as it burns.
-  const keg = new THREE.Group();
-  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.5, 12), new THREE.MeshLambertMaterial({ map: tex.wood, color: '#a06a34' }));
-  barrel.position.y = 0.25; barrel.castShadow = true;
-  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.275, 0.275, 0.07, 12), new THREE.MeshLambertMaterial({ color: '#2a2d30' }));
-  band.position.y = 0.25;
-  const spark = sprite(THREE.AdditiveBlending);
-  spark.material.color.set('#ff7a3a'); spark.position.y = 0.62; spark.scale.setScalar(0.5);
-  const ember = new THREE.PointLight('#ff6a30', 0, 9, 1.6);
+  const keg = kit.build('keg', steel).root, spark = sprite(THREE.AdditiveBlending), ember = new THREE.PointLight('#ff6a30', 0, 9, 1.6);
+  spark.material.color.set('#ff7a3a'); spark.position.y = 0.66;
   ember.position.y = 0.8;
-  keg.add(barrel, band, spark, ember);
+  keg.add(spark, ember);
   keg.visible = false;
   scene.add(keg);
   let pulse = 0;

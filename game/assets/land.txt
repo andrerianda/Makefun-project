@@ -1,0 +1,41 @@
+# CAMPANILE's set pieces beyond the streets, in the model kit's format (see kit.txt and render/kit.js).
+
+# The powder keg as it sits on the ground: staves, three iron bands, the bung and a fuse.
+@ keg
+> root - 0 0 0
+c 0.5 0.5 0.5  0 0.25 0  0 0 0  #a06a34
+c 0.56 0.3 0.56  0 0.25 0  0 0 0  #96602e
+c 0.57 0.05 0.57  0 0.12 0  0 0 0  #2a2d30
+c 0.59 0.05 0.59  0 0.25 0  0 0 0  #2a2d30
+c 0.57 0.05 0.57  0 0.38 0  0 0 0  #2a2d30
+c 0.44 0.02 0.44  0 0.505 0  0 0 0  #7a4f26
+c 0.03 0.14 0.03  0.08 0.56 0  0 0 0.3  #d8c9a0
+
+# The lighthouse on its rock out in the bay; its lamp is the glow bone.
+@ lighthouse
+> root - 0 0 0
+c 2.8 16 4.4  0 7 0  0 0 0  #f1e6d4
+c 3.0 1.2 3.0  0 9.5 0  0 0 0  #b5533a
+c 3.4 0.3 3.4  0 15.1 0  0 0 0  #3a3f45
+n 22 5 0  0 0 0  0 0 0  #4a4468
+n 3.2 1.6 0  0 17.6 0  0 0 0  #3a3f45
+> glow root 0 16 0
+s 2.6 2.6 2.6  0 0 0  0 0 0  #fff0c0
+
+# The far shore: a ring of dusk-blue headlands north and south of the bay.
+@ shore
+> root - 0 0 0
+n 120 26 0  -195 6 170  0 0.0 0  #4a4468
+n 156 33 0  -272 6 -118  0 0.7 0  #4a4468
+n 192 40 0  -328 6 32  0 1.4 0  #4a4468
+n 228 47 0  -263 6 57  0 2.1 0  #4a4468
+n 120 54 0  -253 6 -149  0 2.8 0  #4a4468
+n 156 31 0  -204 6 239  0 3.5 0  #4a4468
+n 192 38 0  -95 6 -223  0 4.2 0  #4a4468
+n 228 45 0  -9 6 258  0 4.9 0  #4a4468
+n 120 52 0  94 6 -257  0 5.6 0  #4a4468
+n 156 29 0  131 6 154  0 6.3 0  #4a4468
+n 192 36 0  202 6 -94  0 7.0 0  #4a4468
+n 228 43 0  250 6 3  0 7.7 0  #4a4468
+n 120 50 0  176 6 79  0 8.4 0  #4a4468
+n 156 27 0  157 6 -169  0 9.1 0  #4a4468
