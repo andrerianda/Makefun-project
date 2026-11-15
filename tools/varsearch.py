@@ -27,6 +27,7 @@ ap.add_argument("--colours", default="white,black")
 ap.add_argument("--variants", default="0-15")
 ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--db", default="/root/makefun-work/var/db.jsonl")
+ap.add_argument("--tag", default=os.environ.get("ENGINE_TAG", "v7"), help="label of the engine's search and evaluation; results are valid for one label")
 ap.add_argument("--stop-on", default="win")
 ap.add_argument("--scenarios", help="explicit list: opponent:colour:opening,...")
 ap.add_argument("--table", action="store_true")
@@ -40,7 +41,8 @@ LN_RE = re.compile(r"\((\d+(?:,\d+){7})\)\[oi\]\*10000")
 assert len(LN_RE.findall(SRC)) == 1, "engine has no single per-opponent budget tuple"
 BUDGET = [int(x) * 10000 for x in LN_RE.search(SRC).group(1).split(",")]
 # the hash leaves out the variant table and the budget tuple: a result holds for its own budget
-EHASH = hashlib.sha256(LN_RE.sub("()[oi]*10000", TB_RE.sub("TB=", SRC)).encode()).hexdigest()[:16]
+EHASH = a.tag
+LEGACY = {"7d66ad0d28f2dc41": "v7"}
 BOOK_ORDER = list(run.BOOK)
 os.makedirs(os.path.dirname(a.db), exist_ok=True)
 
@@ -50,7 +52,7 @@ def load():
     if os.path.exists(a.db):
         for line in open(a.db):
             r = json.loads(line)
-            if r["engine"] == EHASH and r.get("nodes") == BUDGET[run.OPPONENTS.index(r["opponent"])]:
+            if LEGACY.get(r["engine"], r["engine"]) == EHASH and r.get("nodes") == BUDGET[run.OPPONENTS.index(r["opponent"])]:
                 out[(r["opponent"], r["colour"], r["opening"], r["variant"])] = r
     return out
 

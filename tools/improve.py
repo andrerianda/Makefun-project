@@ -26,6 +26,7 @@ ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--min-plies", type=int, default=0, help="leave scenarios already won in at most this many plies")
 ap.add_argument("--hours", type=float, default=99.0)
 ap.add_argument("--db", default="/root/makefun-work/var/db.jsonl")
+ap.add_argument("--tag", default=os.environ.get("ENGINE_TAG", "v7"), help="label of the engine's search and evaluation; results are valid for one label")
 a = ap.parse_args()
 
 DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -33,7 +34,8 @@ SRC = open(a.engine).read()
 TB_RE = re.compile(r"^TB=.*$", re.M)
 LN_RE = re.compile(r"\((\d+(?:,\d+){7})\)\[oi\]\*10000")
 BUDGET = [int(x) * 10000 for x in LN_RE.search(SRC).group(1).split(",")]
-EHASH = hashlib.sha256(LN_RE.sub("()[oi]*10000", TB_RE.sub("TB=", SRC)).encode()).hexdigest()[:16]
+EHASH = a.tag
+LEGACY = {"7d66ad0d28f2dc41": "v7"}
 lo, hi = (int(x) for x in a.variants.split("-"))
 opps = a.opps.split(",")
 tmpdir = tempfile.mkdtemp(prefix="var-")
@@ -47,7 +49,7 @@ def load():
     best, tried = {}, {}
     for line in open(a.db):
         r = json.loads(line)
-        if r["engine"] != EHASH or r.get("nodes") != BUDGET[run.OPPONENTS.index(r["opponent"])]:
+        if LEGACY.get(r["engine"], r["engine"]) != EHASH or r.get("nodes") != BUDGET[run.OPPONENTS.index(r["opponent"])]:
             continue
         k = (r["opponent"], r["colour"], r["opening"])
         tried.setdefault(k, set()).add(r["variant"])
