@@ -124,7 +124,7 @@ export function buildLevel(scene, tex, kit) {
   let lamps = 0;
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
     const t = tile(c, r);
-    if (t === '#' || t === '~') continue;
+    if (t === '#' || t === 'K' || t === '~') continue;
     const x = cellX(c), z = cellZ(r), zone = zoneAt(x, z);
     const batch = t === 'A' || t === 'B' ? site : zone === 'Fish Market' ? flag : zone === 'Boathouse' ? plank : cobble;
     batch.face([x - 1, 0, z + 1], [1, 0, 0], [0, 0, -1], CELL, CELL, [0, 1, 0], batch === plank ? plankTint : batch === cobble ? street : market, batch === cobble ? 1.7 : batch === plank ? 1.4 : 3);
@@ -137,7 +137,7 @@ export function buildLevel(scene, tex, kit) {
 
   for (const b of boxes) {
     const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, k = hash(cx, cz);
-    if (b.kind === 'wall' && (cx || cz !== -12)) { // the campanile replaces the house at (0, -12)
+    if (b.kind === 'wall') {
       plaster.box(b, stucco[b.style], 3, roof, WHITE, 2.4, openAir);
       roof.box({ x0: b.x0 - 0.28, x1: b.x1 + 0.28, z0: b.z0 - 0.28, z1: b.z1 + 0.28, y0: b.y1, y1: b.y1 + 0.24 }, WHITE, 2.4);
       if (k % 2) prop('chimney', cx + 0.4, b.y1 + 0.2, cz - 0.3);
@@ -171,7 +171,7 @@ export function buildLevel(scene, tex, kit) {
   }
 
   // The campanile: a pale shaft over Bell Square, an open belfry with its bell, a tiled spire. Every lane sees it.
-  const tx0 = cellX(19) - 1.06, tx1 = cellX(20) + 1.06, tz0 = cellZ(7) - 1.06, tz1 = cellZ(8) + 1.06, mid = (tx0 + tx1) / 2, midZ = (tz0 + tz1) / 2, pale = colour('#f0dcb8');
+  const tower = boxes.find((b) => b.kind === 'tower'), tx0 = tower.x0 - 0.06, tx1 = tower.x1 + 0.06, tz0 = tower.z0 - 0.06, tz1 = tower.z1 + 0.06, mid = (tx0 + tx1) / 2, midZ = (tz0 + tz1) / 2, pale = colour('#f0dcb8');
   plaster.box({ x0: tx0, x1: tx1, z0: tz0, z1: tz1, y0: 0, y1: 20 }, pale, 3, stone, stoneTint, 1.6);
   for (const [dx, dz] of [[tx0, tz0], [tx1 - 0.6, tz0], [tx0, tz1 - 0.6], [tx1 - 0.6, tz1 - 0.6]]) plaster.box({ x0: dx, x1: dx + 0.6, z0: dz, z1: dz + 0.6, y0: 20, y1: 23.2 }, pale, 3);
   roof.box({ x0: tx0 - 0.3, x1: tx1 + 0.3, z0: tz0 - 0.3, z1: tz1 + 0.3, y0: 23.2, y1: 23.6 }, WHITE, 2.4);

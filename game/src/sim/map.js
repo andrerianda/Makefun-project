@@ -3,7 +3,7 @@
 // run north: Net Row to the Fish Market (site A), Bell Lane through the gate under the campanile, and
 // the Quay to the Boathouse (site B). Each lane is a chicane, never a straight shooting gallery: a house
 // juts in from one side, then the other. Two offset alleys, Cooper's Cut and the Chandlery, link the lanes.
-//   # house   a archway   . cobbles   , market flags   ; boathouse planks   ~ sea   w low wall
+//   # house   K campanile   a archway   . cobbles   , market flags   ; boathouse planks   ~ sea   w low wall
 //   c crate   C crate stack   b barrels   p planter   s market stall   f fountain   h hull on stocks
 //   v handcart   t cafe table   n fishing nets   k sacks
 const ROWS_TEXT = [
@@ -14,8 +14,8 @@ const ROWS_TEXT = [
   '###.s..,AA,.c######..######k.;BB;.n..###',
   '###....,AA,..#..p......p..#..;BB;....###',
   '###.f..,AA,.v#.t........t.#..;BB;.h..###',
-  '###....,,,,..a.....##.....a..;;;;....###',
-  '###.c........a.....##.....a..c.....c.###',
+  '###....,,,,..a.....KK.....a..;;;;....###',
+  '###.c........a.....KK.....a..c.....c.###',
   '###....s..C..#..........v.#..C..##...###',
   '###.s..s.....#..w......w..#..........###',
   '####aa#############aa############aa#####',
@@ -79,18 +79,19 @@ const box = (x0, y0, z0, x1, y1, z1, kind, soft, style = 0) => boxes.push({ x0, 
     for (let c = 0; c < COLS; c++) {
       const t = tile(c, r);
       const x = cellX(c), z = cellZ(r), h = CELL / 2;
-      if (t === '#') {
+      if (t === '#' || t === 'K') {
         if (taken[r * COLS + c]) continue;
         // Greedy rectangles, capped so a long terrace breaks into houses of different height and colour.
         const k = hash(c, r), maxW = 2 + (k % 4), maxD = 2 + ((k >> 3) % 4);
         let w = 1, d = 1;
-        while (w < maxW && tile(c + w, r) === '#' && !taken[r * COLS + c + w]) w++;
+        while (w < maxW && tile(c + w, r) === t && !taken[r * COLS + c + w]) w++;
         grow: while (d < maxD && r + d < ROWS) {
-          for (let i = 0; i < w; i++) if (tile(c + i, r + d) !== '#' || taken[(r + d) * COLS + c + i]) break grow;
+          for (let i = 0; i < w; i++) if (tile(c + i, r + d) !== t || taken[(r + d) * COLS + c + i]) break grow;
           d++;
         }
         for (let j = 0; j < d; j++) for (let i = 0; i < w; i++) taken[(r + j) * COLS + c + i] = 1;
-        box(x - h, 0, z - h, x - h + w * CELL, 6 + ((k >> 6) % 7) * 0.6, z - h + d * CELL, 'wall', false, k % 6);
+        if (t === 'K') box(x - h, 0, z - h, x - h + w * CELL, 20, z - h + d * CELL, 'tower', false); // the campanile's shaft
+        else box(x - h, 0, z - h, x - h + w * CELL, 6 + ((k >> 6) % 7) * 0.6, z - h + d * CELL, 'wall', false, k % 6);
         continue;
       }
       if (t === '~') continue;

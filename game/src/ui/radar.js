@@ -14,7 +14,7 @@ export function createRadar(canvas) {
   b.fillStyle = '#1b1d30'; b.fillRect(0, 0, base.width, base.height);
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
     const t = tile(c, r);
-    b.fillStyle = t === '~' ? '#2c4f66' : t === 'A' || t === 'B' ? '#a8752f' : walk[r * COLS + c] ? '#5c5a70' : t === '#' ? '#1b1d30' : '#3a394c';
+    b.fillStyle = t === '~' ? '#2c4f66' : t === 'A' || t === 'B' ? '#a8752f' : walk[r * COLS + c] ? '#5c5a70' : t === '#' || t === 'K' ? '#1b1d30' : '#3a394c';
     b.fillRect(c * S, r * S, S + 0.5, S + 0.5);
   }
   b.fillStyle = '#f4ead8'; b.font = '800 13px sans-serif'; b.textAlign = 'center';
