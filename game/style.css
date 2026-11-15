@@ -17,9 +17,9 @@ ul { list-style: none; margin: 0; padding: 0; }
 #blind { position: absolute; inset: 0; opacity: 0; background: #fffdf2; }
 #from { position: absolute; left: 50%; top: 50%; opacity: 0; }
 #from i { position: absolute; left: -90px; top: -200px; width: 180px; height: 30px; border-top: 6px solid var(--alarm); border-radius: 50%; }
-/* The Meridian's glass: a clear lens in a hairline ring, the world outside it dimmed but still visible, and a
-   reticle that hides nothing: a short fine cross with a gap and a saffron dot, held by four thin stubs at the rim. */
-#scope { position: absolute; inset: 0; display: none; --ink: rgba(5, 6, 12, 0.85); background: radial-gradient(circle at center, transparent 0 41vh, rgba(5, 6, 12, 0.3) calc(46vh - 2px), var(--ink) calc(46vh - 2px) 46vh, rgba(5, 6, 12, 0.6) calc(46vh + 1px), rgba(5, 6, 12, 0.72) 100vh); }
+/* The Meridian's glass: a clear lens in a black tube, and a reticle that hides nothing: a short fine cross with
+   a gap and a saffron dot, held by four thin stubs at the rim. */
+#scope { position: absolute; inset: 0; display: none; --ink: rgba(5, 6, 12, 0.85); background: radial-gradient(circle at center, transparent 0 42vh, rgba(5, 6, 12, 0.35) calc(46vh - 1px), #05060c 46vh); }
 #scope::before, #scope::after { content: ''; position: absolute; --stub: var(--ink) 0 7%, transparent 7% 93%, var(--ink) 93%; }
 #scope::before { top: calc(50% - 1px); height: 3px; left: calc(50% - 46vh); right: calc(50% - 46vh); background: linear-gradient(90deg, var(--stub)); }
 #scope::after { left: calc(50% - 1px); width: 3px; top: 4vh; bottom: 4vh; background: linear-gradient(180deg, var(--stub)); }

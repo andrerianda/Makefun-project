@@ -16,6 +16,6 @@ await page.evaluate(([c, r, yaw]) => {
   a.slots[0] = 'meridian'; a.mag[0] = 5; a.res[0] = 15; a.slot = 0; a.scoped = true; a.swap = 0;
 }, [+c, +r, +yaw]);
 await page.waitForTimeout(1200);
-await page.screenshot({ path: '/root/makefun/shots/scope.jpg', type: 'jpeg', quality: 80 });
+await page.screenshot({ path: '/root/makefun/shots/scope.jpg', type: 'jpeg', quality: 80, timeout: 150000 });
 console.log(JSON.stringify({ logs }));
 await browser.close();
