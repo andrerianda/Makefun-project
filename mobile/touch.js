@@ -71,10 +71,12 @@ button('GO B', 'right:150px;top:138px', () => tapKey('KeyX', 'x'));
 button('ON ME', 'right:60px;top:138px', () => tapKey('KeyG', 'g'));
 ['1', '2', '3', '4'].forEach((n, i) => button(n, `left:${350 + i * 86}px;bottom:20px`, () => tapKey(`Digit${n}`, n)));
 
-// The buy counter's rows answer a tap with the key printed on them.
+// The buy counter's rows answer a tap with the key printed on them; the menu's links (bot level, watch a match)
+// reload this page with their query instead of leaving for the desktop one.
 document.addEventListener('click', (e) => {
-  const row = e.target.closest ? e.target.closest('#shopRows .row') : null;
+  const row = e.target.closest ? e.target.closest('#shopRows .row') : null, link = e.target.closest ? e.target.closest('#links a') : null;
   if (row) { const k = row.querySelector('kbd').textContent.toLowerCase(); tapKey(`Key${k.toUpperCase()}`, k); }
+  if (link) { e.preventDefault(); location.search = link.getAttribute('href'); }
 });
 
 // The stick: where the thumb sits relative to the pad's centre decides which of W, A, S, D are down.
