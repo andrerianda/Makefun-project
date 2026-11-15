@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/threejs-fps-02/andrerianda/Makefun-project/rank.svg)](https://make.fun/bounty/threejs-fps-02/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=threejs-fps-02)
 [![reward](https://make.fun/badge/threejs-fps-02/andrerianda/Makefun-project/reward.svg)](https://make.fun/bounty/threejs-fps-02?utm_source=github&utm_medium=readme&utm_campaign=threejs-fps-02)
 
-CAMPANILE is a 5v5 round-based tactical first-person shooter on three.js, set in a pastel harbour town at dusk. The Smugglers carry a powder keg to the Fish Market or the Boathouse and light it; the Wardens hold both sites and douse the fuse, and the two crews swap sides at half-time. Money between rounds buys rifles, armour and grenades, standing still shoots straight, and the bots run plays, rotate and call their contacts on the radio.
+CAMPANILE is a 5v5 round-based tactical first-person shooter on three.js, set in a pastel harbour town at dusk. The Smugglers carry a powder keg to the Fish Market or the Boathouse and light it; the Wardens hold both sites and douse the fuse, and the two crews swap sides at half-time. Money between rounds buys rifles, armour and grenades, standing still shoots straight, and the bots run plays, rotate and call their contacts on the radio, read out in the browser's own voice.
 
 ![A firefight in the Fish Market](screenshots/1-firefight.jpg)
 
@@ -41,7 +41,7 @@ A rifle falls where its owner dies; walk over it with no rifle of your own and i
 - `game/src/ui/`, `audio.js` and `input.js` are the HUD, the synthesised sound and the controls.
 - `main.ts` hands the entry in: it copies `game/` and `screenshots/` to the output directory and writes the dossier.
 
-The two sides are tuned against each other by playing bot-only matches headless: over 32 matches of twelve rounds the attackers took 51% of the rounds, and the crew that attacked first won 10 matches to the other's 15, with 7 drawn.
+The two sides are tuned against each other by playing bot-only matches headless: over 128 matches of twelve rounds the attackers took 52% of the rounds, and each crew won 50 matches, with 28 drawn.
 
 Every map, name, texture and sound here is original; three.js 0.187.0 (MIT) is the only third-party code.
 
