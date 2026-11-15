@@ -2,7 +2,7 @@
 // All of it comes from fixed pools, made at load or on first use; a firefight allocates nothing.
 import * as THREE from 'three';
 import { NADES } from '../config.js';
-import { DROPS, overShoulder } from '../sim/state.js';
+import { DROPS, NADE_POOL, overShoulder } from '../sim/state.js';
 
 const TRACERS = 36, MARKS = 96, PUFFS = 48, CLOUD = 9, BLASTS = 4;
 const NADE_TINT = ['#4c6b3a', '#e8e2d0', '#8fa3b0'];
@@ -19,7 +19,7 @@ export function buildEffects(scene, tex, actors, camera, kit) {
   const sprite = (blending) => new THREE.Sprite(new THREE.SpriteMaterial({ map: tex.puff, transparent: true, depthWrite: false, blending }));
   const puffs = pool(PUFFS, () => sprite(THREE.NormalBlending));
   const blasts = pool(BLASTS, () => sprite(THREE.AdditiveBlending));
-  const shells = pool(NADES.length * 4, (i) => new THREE.Mesh(new THREE.IcosahedronGeometry(0.07, 0), new THREE.MeshLambertMaterial({ color: NADE_TINT[i % 3] })));
+  const shells = pool(NADE_POOL, (i) => new THREE.Mesh(new THREE.IcosahedronGeometry(0.07, 0), new THREE.MeshLambertMaterial({ color: NADE_TINT[i % 3] })));
   const clouds = [], fading = [puffs, blasts];
   const steel = new THREE.MeshLambertMaterial({ vertexColors: true }), fallen = pool(DROPS, () => new THREE.Group()); // kit models; dropped rifles
   const flare = new THREE.PointLight('#ffb060', 0, 22, 1.5);
@@ -28,10 +28,9 @@ export function buildEffects(scene, tex, actors, camera, kit) {
   // The keg: a banded barrel with a fuse that glows faster as it burns.
   const keg = kit.build('keg', steel).root, spark = sprite(THREE.AdditiveBlending), ember = new THREE.PointLight('#ff6a30', 0, 9, 1.6);
   spark.material.color.set('#ff7a3a'); spark.position.y = 0.66;
-  ember.position.y = 0.8;
-  keg.add(spark, ember);
+  keg.add(spark);
   keg.visible = false;
-  scene.add(keg);
+  scene.add(keg, ember); // in the scene for good: a changing light count recompiles shaders
   let pulse = 0;
 
   const puff = (x, y, z, color, size, life) => {
@@ -111,13 +110,13 @@ export function buildEffects(scene, tex, actors, camera, kit) {
         g.add(gun);
       }
 
-      const k = state.keg;
-      keg.visible = k.state === 'dropped' || k.state === 'planted' || k.state === 'doused';
+      const k = state.keg, lit = k.state === 'planted';
+      keg.visible = lit || k.state === 'dropped' || k.state === 'doused';
+      ember.intensity = lit ? 2 + pulse * 16 : 0;
       if (keg.visible) {
-        keg.position.set(k.x, 0, k.z);
+        keg.position.set(k.x, 0, k.z); ember.position.set(k.x, 0.8, k.z);
         pulse = Math.max(0, pulse - dt * 4);
-        const lit = k.state === 'planted';
-        spark.visible = lit; spark.scale.setScalar(0.35 + pulse * 0.6); ember.intensity = lit ? 2 + pulse * 16 : 0;
+        spark.visible = lit; spark.scale.setScalar(0.35 + pulse * 0.6);
       }
     },
   };

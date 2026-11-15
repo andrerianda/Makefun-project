@@ -65,7 +65,7 @@ export function createView(host, state, kit, sharp) {
       const ex = a.px + (a.x - a.px) * alpha, ey = a.py + (a.y - a.py) * alpha + (a.alive ? eyeHeight(a) : 0.35), ez = a.pz + (a.z - a.pz) * alpha;
       const third = overShoulder(st);
       camera.position.set(ex, ey, ez);
-      camera.rotation.set(a.pitch + a.punchP * 0.6 + Math.sin(st.time * 47) * jitter, a.yaw + a.punchY * 0.6 + Math.cos(st.time * 53) * jitter, a.alive ? 0 : 0.5);
+      camera.rotation.set(a.cmd.pitch + a.punchP * 0.6 + Math.sin(st.time * 47) * jitter, a.cmd.yaw + a.punchY * 0.6 + Math.cos(st.time * 53) * jitter, a.alive ? 0 : 0.5);
       if (third) {
         // Over the shoulder: back along the aim until a wall is in the way, then turned to look at the point
         // the muzzle is on, so the crosshair still marks where the round lands.

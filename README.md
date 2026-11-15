@@ -22,7 +22,7 @@ python3 -m http.server --directory game 8080   # then open http://localhost:8080
 
 | Keys | |
 | --- | --- |
-| W A S D, Space, Ctrl or C, Shift | move, jump, crouch (steadier aim), walk silently |
+| W A S D, Space, C, Shift | move, jump, crouch (steadier aim), walk silently |
 | Mouse, R | aim and fire, right button for the scope; reload |
 | 1 2 3 4 | rifle, sidearm, blade, grenades (frag, flash, smoke) |
 | B | the buy counter, open in the first seconds of a round near your spawn |

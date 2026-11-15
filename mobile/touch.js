@@ -58,7 +58,7 @@ root.lastChild.className = 'fire';
 button('SCOPE', 'right:200px;bottom:150px', () => mouse('mousedown', 2), () => mouse('mouseup', 2));
 button('RELOAD', 'right:200px;bottom:225px', ...hold('KeyR'));
 button('JUMP', 'right:60px;bottom:330px', () => tapKey('Space', ' '));
-button('CROUCH', 'right:150px;bottom:330px', ...hold('ControlLeft'), 'toggle');
+button('CROUCH', 'right:150px;bottom:330px', ...hold('KeyC'), 'toggle');
 button('WALK', 'right:250px;bottom:330px', ...hold('ShiftLeft'), 'toggle');
 button('USE', 'right:300px;bottom:150px', ...hold('KeyE'));
 button('BUY', 'right:60px;top:76px', () => tapKey('KeyB', 'b'));

@@ -23,7 +23,7 @@ const makeJob = () => ({ x: 0, z: 0, wx: 0, wz: 0, hold: false, quiet: false, na
 export function makeCoach(team) {
   const jobs = [];
   for (let i = 0; i < TEAM_SIZE; i++) jobs.push(makeJob());
-  return { team, side: ATT, play: 'default', site: 'A', hitAt: 0, go: false, lit: false, jobs, threat: { A: 0, B: 0 }, rotated: false, saidT: -9, think: 0, douser: -1, fetcher: -1, px: 0, pz: 0, lastSite: 'B' };
+  return { team, side: ATT, play: 'default', site: 'A', hitAt: 0, go: false, lit: false, jobs, threat: { A: 0, B: 0 }, rotated: false, saidT: -9, said: '', think: 0, douser: -1, fetcher: -1, px: 0, pz: 0, lastSite: 'B' };
 }
 
 function post(j, p, hold, site) {
@@ -33,10 +33,10 @@ function post(j, p, hold, site) {
 
 const holdSite = (c, site) => c.jobs.forEach((j, i) => post(j, HOLDS[site][i % HOLDS[site].length], true, site));
 
-/** A line on the team radio, at most one every few seconds so the feed stays readable. */
+/** A line on the team radio, at most one every few seconds and never the same call twice running, so the feed stays readable. */
 function radio(state, c, a, text, force = false) {
-  if (!a || (!force && state.time - c.saidT < 3)) return;
-  c.saidT = state.time;
+  if (!a || (!force && (state.time - c.saidT < 3 || text === c.said))) return;
+  c.saidT = state.time; c.said = text;
   emit(state, 'radio', a.id, -1, a.x, a.y, a.z, 0, text);
 }
 const speaker = (state, c) => state.actors.find((a) => a.team === c.team && a.alive && a.bot);

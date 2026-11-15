@@ -6,7 +6,8 @@ import { makeRng } from './rng.js';
 export const ATT = 0, DEF = 1; // a side: attacking or defending this half
 export const TEAM_SIZE = 5;
 export const DROPS = 8; // rifles that can lie on the ground at once
-const EVENTS = 256, SOUNDS = 32, NADE_POOL = 12;
+const EVENTS = 256, SOUNDS = 32;
+export const NADE_POOL = 12;
 
 function makeActor(id) {
   const team = id < TEAM_SIZE ? 0 : 1;

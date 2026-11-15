@@ -45,7 +45,7 @@ export function buildActors(scene, state, tex, kit) {
         const side = sideOf(st, a), f = rigs[a.id][side], b = f.b, r = b.root, id = a.slots[a.slot] || NADES[a.nadeSel].id;
         // A figure carries the model the player holds in first person, built when first needed.
         const g = f.guns[id] ||= kit.build(`fp_${id}`, cloth);
-        if (g.root.parent !== b.gun) { b.gun.clear(); b.gun.add(g.root); g.root.position.copy(g.carry.position); g.tip.add(f.flash); }
+        if (f.flash.parent !== g.tip) { b.gun.clear(); b.gun.add(g.root); g.root.position.copy(g.carry.position); g.tip.add(f.flash); }
         rigs[a.id][1 - side].b.root.visible = false;
         r.visible = (a.alive || a.deadT < 6) && !(a.id === unseen && a.alive);
         f.fall = a.alive ? 0 : Math.min(1, f.fall + dt * 3); // the dead tip over backwards and lie there

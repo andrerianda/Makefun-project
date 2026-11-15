@@ -143,7 +143,7 @@ export function buildLevel(scene, tex, kit) {
 
   for (const b of boxes) {
     const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, k = hash(cx, cz);
-    if (b.kind === 'wall') {
+    if (b.kind === 'wall' && (cx || cz !== -12)) { // the campanile replaces the house at (0, -12)
       plaster.box(b, stucco[b.style], 3, roof, WHITE, 2.4, openAir);
       roof.box({ x0: b.x0 - 0.28, x1: b.x1 + 0.28, z0: b.z0 - 0.28, z1: b.z1 + 0.28, y0: b.y1, y1: b.y1 + 0.24 }, WHITE, 2.4);
       if (k % 2) prop('chimney', cx + 0.4, b.y1 + 0.2, cz - 0.3);
@@ -206,7 +206,7 @@ export function buildLevel(scene, tex, kit) {
     for (let x = x0 + 2; x < x1; x += 4) prop('bunting', x, 5.5, z + 1);
   };
   for (const r of [13, 17, 22]) { festoon(cellX(18) - 1, cellX(21) + 1, cellZ(r)); festoon(cellX(3) - 1, cellX(6) + 1, cellZ(r + 1)); }
-  for (const r of [3, 8]) festoon(cellX(14) - 1, cellX(25) + 1, cellZ(r));
+  for (const r of [3, 9]) festoon(cellX(14) - 1, cellX(25) + 1, cellZ(r));
   const string = new THREE.InstancedMesh(new THREE.SphereGeometry(0.11, 8, 6), glow, bulbs.length / 3), spot = new THREE.Object3D();
   for (let i = 0; i < bulbs.length; i += 3) { spot.position.set(bulbs[i], bulbs[i + 1], bulbs[i + 2]); spot.updateMatrix(); string.setMatrixAt(i / 3, spot.matrix); }
   scene.add(string);

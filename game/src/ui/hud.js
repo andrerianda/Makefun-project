@@ -49,7 +49,7 @@ export function createHud(state) {
     const st = state, view = st.viewId, me = st.actors[view];
     if (e.type === 'kill') {
       const killer = e.a >= 0 ? st.actors[e.a] : null, how = WEAPONS[e.s] ? WEAPONS[e.s].name : e.s === 'keg' ? 'the keg' : 'Crackler';
-      if (e.b === 0) recap = killer ? `${killer.name} got you with ${how} · ${Math.ceil(killer.hp)} hp left · ` : '';
+      if (e.b === 0) recap = killer ? `${killer.name} got you with ${how} · ${Math.ceil(killer.hp)} hp left` : '';
       line(el.feed, `${killer ? named(killer) : ''}<i>${how}${e.n & 1 ? ' &middot; head' : ''}${e.n & 2 ? ' &middot; through cover' : ''}</i>${named(st.actors[e.b])}`, e.a === view || e.b === view ? 'mine' : '', 5);
     } else if (e.type === 'radio' && st.actors[e.a].team === me.team) line(el.radio, `${named(st.actors[e.a])} ${e.s}`, '', 4);
     else if (e.type === 'hurt' && e.b === view && e.a !== view) { hitT = 0.18; el.hitmark.className = e.s === 'head' ? 'head' : ''; }
@@ -127,7 +127,7 @@ export function createHud(state) {
       put(el.prompt.firstElementChild, prompt);
       put(el.bar, progress >= 0 ? 'block' : 'none', 'display');
       put(el.bar.firstElementChild, Math.min(100, Math.round(progress * 100)), 'width', percent);
-      put(el.watching, me.alive ? '' : `${recap}${a !== me ? `WATCHING ${a.name.toUpperCase()}` : ''}`);
+      put(el.watching, me.alive ? '' : `${recap}${a !== me ? ` · WATCHING ${a.name.toUpperCase()}` : ''}`);
       radar.draw(st);
       shop.update(st); board.update(st);
     },

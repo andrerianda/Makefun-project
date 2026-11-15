@@ -17,6 +17,6 @@ const found = await page.evaluate(([maxS, pred, pre]) => {
   return null;
 }, [+maxS, pred, pre]);
 await page.waitForTimeout(1500);
-await page.screenshot({ path: out, type: 'jpeg', quality: 84 });
+await page.screenshot({ path: out, type: 'jpeg', quality: 84, timeout: 180000 });
 console.log(JSON.stringify({ found, logs: logs.slice(0, 8) }));
 await browser.close();

@@ -62,7 +62,7 @@ function menu() {
   const m = state.match;
   if (running()) hud.menu(null);
   else if (m.phase === 'final') hud.menu(m.champion < 0 ? `A draw, ${m.score[0]} all.` : `${m.champion ? 'The other crew takes' : 'Your crew takes'} Porto Vesper, ${m.score[0]} to ${m.score[1]}.`, 'Play again');
-  else hud.menu(m.round > 1 || m.phase !== 'freeze' ? 'Paused. The match waits for you.' : INTRO, m.round > 1 ? 'Click to resume' : 'Click to deploy');
+  else { const begun = m.round > 1 || m.phase !== 'freeze'; hud.menu(begun ? 'Paused. The match waits for you.' : INTRO, begun ? 'Click to resume' : 'Click to deploy'); }
 }
 
 document.getElementById('deploy').addEventListener('click', () => {
