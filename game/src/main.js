@@ -35,7 +35,7 @@ const INTRO = document.getElementById('menuLine').textContent;
 // and a switch that stops the clock so a frame can be looked at.
 const dev = window.campanile = { state, hud, hold: false, skip(seconds) { for (let i = 0; i < seconds / TICK; i++) stepGame(state, TICK); } };
 
-let last = performance.now(), debt = 0;
+let last = performance.now(), debt = 0, encore = 0;
 const running = () => !dev.hold && (watch || input.locked());
 
 function frame(now) {
@@ -49,6 +49,10 @@ function frame(now) {
   // A stopped clock stops the effects too, so a paused frame stays exactly as it was.
   view.frame(state, live ? debt / TICK : 1, live ? dt : 0);
   hud.update(state, live ? dt : 0);
+  // The match is decided: hand the mouse back so the result card can offer another, or (watching) start one.
+  if (state.match.phase === 'final') {
+    if (!watch) { if (input.locked()) document.exitPointerLock(); } else if ((encore += dt) > 8) { encore = 0; startMatch(state); }
+  }
   audio.update(state);
   requestAnimationFrame(frame);
 }
