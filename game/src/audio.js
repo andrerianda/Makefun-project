@@ -13,6 +13,7 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 function createSynth(ctx) {
   const sr = ctx.sampleRate, hiss = ctx.createBuffer(1, sr * 2, sr), ir = ctx.createBuffer(2, sr * 1.7, sr);
   const out = ctx.createDynamicsCompressor(), verb = ctx.createConvolver(), bed = ctx.createGain(), wash = ctx.createBufferSource(), tone = ctx.createBiquadFilter();
+  const voice = window.speechSynthesis; // absent in some browsers: then the radio is only a click
   let live = 0, next = 2, st, me, who, now, spot, near, pan, cut, wet;
 
   hiss.getChannelData(0).forEach((_, i, d) => { d[i] = rnd(-1, 1); });
@@ -80,7 +81,11 @@ function createSynth(ctx) {
     dousing: () => air(0.16, 1.5, 1500, 900),
     doused() { L('bandpass', 0.5, 0.5, 3000, 500); air(0.25, 1.6, 6000, 9000); },
     kegBoom: () => blast(1.4, 2.4, 700),
-    radio() { if (who.team === me.team) { flat(); L('bandpass', 0.16, 0.09, 2600); note(1500, 0.1, 0.1, 0.05); } },
+    radio(e) { // a click, then the browser's own voice reads the call out, pitched per speaker
+      if (who.team !== me.team) return;
+      flat(); L('bandpass', 0.16, 0.09, 2600); note(1500, 0.1, 0.1, 0.05);
+      if (voice && !voice.speaking) voice.speak(Object.assign(new SpeechSynthesisUtterance(e.s), { rate: 1.15, pitch: 0.6 + who.id % 5 / 5, volume: 0.8 }));
+    },
     buy() { if (who === me) { note(2100); note(3300, 0.07); } },
     round(e) {
       flat();
