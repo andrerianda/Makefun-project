@@ -33,15 +33,13 @@ export function buildEffects(scene, tex, actors, camera, kit) {
   scene.add(keg, ember); // in the scene for good: a changing light count recompiles shaders
   let pulse = 0;
 
-  const puff = (x, y, z, color, size, life) => {
-    const p = puffs[puffI++ % PUFFS];
-    p.visible = true; p.position.set(x, y, z); p.material.color.set(color);
-    p.userData.t = 0; p.userData.life = life; p.userData.size = size;
+  const wake = (s, x, y, z, color, size, life) => {
+    const u = s.userData;
+    s.visible = true; s.position.set(x, y, z); s.material.color.set(color); u.t = 0; u.life = life; u.size = size;
   };
+  const puff = (x, y, z, color, size, life) => wake(puffs[puffI++ % PUFFS], x, y, z, color, size, life);
   const blast = (x, y, z, color, size, life) => {
-    const b = blasts[blastI++ % BLASTS];
-    b.visible = true; b.position.set(x, y, z); b.material.color.set(color);
-    b.userData.t = 0; b.userData.life = life; b.userData.size = size;
+    wake(blasts[blastI++ % BLASTS], x, y, z, color, size, life);
     flare.position.set(x, y + 0.5, z); flare.intensity = size * 14;
   };
 

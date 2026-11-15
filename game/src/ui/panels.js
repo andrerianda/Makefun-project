@@ -3,7 +3,7 @@ import { GEAR, NADES, SHOP, SIDES, WEAPONS } from '../config.js';
 import { sideOfTeam } from '../sim/state.js';
 import { owns, priceOf, shopOpen } from '../sim/economy.js';
 
-export const SHOP_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'z', 'x', 'v'];
+export const SHOP_KEYS = [...'1234567890zxv'];
 const describe = (id) => WEAPONS[id] || GEAR[id] || NADES.find((n) => n.id === id);
 
 export function createShop(el) {

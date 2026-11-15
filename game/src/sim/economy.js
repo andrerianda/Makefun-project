@@ -5,7 +5,7 @@ import { SPAWN } from './map.js';
 import { giveWeapon } from './loadout.js';
 
 const nadeOf = (id) => NADES.findIndex((g) => g.id === id);
-const pay = (a, n) => { a.money = Math.max(0, Math.min(ECON.cap, a.money + n)); };
+export const pay = (a, n) => { a.money = Math.max(0, Math.min(ECON.cap, a.money + n)); };
 
 export function rewardKill(killer, cause) {
   pay(killer, WEAPONS[cause] ? WEAPONS[cause].reward : 300);

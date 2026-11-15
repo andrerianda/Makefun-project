@@ -7,6 +7,7 @@ import { PALETTE } from '../config.js';
 import { boxes, COLS, ROWS, CELL, cellX, cellZ, colOf, rowOf, tile, zoneAt, hash } from '../sim/map.js';
 import { rayWorld } from '../sim/world.js';
 import { label } from './textures.js';
+import { geometry } from './kit.js';
 
 const REACH = 2.4, RING = [[1, 0], [0, 1], [-1, 0], [0, -1], [0.7, 0.7], [-0.7, 0.7], [-0.7, -0.7], [0.7, -0.7]];
 const baked = new Map();
@@ -60,9 +61,9 @@ class Batch {
     if (b.y0 > 0.5) this.face([b.x0, b.y0, b.z0], [1, 0, 0], [0, 0, 1], w, d, [0, -1, 0], tint, tile);
   }
 
-  /** A flat decal with its own UV rectangle: a window, a door. `r` is the wall's right-hand axis. */
-  decal(x, y, z, r, n, w, h, u0, v0, u1, v1) {
-    const base = this.p.length / 3, hw = w / 2;
+  /** A flat decal showing one cell of the trim atlas: 0-5 windows, 6-7 doors. `r` is the wall's right-hand axis. */
+  decal(x, y, z, r, n, w, h, cell) {
+    const base = this.p.length / 3, hw = w / 2, u0 = (cell % 4) / 4, u1 = u0 + 0.25, v0 = cell < 4 ? 0.5 : 0, v1 = v0 + 0.5;
     for (const [sx, sy, tu, tv] of [[-1, 0, u0, v0], [1, 0, u1, v0], [1, 1, u1, v1], [-1, 1, u0, v1]]) {
       this.p.push(x + r[0] * sx * hw + n[0] * 0.04, y + sy * h, z + r[2] * sx * hw + n[2] * 0.04);
       this.n.push(n[0], 0, n[2]); this.uv.push(tu, tv); this.c.push(1, 1, 1);
@@ -71,13 +72,7 @@ class Batch {
   }
 
   mesh() {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(this.p, 3));
-    g.setAttribute('normal', new THREE.Float32BufferAttribute(this.n, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(this.uv, 2));
-    g.setAttribute('color', new THREE.Float32BufferAttribute(this.c, 3));
-    g.setIndex(this.i);
-    const m = new THREE.Mesh(g, this.material);
+    const m = new THREE.Mesh(geometry({ position: this.p, normal: this.n, uv: this.uv, color: this.c }).setIndex(this.i), this.material);
     m.castShadow = m.receiveShadow = true;
     return m;
   }
@@ -151,14 +146,14 @@ export function buildLevel(scene, tex, kit) {
       for (const [edge, alongX, r, n] of [[b.x1, 0, [0, 0, -1], [1, 0, 0]], [b.x0, 0, [0, 0, 1], [-1, 0, 0]], [b.z1, 1, [1, 0, 0], [0, 0, 1]], [b.z0, 1, [-1, 0, 0], [0, 0, -1]]]) {
         const lo = alongX ? b.x0 : b.z0, hi = alongX ? b.x1 : b.z1, yaw = Math.atan2(n[0], n[2]);
         for (let s = lo + 1.2; s < hi - 0.5; s += 2.4) {
-          const x = alongX ? s : edge, z = alongX ? edge : s, q = hash(x, z), cell = q % 6, u = (cell % 4) / 4, v = cell < 4 ? 0.5 : 0;
+          const x = alongX ? s : edge, z = alongX ? edge : s, q = hash(x, z);
           if (!openAir(x + n[0], 0, z + n[2]) || signed(x, z)) continue;
-          trim.decal(x, 3.1, z, r, n, 1.5, 1.7, u, v, u + 0.25, v + 0.5);
+          trim.decal(x, 3.1, z, r, n, 1.5, 1.7, q % 6);
           if (b.y1 > 7.6) {
-            trim.decal(x, 5.7, z, r, n, 1.5, 1.7, ((q >>> 4) % 4) / 4, 0.5, ((q >>> 4) % 4) / 4 + 0.25, 1);
+            trim.decal(x, 5.7, z, r, n, 1.5, 1.7, (q >>> 4) % 4);
             if (q % 3 === 0) prop('balcony', x, 5.6, z, yaw);
           }
-          if (q % 5 === 0) { trim.decal(x, 0, z, r, n, 1.5, 2.3, 0.5 + ((q >>> 7) % 2) / 4, 0, 0.75 + ((q >>> 7) % 2) / 4, 0.5); prop('awning', x, 0, z, yaw); }
+          if (q % 5 === 0) { trim.decal(x, 0, z, r, n, 1.5, 2.3, 6 + (q >>> 7) % 2); prop('awning', x, 0, z, yaw); }
           else if (q % 7 === 2) prop(LEANS[(q >>> 3) % LEANS.length], x, 0, z, yaw);
           else if (q % 11 === 5) prop('washing', x, 0, z, yaw);
         }
@@ -182,8 +177,8 @@ export function buildLevel(scene, tex, kit) {
   roof.box({ x0: tx0 - 0.3, x1: tx1 + 0.3, z0: tz0 - 0.3, z1: tz1 + 0.3, y0: 23.2, y1: 23.6 }, WHITE, 2.4);
   for (const y of [0, 7.4, 13.4, 19.6]) stone.box({ x0: tx0 - 0.14, x1: tx1 + 0.14, z0: tz0 - 0.14, z1: tz1 + 0.14, y0: y, y1: y + (y ? 0.4 : 1.1) }, stoneTint, 1.6); // plinth and cornices
   for (const y of [3.4, 9.6]) for (const s of [1, -1]) { // lancet windows up the shaft
-    trim.decal(mid, y, s > 0 ? tz1 : tz0, [s, 0, 0], [0, 0, s], 0.9, 2.3, 0.5, 0, 0.75, 0.5);
-    trim.decal(s > 0 ? tx1 : tx0, y, midZ, [0, 0, -s], [s, 0, 0], 0.9, 2.3, 0.75, 0, 1, 0.5);
+    trim.decal(mid, y, s > 0 ? tz1 : tz0, [s, 0, 0], [0, 0, s], 0.9, 2.3, 6);
+    trim.decal(s > 0 ? tx1 : tx0, y, midZ, [0, 0, -s], [s, 0, 0], 0.9, 2.3, 7);
   }
   prop('bell', mid, 20.6, midZ);
 
@@ -224,15 +219,11 @@ export function buildLevel(scene, tex, kit) {
 
   // The harbour haze catching the light: a soft additive disc around every lamp and every bulb.
   const haze = (points, size, opacity) => {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ map: tex.puff, color: '#ffb060', size, opacity, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })));
+    scene.add(new THREE.Points(geometry({ position: points }), new THREE.PointsMaterial({ map: tex.puff, color: '#ffb060', size, opacity, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })));
   };
   haze(halos, 4, 0.3); haze(bulbs, 1.1, 0.5);
 
-  const town = new THREE.BufferGeometry();
-  for (const k in still) town.setAttribute(k, new THREE.Float32BufferAttribute(still[k], 3));
-  scene.add(Object.assign(new THREE.Mesh(town, paint), { castShadow: true, receiveShadow: true }));
+  scene.add(Object.assign(new THREE.Mesh(geometry(still), paint), { castShadow: true, receiveShadow: true }));
 
   for (const [text, c, r, y, turn, height] of SIGNS) {
     const map = label(text, height > 1 ? 'rgba(242,162,58,0.95)' : 'rgba(250,240,220,0.9)');

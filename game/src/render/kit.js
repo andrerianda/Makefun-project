@@ -15,6 +15,13 @@ const SHAPES = {
   n: (w, h) => new THREE.ConeGeometry(w / 2, h, 10),
 };
 
+/** A BufferGeometry from flat arrays named by attribute: uv in pairs, the rest in triples. */
+export function geometry(arrays) {
+  const g = new THREE.BufferGeometry();
+  for (const k in arrays) g.setAttribute(k, new THREE.Float32BufferAttribute(arrays[k], k === 'uv' ? 2 : 3));
+  return g;
+}
+
 export async function loadKit(urls) {
   const texts = await Promise.all(urls.map((url) => fetch(url).then((r) => r.text())));
   const models = {}, place = new THREE.Object3D(), tint = new THREE.Color();
@@ -33,11 +40,7 @@ export async function loadKit(urls) {
       for (let i = 0; i < g.attributes.position.count; i++) bone.color.push(tint.r, tint.g, tint.b);
     }
   }
-  for (const name in models) for (const b of models[name]) {
-    if (!b.color.length) continue;
-    b.geo = new THREE.BufferGeometry();
-    for (const k of ['position', 'normal', 'color']) b.geo.setAttribute(k, new THREE.Float32BufferAttribute(b[k], 3));
-  }
+  for (const name in models) for (const b of models[name]) if (b.color.length) b.geo = geometry({ position: b.position, normal: b.normal, color: b.color });
   return {
     /** One copy of a model: a group per bone, parented as the kit says, sharing the baked geometry. Returns
      *  the bones by name; the first bone is also returned as `root`. */

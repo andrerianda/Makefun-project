@@ -3,6 +3,7 @@ import { ECON, ROUND } from '../config.js';
 import { ATT, DEF, emit, noise, sideOf } from './state.js';
 import { siteAt } from './map.js';
 import { hurt } from './damage.js';
+import { pay } from './economy.js';
 
 export function giveKeg(state, a) {
   const k = state.keg;
@@ -33,7 +34,7 @@ export function stepKeg(state, dt) {
       if (a.use === 0) { emit(state, 'planting', a.id, -1, a.x, a.y, a.z); noise(state, a.x, a.z, 14, a.team, 'plant'); }
       a.use += dt;
       if (a.use >= ROUND.plantTime) {
-        a.use = 0; a.hasKeg = false; a.plants++; a.money = Math.min(ECON.cap, a.money + ECON.plantSelf);
+        a.use = 0; a.hasKeg = false; a.plants++; pay(a, ECON.plantSelf);
         k.state = 'planted'; k.carrier = -1; k.fuse = ROUND.fuse; k.beep = 0; k.site = siteAt(a.x, a.z); k.douser = -1;
         emit(state, 'planted', a.id, -1, k.x, k.y, k.z, 0, k.site);
         noise(state, k.x, k.z, 200, a.team, 'plant');
@@ -59,7 +60,7 @@ export function stepKeg(state, dt) {
       if (a.use === 0) { emit(state, 'dousing', a.id, -1, k.x, k.y, k.z); noise(state, k.x, k.z, 16, a.team, 'douse'); }
       a.use += dt;
       if (a.use >= douseTime(a)) {
-        a.use = 0; a.money = Math.min(ECON.cap, a.money + ECON.douseSelf); k.state = 'doused';
+        a.use = 0; pay(a, ECON.douseSelf); k.state = 'doused';
         emit(state, 'doused', a.id, -1, k.x, k.y, k.z);
       }
     }

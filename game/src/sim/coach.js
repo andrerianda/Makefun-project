@@ -38,7 +38,7 @@ function radio(state, c, a, text, force = false) {
   c.saidT = state.time; c.said = text;
   emit(state, 'radio', a.id, -1, a.x, a.y, a.z, 0, text);
 }
-const speaker = (state, c) => state.actors.find((a) => a.team === c.team && a.alive && a.bot);
+const announce = (state, c, text) => radio(state, c, state.actors.find((a) => a.team === c.team && a.alive && a.bot), text, true);
 
 /** Send the team into the site: every bot takes a post inside, two smoke the rotations and one flashes the site first. */
 function hit(state, c) {
@@ -49,7 +49,7 @@ function hit(state, c) {
     if (i > 2) { j.nade = 2; j.nx = smokes[i >> 2].x; j.nz = smokes[i >> 2].z; }
     else if (i === 1) { j.nade = 1; j.nx = site.x; j.nz = site.z; }
   });
-  radio(state, c, speaker(state, c), `Hit ${SITES[c.site].name} now, smokes out`, true);
+  announce(state, c, `Hit ${SITES[c.site].name} now, smokes out`);
 }
 
 /** Choose the site to hit and the cobble on it where the keg goes down. */
@@ -74,14 +74,14 @@ function planAttack(state, c) {
     j.quiet = role === 'lurk' || role === 'mid';
   });
   const line = { default: `Default, then we hit ${SITES[c.site].name}`, split: `Split ${SITES[c.site].name} through Bell Square`, fake: `Fake ${SITES[OTHER[c.site]].name}, hit ${SITES[c.site].name}`, rush: `Rush ${SITES[c.site].name}, go go go` };
-  radio(state, c, speaker(state, c), line[c.play], true);
+  announce(state, c, line[c.play]);
 }
 
 function planDefence(state, c) {
   const roll = state.rng.next(), setup = roll < 0.55 ? 'standard' : roll < 0.7 ? 'stackA' : roll < 0.85 ? 'stackB' : 'mid';
   const used = { A: 0, B: 0, M: 0 };
   c.jobs.forEach((j, i) => { const s = SETUPS[setup][i]; post(j, HOLDS[s][used[s]++ % HOLDS[s].length], true, s); });
-  radio(state, c, speaker(state, c), setup === 'standard' ? 'Two Market, two Boathouse, one Bell Square' : setup === 'mid' ? 'Two on Bell Square, hold the gate' : `Stacking ${SITES[setup === 'stackA' ? 'A' : 'B'].name} this round`, true);
+  announce(state, c, setup === 'standard' ? 'Two Market, two Boathouse, one Bell Square' : setup === 'mid' ? 'Two on Bell Square, hold the gate' : `Stacking ${SITES[setup === 'stackA' ? 'A' : 'B'].name} this round`);
 }
 
 export function planRound(state, c) {
@@ -133,7 +133,7 @@ export function stepCoach(state, c, dt) {
     } else if (k.state === 'planted' && !c.lit) { // hold the site until the fuse runs out
       c.lit = true; c.site = k.site;
       holdSite(c, k.site);
-      radio(state, c, speaker(state, c), `Keg is lit, hold ${SITES[k.site].name}`, true);
+      announce(state, c, `Keg is lit, hold ${SITES[k.site].name}`);
     }
     return;
   }
@@ -141,7 +141,7 @@ export function stepCoach(state, c, dt) {
     if (!c.lit) {
       c.lit = true;
       holdSite(c, k.site);
-      radio(state, c, speaker(state, c), `They lit it at ${SITES[k.site].name}, retake`, true);
+      announce(state, c, `They lit it at ${SITES[k.site].name}, retake`);
     }
     const a = nearestBot(state, c, k.x, k.z, true);
     if (a && !state.actors[c.douser]?.alive) { c.douser = a.id; post(c.jobs[a.id % TEAM_SIZE], k, true, k.site); radio(state, c, a, 'Dousing, watch my back'); }
@@ -153,6 +153,6 @@ export function stepCoach(state, c, dt) {
     let moved = 0, slot = 2;
     for (const j of c.jobs) if (j.site !== hot && (j.site === 'M' || moved++ === 0)) post(j, HOLDS[hot][slot++ % HOLDS[hot].length], true, hot);
     c.rotated = true;
-    radio(state, c, speaker(state, c), `Rotating ${SITES[hot].name}`, true);
+    announce(state, c, `Rotating ${SITES[hot].name}`);
   }
 }

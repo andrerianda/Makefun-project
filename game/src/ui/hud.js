@@ -10,21 +10,20 @@ import { shopOpen } from '../sim/economy.js';
 import { createRadar } from './radar.js';
 import { createShop, createBoard } from './panels.js';
 
-const $ = (q) => document.querySelector(q);
 const REASONS = { wiped: 'the other crew is down', time: 'the clock ran out', doused: 'the keg is doused', blast: 'the keg went up' };
 const clockText = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; // from whole seconds
 const percent = (v) => `${v}%`, turn = (v) => `rotate(${v / 50}rad)`;
 const roundText = (n) => `ROUND ${n} / ${ROUND.max}`;
 
 export function createHud(state) {
-  const el = {};
-  for (const id of ['phase', 'time', 'roundNo', 'clock', 'zone', 'radio', 'feed', 'cross', 'hitmark', 'from', 'prompt', 'bar', 'banner', 'watching', 'hp', 'hpBar', 'ap', 'apBar', 'cash', 'kegTag', 'gun', 'mag', 'res', 'ammo', 'slots', 'pain', 'blind', 'scope', 'menu', 'menuLine', 'deploy']) el[id] = $(`#${id}`);
+  const el = {}; // every element index.html names, by its id
+  for (const node of document.querySelectorAll('[id]')) el[node.id] = node;
   const sides = [0, 1].map((t) => {
-    const root = $(`#side${t}`), pips = root.querySelector('.pips');
+    const root = el[`side${t}`], pips = root.querySelector('.pips');
     pips.innerHTML = '<i></i>'.repeat(5);
     return { root, name: root.querySelector('.name'), score: root.querySelector('.score'), pips: [...pips.children], side: null, alive: -1 };
   });
-  const radar = createRadar($('#radar canvas')), shop = createShop($('#shop')), board = createBoard($('#board'));
+  const radar = createRadar(el.radar.firstElementChild), shop = createShop(el.shop), board = createBoard(el.board);
   const slotEls = [...el.slots.children], shown = new Map();
   let cursor = state.events.seq, hitT = 0, painT = 0, fromT = 0, fromX = 0, fromZ = 0, bannerEnd = 0, recap = '', gap = 0;
 
@@ -36,6 +35,7 @@ export function createHud(state) {
     seen[prop] = value;
     if (prop in node) node[prop] = text ? text(value) : value; else node.style[prop] = text ? text(value) : value;
   };
+  const display = (node, on) => put(node, on ? 'block' : 'none', 'display');
   const line = (list, html, cls, keep) => {
     const li = document.createElement('li');
     li.innerHTML = html; li.className = cls;
@@ -94,7 +94,7 @@ export function createHud(state) {
       put(el.hp, Math.ceil(a.hp)); put(el.hpBar, Math.ceil(a.hp), 'width', percent);
       put(el.ap, Math.ceil(a.armor)); put(el.ap, a.helmet ? 'cap' : '', 'className'); put(el.apBar, Math.ceil(a.armor), 'width', percent);
       put(el.cash, a.money);
-      put(el.kegTag, a.hasKeg ? 'block' : 'none', 'display');
+      display(el.kegTag, a.hasKeg);
       put(el.gun, a.slot === 3 ? NADES[a.nadeSel].name : w.name); put(el.gun, a.reload > 0 ? 'busy' : '', 'className');
       put(el.mag, a.slot === 3 ? a.nades[a.nadeSel] : w.mag ? a.mag[a.slot] : '-');
       put(el.res, a.slot === 3 || !w.mag ? '' : a.res[a.slot]);
@@ -106,8 +106,8 @@ export function createHud(state) {
       // The crosshair is the firing cone: it opens when you run, jump or hold the trigger.
       const cone = Math.round(8 + inaccuracy(a, w) * 840) / 2;
       if (cone !== gap) { gap = cone; el.cross.style.setProperty('--gap', `${gap}px`); }
-      put(el.cross, a.alive && !a.scoped ? 'block' : 'none', 'display');
-      put(el.scope, a.alive && a.scoped ? 'block' : 'none', 'display');
+      display(el.cross, a.alive && !a.scoped);
+      display(el.scope, a.alive && a.scoped);
       hitT = Math.max(0, hitT - dt); painT = Math.max(0, painT - dt * 1.5);
       put(el.hitmark, hitT > 0 ? 1 : 0, 'opacity');
       put(el.pain, Math.round(painT * 20) / 20, 'opacity');
@@ -125,9 +125,9 @@ export function createHud(state) {
       else if (a.alive && canPlant(st, a)) prompt = 'Hold E to light the keg here';
       else if (a.alive && canDouse(st, a)) prompt = 'Hold E to douse the keg';
       else if (a === me && me.human && shopOpen(st, me) && !shop.open) prompt = 'B opens the Chandler\'s Counter';
-      put(el.prompt, prompt ? 'block' : 'none', 'display');
+      display(el.prompt, prompt);
       put(el.prompt.firstElementChild, prompt);
-      put(el.bar, progress >= 0 ? 'block' : 'none', 'display');
+      display(el.bar, progress >= 0);
       put(el.bar.firstElementChild, Math.min(100, Math.round(progress * 100)), 'width', percent);
       put(el.watching, me.alive ? -1 : a.id, 'textContent', watching);
       radar.draw(st);

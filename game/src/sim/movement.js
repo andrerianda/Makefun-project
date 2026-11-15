@@ -50,14 +50,10 @@ export function stepMovement(state, a, dt) {
       const keep = Math.max(0, speed - Math.max(speed, MOVE.stopSpeed) * MOVE.friction * dt) / speed;
       a.vx *= keep; a.vz *= keep;
     }
-    const add = wish - (a.vx * wx + a.vz * wz);
-    if (add > 0) { const k = Math.min(MOVE.accel * dt, add); a.vx += wx * k; a.vz += wz * k; }
     if (c.jump && !rooted) { a.vy = MOVE.jump; a.ground = false; emit(state, 'jump', a.id, -1, a.x, a.y, a.z); }
-  } else {
-    wish = Math.min(wish, MOVE.airCap); // a little steering in the air, no speed gained
-    const add = wish - (a.vx * wx + a.vz * wz);
-    if (add > 0) { const k = Math.min(MOVE.airAccel * dt, add); a.vx += wx * k; a.vz += wz * k; }
-  }
+  } else wish = Math.min(wish, MOVE.airCap); // a little steering in the air, no speed gained
+  const add = wish - (a.vx * wx + a.vz * wz);
+  if (add > 0) { const k = Math.min((wasGround ? MOVE.accel : MOVE.airAccel) * dt, add); a.vx += wx * k; a.vz += wz * k; }
   a.vy -= MOVE.gravity * dt; // grounded too: it settles back each step
   moveBody(a, dt);
 
