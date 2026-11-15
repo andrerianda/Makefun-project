@@ -8,7 +8,7 @@ import { weaponOf } from './loadout.js';
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 
 /** The top speed a body may reach now: its weapon's weight, its stance, a scope and a fresh wound all cut it. */
-export function speedLimit(a) {
+function speedLimit(a) {
   const w = weaponOf(a);
   let v = MOVE.speed * (w ? w.speed : 1);
   if (a.duck > 0.5) v *= MOVE.duckMul; else if (a.cmd.walk) v *= MOVE.walkMul;

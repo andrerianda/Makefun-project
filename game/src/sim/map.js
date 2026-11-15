@@ -68,7 +68,7 @@ export const boxes = [];
 export const walk = new Uint8Array(COLS * ROWS);
 export const SPAWN = [[], []]; // [attackers' cells, defenders' cells] as {x, z}
 export const SITES = { A: { cells: [], x: 0, z: 0 }, B: { cells: [], x: 0, z: 0 } };
-export const ROOF = { c0: 27, r0: 1, c1: 36, r1: 10, y: 5.6 }; // the Boathouse is the one roofed room
+const ROOF = { c0: 27, r0: 1, c1: 36, r1: 10, y: 5.6 }; // the Boathouse is the one roofed room
 
 const hash = (c, r) => ((c * 73856093) ^ (r * 19349663)) >>> 0;
 const box = (x0, y0, z0, x1, y1, z1, kind, soft, style = 0) => boxes.push({ x0, y0, z0, x1, y1, z1, kind, soft, style });
@@ -131,7 +131,6 @@ export function zoneAt(x, z) {
   for (const q of ZONES) if (c >= q[1] && c <= q[3] && r >= q[2] && r <= q[4]) return q[0];
   return 'Porto Vesper';
 }
-export const ZONE_LABELS = ZONES.map((q) => ({ name: q[0], x: (cellX(q[1]) + cellX(q[3])) / 2, z: (cellZ(q[2]) + cellZ(q[4])) / 2 }));
 
 // Tactical points, in cells (a whole number is a cell's centre; fractions allowed), turned into metres below.
 const at = (c, r) => ({ x: cellX(c), z: cellZ(r) });

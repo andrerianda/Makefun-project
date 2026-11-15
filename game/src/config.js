@@ -60,10 +60,9 @@ export const SHOP = ['sparrow', 'mastiff', 'cicada', 'brine', 'corsa', 'tramont'
 export const SIDES = [{ name: 'Smugglers', color: '#f2a23a' }, { name: 'Wardens', color: '#35b8ad' }];
 export const CREWS = [['You', 'Brannoch', 'Isolde', 'Quill', 'Marrow'], ['Hale', 'Verity', 'Osric', 'Tamsin', 'Corwen']];
 
-// The look: one dusk palette, used by the level, the actors and the HUD alike.
+// The look: one dusk palette, shared by the sky, the level and its painted textures.
 export const PALETTE = {
   sky: ['#f6c38a', '#e88f6b', '#5b5f9a', '#1f2550'], sun: '#ffd9a0', fog: '#d99a80', sea: '#2f5f7c',
   stucco: ['#e8b98c', '#d98f6f', '#e6d3a8', '#b9cfc0', '#c9a0a8', '#dcc48a'], shutter: ['#2f6f66', '#7a3b2e', '#31507a', '#3d5a34'],
-  roof: '#b5533a', stone: '#9c8f86', cobble: '#7d726c', plank: '#8a633f', crate: '#b08650', metal: '#4f585f', leaf: '#4f7d46',
-  ink: '#f4ead8', panel: 'rgba(22,24,38,0.72)', alarm: '#ff5d4a',
+  stone: '#9c8f86', crate: '#b08650',
 };

@@ -13,9 +13,11 @@ import { buildViewmodel } from './viewmodel.js';
 
 const FOV = 74, BACK = 2.7, SIDE = 0.6; // third person: the camera sits this far behind and beside the eye
 
-export function createView(host, state, kit) {
+/** `sharp` pins the canvas at full resolution; otherwise a slow device gets a coarser one. */
+export function createView(host, state, kit, sharp) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  let ratio = Math.min(window.devicePixelRatio, 2), slow = 0;
+  renderer.setPixelRatio(ratio);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -43,6 +45,9 @@ export function createView(host, state, kit) {
     canvas: renderer.domElement,
     /** Draw one frame; `alpha` is how far the clock is between the last simulation step and the next. */
     frame(st, alpha, dt) {
+      // A device that cannot hold 40 frames a second draws fewer pixels, a quarter step at a time.
+      slow = dt > 0.025 ? slow + dt : 0;
+      if (!sharp && slow > 1.5 && ratio > 0.75) { slow = 0; ratio -= 0.25; renderer.setPixelRatio(ratio); resize(); }
       const a = st.actors[st.viewId];
       cursor = drain(st, cursor, (e) => {
         effects.event(e, st);

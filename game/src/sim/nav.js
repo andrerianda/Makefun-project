@@ -53,7 +53,7 @@ function snap(x, z) {
 }
 
 /** True when a body can walk the straight line between two points without clipping a corner. */
-export function lineOpen(x0, z0, x1, z1) {
+function lineOpen(x0, z0, x1, z1) {
   const len = Math.hypot(x1 - x0, z1 - z0), steps = Math.ceil(len / 0.4);
   for (let s = 0; s <= steps; s++) {
     const k = steps ? s / steps : 0, x = x0 + (x1 - x0) * k, z = z0 + (z1 - z0) * k;

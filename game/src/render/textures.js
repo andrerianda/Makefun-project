@@ -77,9 +77,6 @@ export function makeTextures() {
       g.fillStyle = '#d9d2c8'; g.fillRect(0, 0, w, h);
       for (let i = 0; i < 70; i++) { g.fillStyle = grey(90, 0.14); g.fillRect(0, rng.int(h), w, 1 + rng.int(2)); }
     }),
-    awning: paint(128, 64, (g, w, h) => {
-      for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#f4ead8' : P.roof; g.fillRect(i * 16, 0, 16, h); }
-    }),
     // Six shuttered windows (three lit from inside) and two doors in one 4 x 2 atlas.
     trim: paint(512, 256, (g, w, h, rng) => {
       for (let i = 0; i < 8; i++) {

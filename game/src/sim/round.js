@@ -20,7 +20,7 @@ function spawn(state, a, index) {
   if (a.bot) { a.bot.target = -1; a.bot.lost = 9; a.bot.path.n = 0; a.bot.gx = 1e9; a.bot.threw = false; a.bot.heardT = state.time; }
 }
 
-export function startRound(state) {
+function startRound(state) {
   const m = state.match;
   m.round++; m.phase = 'freeze'; m.t = ROUND.freeze; m.last = null;
   state.actors.forEach((a, i) => spawn(state, a, i % TEAM_SIZE));
