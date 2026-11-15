@@ -60,7 +60,8 @@ export function buildActors(scene, state, tex, kit) {
         b.torso.rotation.set(a.pitch * 0.4 - gait * 0.15 - d * 0.2, Math.sin(f.stride) * 0.1 * gait - 0.5, 0);
         b.head.rotation.set(a.pitch * 0.4 - 0.3, 0.5, -0.12, 'YXZ');
         b.gun.rotation.set(a.pitch * 0.6 + Math.max(0, 0.1 - a.sinceShot) + (a.reload > 0 ? 0.5 : 0), 0.58, 0, 'YXZ');
-        if (g.root.visible = a.alive) {
+        g.root.visible = a.alive;
+        if (a.alive) {
           reach(b, b.armR, b.foreR, g.grip);
           reach(b, b.armL, b.foreL, a.reload > 0 && g.mag ? g.mag : g.fore);
         } else { b.armL.rotation.set(0, 0, -1.2); b.armR.rotation.set(0, 0, 0.9); } // arms flung wide

@@ -53,7 +53,7 @@ export function buildEffects(scene, tex, actors, camera, kit) {
         const a = state.actors[e.a], t = tracers[tracerI++ % TRACERS];
         to.set(e.x, e.y, e.z);
         // Your own tracer leaves the gun in your hands; everyone else's leaves their figure's muzzle.
-        if (e.a === state.viewId && !overShoulder(state)) from.set(0.16, -0.13, -0.9).applyMatrix4(camera.matrixWorld); else actors.muzzle(a, from);
+        if (e.a === state.viewId && !overShoulder(state)) from.set(0.095, -0.12, -0.9).applyMatrix4(camera.matrixWorld); else actors.muzzle(a, from);
         const len = from.distanceTo(to);
         if (len < 1.5) return;
         t.visible = true; t.position.copy(from).lerp(to, 0.5); t.lookAt(to); t.scale.set(0.014, 0.014, len);

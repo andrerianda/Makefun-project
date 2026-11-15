@@ -24,7 +24,8 @@ export function buildViewmodel(tex, kit) {
         if (R) R.removeFromParent();
         if (L) L.removeFromParent();
         b.grip.add(R = hands[side]['R' + id]);
-        if (L = hands[side]['L' + id]) b.fore.add(L);
+        L = hands[side]['L' + id];
+        if (L) b.fore.add(L);
         b.tip.add(flash);
         held = id + side;
       }
