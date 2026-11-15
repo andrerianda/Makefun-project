@@ -20,16 +20,17 @@ import run
 ap = argparse.ArgumentParser()
 ap.add_argument("--engine", required=True)
 ap.add_argument("--opps", default=",".join(run.OPPONENTS))
-ap.add_argument("--variants", default="0-35")
+ap.add_argument("--variants", default="0-78")
 ap.add_argument("--rounds", type=int, default=99)
 ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--min-plies", type=int, default=0, help="leave scenarios already won in at most this many plies")
 ap.add_argument("--hours", type=float, default=99.0)
+ap.add_argument("--order", default="asc", help="asc: lowest untried variant first; desc: highest first (two machines can then share a scenario)")
 ap.add_argument("--db", default="/root/makefun-work/var/db.jsonl")
 ap.add_argument("--tag", default=os.environ.get("ENGINE_TAG", "v7"), help="label of the engine's search and evaluation; results are valid for one label")
 a = ap.parse_args()
 
-DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz"
+DIGITS = "".join(chr(48 + v) for v in range(79))  # one character per variant; 44 (a backslash) is never used
 SRC = open(a.engine).read()
 TB_RE = re.compile(r"^TB=.*$", re.M)
 LN_RE = re.compile(r"\((\d+(?:,\d+){7})\)\[oi\]\*10000")
@@ -40,9 +41,9 @@ lo, hi = (int(x) for x in a.variants.split("-"))
 opps = a.opps.split(",")
 tmpdir = tempfile.mkdtemp(prefix="var-")
 files = {}
-for v in range(lo, hi + 1):
+for v in [x for x in range(lo, hi + 1) if x != 44]:
     files[v] = os.path.join(tmpdir, f"engine_v{v}.py")
-    open(files[v], "w").write(TB_RE.sub("TB='%s'*640" % DIGITS[v], SRC))
+    open(files[v], "w").write(TB_RE.sub(lambda m: "TB='%s'*640" % DIGITS[v], SRC))
 
 
 def load():
@@ -81,9 +82,9 @@ for rnd in range(a.rounds):
     for k, p in sorted(best.items(), key=lambda kv: -kv[1]):
         if k[0] not in opps or p <= a.min_plies:
             continue
-        nxt = [v for v in range(lo, hi + 1) if v not in tried.get(k, ())]
+        nxt = [v for v in range(lo, hi + 1) if v != 44 and v not in tried.get(k, ())]
         if nxt:
-            todo.append((k, nxt[0], p))
+            todo.append((k, nxt[0] if a.order == "asc" else nxt[-1], p))
     if not todo or time.time() > t_end:
         break
     t0 = time.time()

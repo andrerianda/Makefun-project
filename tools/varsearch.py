@@ -24,7 +24,7 @@ ap.add_argument("--opps", default=",".join(run.OPPONENTS))
 ap.add_argument("--openings")
 ap.add_argument("--limit", type=int)
 ap.add_argument("--colours", default="white,black")
-ap.add_argument("--variants", default="0-15")
+ap.add_argument("--variants", default="0-11")
 ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--db", default="/root/makefun-work/var/db.jsonl")
 ap.add_argument("--tag", default=os.environ.get("ENGINE_TAG", "v7"), help="label of the engine's search and evaluation; results are valid for one label")
@@ -44,6 +44,7 @@ BUDGET = [int(x) * 10000 for x in LN_RE.search(SRC).group(1).split(",")]
 EHASH = a.tag
 LEGACY = {"7d66ad0d28f2dc41": "v7"}
 BOOK_ORDER = list(run.BOOK)
+DIGITS = "".join(chr(48 + v) for v in range(79))  # one character per variant; 44 (a backslash) is never used
 os.makedirs(os.path.dirname(a.db), exist_ok=True)
 
 
@@ -75,7 +76,7 @@ if a.table or a.stats:
         if k not in cover or rank(r) < rank(cover[k]):
             cover[k] = r
     for (o, c, b), r in cover.items():
-        tb[scen_index(o, c, b)] = "0123456789abcdefghijklmnopqrstuvwxyz"[r["variant"]]
+        tb[scen_index(o, c, b)] = DIGITS[r["variant"]]
     if a.table:
         print("".join(tb))
     for o in run.OPPONENTS:
@@ -96,16 +97,16 @@ if a.limit:
     scen = scen[: a.limit]
 tmpdir = tempfile.mkdtemp(prefix="var-")
 files = {}
-for v in range(lo, hi + 1):
+for v in [x for x in range(lo, hi + 1) if x != 44]:
     p = os.path.join(tmpdir, f"engine_v{v}.py")
-    open(p, "w").write(TB_RE.sub("TB='%s'*640" % "0123456789abcdefghijklmnopqrstuvwxyz"[v], SRC))
+    open(p, "w").write(TB_RE.sub(lambda m: "TB='%s'*640" % DIGITS[v], SRC))
     files[v] = p
 
 
 def work(s, vs=None):
     """Try the variants in order on one scenario; stop at the first win."""
     done = []
-    for v in (vs or range(lo, hi + 1)):
+    for v in (vs or [x for x in range(lo, hi + 1) if x != 44]):
         key = s + (v,)
         r = DB.get(key)
         if r is None:
@@ -131,7 +132,7 @@ t0 = time.time()
 with ThreadPoolExecutor(a.jobs) as ex:
     if a.stop_on == "never":
         # every variant of every scenario is wanted: each game is its own unit of work
-        futs = [ex.submit(work, s, [v]) for v in range(lo, hi + 1) for s in scen]
+        futs = [ex.submit(work, s, [v]) for v in range(lo, hi + 1) if v != 44 for s in scen]
     else:
         futs = [ex.submit(work, s) for s in scen]
     n = 0

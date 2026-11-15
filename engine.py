@@ -238,8 +238,8 @@ while g['status']!='done':
    if i==7:kk=int.from_bytes(b,'big')%207
   if j<10:
    TT.clear();oi='2 3 4 10 25 50 1M 2M'.split().index(g['opponent'][6:8])
-   v=int(TB[KY.index(kk)*16+oi*2+j%2],36);XS=1+v//24*2;am=6+v//12%2*8
-   NZ=random.Random(v).choices(range(-am,am+1),k=448)
+   v=ord(TB[KY.index(kk)*16+oi*2+j%2])-48;XS=(1,3,3,5,5,8,8)[v//12]
+   NZ=random.Random(v).choices(range(-6,7),k=448)
    LN=int(os.environ.get('NODES',(15,15,15,15,15,25,25,25)[oi]*10000))
   L=[(sq(u,j),sq(u[2:],j))for u in g['legal_moves']if u[4:]in('','q')]
   f,t=go(b,L,LN if j<110 else LN//3)

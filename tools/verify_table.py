@@ -25,7 +25,7 @@ ap.add_argument("--jobs", type=int, default=4)
 a = ap.parse_args()
 
 SRC = open(a.engine).read()
-TB = re.search(r"^TB='([0-9a-z]{640})'$", SRC, re.M).group(1)
+TB = re.search(r"^TB='(.{640})'$", SRC, re.M).group(1)
 TB_RE = re.compile(r"^TB=.*$", re.M)
 LN_RE = re.compile(r"\((\d+(?:,\d+){7})\)\[oi\]\*10000")
 BUDGET = [int(x) * 10000 for x in LN_RE.search(SRC).group(1).split(",")]
@@ -40,7 +40,7 @@ for line in open(a.db):
 
 
 def expected(s):
-    v = int(TB[ORDER.index(s[2]) * 16 + run.OPPONENTS.index(s[0]) * 2 + (s[1] == "black")], 36)
+    v = ord(TB[ORDER.index(s[2]) * 16 + run.OPPONENTS.index(s[0]) * 2 + (s[1] == "black")]) - 48
     return v, DB.get(s + (v,))
 
 
