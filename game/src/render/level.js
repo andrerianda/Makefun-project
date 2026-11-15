@@ -89,7 +89,7 @@ const colour = (hex) => new THREE.Color(hex);
 const WHITE = colour('#ffffff');
 // What the kit draws for a solid the map lists, and what may lean against a house wall.
 const STANDS = { barrel: 'barrels', stall: 'stall', basin: 'fountain', hull: 'hull', cart: 'cart', table: 'table', nets: 'nets', sacks: 'sacks', planter: 'cypress' };
-const LEANS = ['pots', 'anchor', 'lobsterpots', 'pipe'];
+const LEANS = ['pots', 'anchor', 'lobsterpots', 'pipe', 'bench', 'fishcrate', 'crates', 'signpost'];
 
 /** Build Porto Vesper into `scene`. Returns `update(time)` for the few things that move. */
 export function buildLevel(scene, tex, kit) {
@@ -159,7 +159,7 @@ export function buildLevel(scene, tex, kit) {
             if (q % 3 === 0) prop('balcony', x, 5.6, z, yaw);
           }
           if (q % 5 === 0) { trim.decal(x, 0, z, r, n, 1.5, 2.3, 0.5 + ((q >>> 7) % 2) / 4, 0, 0.75 + ((q >>> 7) % 2) / 4, 0.5); prop('awning', x, 0, z, yaw); }
-          else if (q % 7 === 2) prop(LEANS[(q >>> 3) % 4], x, 0, z, yaw);
+          else if (q % 7 === 2) prop(LEANS[(q >>> 3) % LEANS.length], x, 0, z, yaw);
           else if (q % 11 === 5) prop('washing', x, 0, z, yaw);
         }
       }

@@ -19,7 +19,7 @@ for (const spec of process.argv.slice(2)) {
     a.cmd.yaw = a.yaw = yaw; a.cmd.pitch = a.pitch = pitch; a.cmd.mx = a.cmd.mz = 0; a.cmd.fire = false;
   }, [+c, +r, +yaw, +pitch]);
   await page.waitForTimeout(900);
-  await page.screenshot({ path: `/root/makefun/shots/${name}.jpg`, type: 'jpeg', quality: 80 });
+  await page.screenshot({ path: `/root/makefun/shots/${name}.jpg`, type: 'jpeg', quality: 80, timeout: 180000 });
 }
 console.log(JSON.stringify({ logs: logs.slice(0, 10) }));
 await browser.close();
