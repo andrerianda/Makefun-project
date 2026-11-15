@@ -238,7 +238,7 @@ while g['status']!='done':
   if j<10:
    TT.clear();oi='2 3 4 10 25 50 1M 2M'.split().index(g['opponent'][6:8])
    NZ=random.Random(int(TB[KY.index(kk)*16+oi*2+j%2],36)).choices(range(-6,7),k=448)
-   LN=int(os.environ.get('NODES',(15,15,15,25,25,25,25,25)[oi]*10000))
+   LN=int(os.environ.get('NODES',(15,15,15,15,15,25,25,25)[oi]*10000))
   L=[(sq(u,j),sq(u[2:],j))for u in g['legal_moves']if u[4:]in('','q')]
   f,t=go(b,L,LN if j<110 else LN//3)
   u=nm(f,j)+nm(t,j)

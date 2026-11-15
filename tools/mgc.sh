@@ -1,6 +1,6 @@
 #!/bin/bash
 # run the movegen check over several seeds in parallel
-for seed in 1 2 3 4; do
+for seed in ${SEEDS:-1 2 3 4}; do
 SEED=$seed python3 - <<PY &
 import sys,os
 sys.path.insert(0,'/root/makefun-work/tools')
