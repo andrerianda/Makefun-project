@@ -118,6 +118,7 @@ function createSynth(ctx) {
 /** The game's sound: start() on the first click, then update(st) every frame. */
 export function createAudio(state) {
   let ctx, frame, cursor = state.events.seq;
+  document.addEventListener('visibilitychange', () => ctx && ctx[document.hidden ? 'suspend' : 'resume']()); // a hidden tab goes quiet
   return {
     start() { if (ctx) ctx.resume(); else frame = createSynth(ctx = new AudioContext()); },
     update(st) { cursor = ctx && ctx.state === 'running' ? frame(st, cursor) : st.events.seq; },

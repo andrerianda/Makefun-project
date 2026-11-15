@@ -36,7 +36,11 @@ export function createInput(canvas, state, hud) {
   document.addEventListener('mousedown', (e) => { if (locked()) { if (e.button === 0) fire = tap = true; else if (e.button === 2) alt = true; } });
   document.addEventListener('mouseup', (e) => { if (e.button === 0) fire = false; else if (e.button === 2) alt = false; });
   document.addEventListener('contextmenu', (e) => e.preventDefault());
-  document.addEventListener('wheel', (e) => { if (locked()) slot = (me().slot + (e.deltaY > 0 ? 1 : 2)) % 3; });
+  document.addEventListener('wheel', (e) => {
+    if (!locked()) return;
+    const d = e.deltaY > 0 ? 1 : 2, s = (me().slot + d) % 3;
+    slot = me().slots[s] ? s : (s + d) % 3; // step over an empty rifle slot
+  });
 
   return {
     locked,

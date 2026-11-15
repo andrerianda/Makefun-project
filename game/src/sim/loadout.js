@@ -21,7 +21,7 @@ export function resetLoadout(a, fresh) {
 
 /** A dying body's rifle falls where it stood, rounds and all; the oldest one on the ground makes room. */
 export function dropWeapon(state, a) {
-  if (!a.slots[0]) return;
+  if (!a.slots[0] || !(a.mag[0] + a.res[0])) return; // an empty rifle stays with its owner
   const d = state.drops[state.dropSeq++ % state.drops.length];
   d.live = true; d.id = a.slots[0]; d.x = a.x; d.z = a.z; d.mag = a.mag[0]; d.res = a.res[0];
   a.slots[0] = null; a.slot = 1;

@@ -56,7 +56,6 @@ export function createView(host, state, kit, sharp) {
       slow = dt > 0.025 ? slow + dt : 0;
       if (!sharp && slow > 1.5 && ratio > 0.75) { slow = 0; ratio -= 0.25; renderer.setPixelRatio(ratio); resize(); }
       const a = st.actors[st.viewId];
-      cursor = drain(st, cursor, onEvent, 0.15);
       shake = Math.max(0, shake - dt * 3);
       const w = weaponOf(a);
       fov += ((a.scoped && w && w.scopeFov ? w.scopeFov : FOV) - fov) * Math.min(1, dt * 14);
@@ -76,6 +75,8 @@ export function createView(host, state, kit, sharp) {
         camera.lookAt(ex + dx * aim, ey + dy * aim, ez + dz * aim);
       }
       actors.update(st, alpha, dt);
+      camera.updateMatrixWorld();
+      cursor = drain(st, cursor, onEvent, 0.15); // once the camera and rigs have moved: a tracer leaves this frame's muzzle
       effects.update(st, dt);
       town(st.time);
       renderer.clear();

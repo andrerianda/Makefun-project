@@ -53,11 +53,13 @@ function fireBullet(state, a, w, id, cone) {
 function stab(state, a, w) {
   const { x: dx, y: dy, z: dz } = look(a.yaw, a.pitch);
   const oy = a.y + eyeHeight(a), reach = rayWorld(a.x, oy, a.z, dx, dy, dz, w.range);
-  for (const o of state.actors) {
+  let victim = null, t = reach, zone = 0;
+  for (const o of state.actors) { // the blade stops in the nearest body on its line
     if (!o.alive || o.team === a.team) continue;
-    const h = rayActor(o, a.x, oy, a.z, dx, dy, dz, reach);
-    if (h) { strike(state, o, a, w, 'knife', h.zone, 0, 1, 0); return; }
+    const h = rayActor(o, a.x, oy, a.z, dx, dy, dz, t);
+    if (h) { victim = o; t = h.t; zone = h.zone; }
   }
+  if (victim) strike(state, victim, a, w, 'knife', zone, 0, 1, 0);
 }
 
 function pull(state, a, w, id) {

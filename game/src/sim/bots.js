@@ -87,7 +87,7 @@ function fight(state, a, b, c, w, tgt, dt) {
   c.pitch = turnTo(a.pitch, truePitch + b.ey - a.punchP * comp, speed);
   const onTarget = Math.abs(turnTo(0, trueYaw - a.yaw, 9)) < Math.max(0.02, 0.4 / dist) && Math.abs(truePitch - a.pitch) < 0.12;
   const near = dist < 7;
-  if (!w) { c.slot = a.slots[0] ? 0 : 1; return; } // a grenade in hand: draw a gun
+  if (!w) { c.slot = a.slots[0] && a.mag[0] + a.res[0] ? 0 : 1; return; } // a grenade in hand: draw a gun
   if (a.mag[a.slot] === 0) c.reload = true;
   else if (b.react <= 0 && onTarget) {
     if (b.pause > 0) b.pause -= dt;
@@ -140,7 +140,7 @@ export function thinkBot(state, a, dt) {
 
   if (tgt && a.blind < 0.35) {
     // Stick the douse when the fuse leaves no time for a duel; otherwise deal with the threat first.
-    const mustDouse = task === 'douse' && k.fuse < douseTime(a) - a.use + 1.5;
+    const left = douseTime(a) - a.use, mustDouse = task === 'douse' && (k.fuse < left + 1.5 || left < 1.5);
     if (mustDouse) c.use = true; else fight(state, a, b, c, w, tgt, dt);
     return;
   }
