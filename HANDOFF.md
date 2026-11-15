@@ -11,6 +11,17 @@ Hapus file ini dan `tools/` sebelum submit final kalau mau repo rapi (tidak waji
 - Hanya kerja di branch `claude/makefun-bounty-setup-dzhuji`. Bounty catur dikerjakan sesi lain: jangan disentuh.
 - Nama, peta, karakter, suara harus orisinal (jangan pakai nama game komersial). Tim: Smugglers (serang) / Wardens (bertahan).
 
+## Larangan keras (melanggar = entri ditolak)
+
+- **Jangan ubah**: `game/vendor/` (three.js 0.187.0 dicek byte-per-byte), `vendor/makefun-threejs.ts`, `LICENSE`, `.makefun/owner.json`, lencana di README, dan import map tunggal di `game/index.html`.
+- **Jangan menyalin kode atau aset dari luar**, termasuk dari repo lain milik pemilik: semua harus ditulis di dalam sesi, karena gate transkrip mencocokkan kode dengan log. Tanpa CDN, tanpa URL luar, tanpa addon three.js lain, tanpa paket npm; `main.ts` hanya pustaka standar Node.
+- Semua file game ada di dalam `game/` dengan referensi relatif (maks 993 file / 48 MiB).
+- **Jangan commit rahasia** dalam bentuk apa pun, dan jangan minta pemilik menempelkannya di sesi ini.
+- **Jangan force-push atau menulis ulang riwayat**, jangan push ke branch lain, jangan buat PR.
+- **Jangan submit dan jangan claim.**
+- Jangan pakai nama, peta, karakter, atau aset game komersial.
+- Sebelum setiap push: `node tools/errs.mjs` dan `node tools/simtest.mjs 1` harus bersih.
+
 ## Tenggat dan status
 
 - Deadline **2026-11-16T21:30Z** (17 Nov 04:30 WIB). Submission terakhir sebelum deadline yang dihitung. Kuota 5 per hari UTC, 10 total.
