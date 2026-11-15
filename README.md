@@ -16,6 +16,8 @@ python3 -m http.server --directory game 8080   # then open http://localhost:8080
 
 Add `?watch=1` to the address to watch the bots play a whole match by themselves.
 
+To try it on a phone, serve the repository root instead (`python3 -m http.server 8080`) and open `/mobile/`: that page loads the same game and adds touch controls. That page is a test harness and not part of the entry.
+
 ## How it is built
 
 - `game/src/sim/` is the game itself: a fixed 60 Hz simulation with no DOM and no three.js in it (it runs headless in Node). One state object, one module per job: movement, weapons, damage, grenades, the keg, the economy, rounds, path finding, and the bots' coach and brains.

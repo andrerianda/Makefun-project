@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- A test page for phones: it loads the very same game from ../game/ and adds touch controls on top.
+     Not part of the entry (the entry is game/ alone). Hold the phone sideways. -->
+<meta name="viewport" content="width=1280, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<base href="../game/">
+<title>CAMPANILE on a phone (touch test)</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+  // Borrow the game's own page for its markup, so there is one HUD and not a copy of it.
+  const page = new DOMParser().parseFromString(await (await fetch('index.html')).text(), 'text/html');
+  document.body.append(document.adoptNode(page.getElementById('game')), document.adoptNode(page.getElementById('hud')));
+  await import('../mobile/touch.js'); // stands in for pointer lock before the game asks for it
+  await import('./src/main.js');
+</script>
+</body>
+</html>
