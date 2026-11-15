@@ -1,6 +1,5 @@
 // What a body carries: slot 0 primary, 1 sidearm, 2 blade, 3 the selected grenade. And what it leaves behind.
 import { WEAPONS } from '../config.js';
-import { emit } from './state.js';
 
 /** The weapon in hand, or null while a grenade is. */
 export const weaponOf = (a) => (a.slot === 3 ? null : WEAPONS[a.slots[a.slot]]);
@@ -35,7 +34,6 @@ export function stepDrops(state) {
     for (const a of state.actors) {
       if (!a.alive || a.slots[0] || Math.hypot(a.x - d.x, a.z - d.z) > 1) continue;
       d.live = false; a.slots[0] = d.id; a.mag[0] = d.mag; a.res[0] = d.res; a.slot = 0; a.swap = 0.4; a.reload = 0;
-      emit(state, 'pickup', a.id, -1, a.x, a.y, a.z);
       break;
     }
   }

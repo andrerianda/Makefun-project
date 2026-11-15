@@ -24,8 +24,7 @@ export function createGame(seed, watch, level = 1) {
 function followTheLiving(state) {
   const me = state.actors[0], view = state.actors[state.viewId];
   if (view.alive || me.deadT < 1.5) return;
-  const mate = state.actors.find((a) => a.alive && a.team === me.team);
-  if (mate) state.viewId = mate.id;
+  for (const o of state.actors) if (o.alive && o.team === me.team) { state.viewId = o.id; break; }
 }
 
 export function stepGame(state, dt) {

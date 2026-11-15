@@ -13,13 +13,13 @@ export function buildViewmodel(tex, kit) {
   const hands = [0, 1].map((side) => kit.build(`fp_hand${side}`, metal, false));
   const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex.star, blending: THREE.AdditiveBlending, depthTest: false, transparent: true }));
   scene.add(rig, key, new THREE.HemisphereLight('#fff4e6', '#7f86b0', 2.2));
-  let held = '', R, L, bob = 0, lastYaw = 0, sway = 0;
+  let held, hs, R, L, bob = 0, lastYaw = 0, sway = 0;
 
   return {
     scene, camera,
     update(a, side, dt, aspect) {
       const id = a.slots[a.slot] || NADES[a.nadeSel].id, w = WEAPONS[id] || WEAPONS.knife, b = guns[id] ||= kit.build(`fp_${id}`, metal, false);
-      if (held !== id + side) { // a new weapon, or new sleeves at half-time: this side's hands take hold of it
+      if (held !== b || hs !== side) { // a new weapon, or new sleeves at half-time: this side's hands take hold of it
         rig.clear(); rig.add(b.root);
         if (R) R.removeFromParent();
         if (L) L.removeFromParent();
@@ -27,7 +27,7 @@ export function buildViewmodel(tex, kit) {
         L = hands[side]['L' + id];
         if (L) b.fore.add(L);
         b.tip.add(flash);
-        held = id + side;
+        held = b; hs = side;
       }
       camera.aspect = aspect; camera.updateProjectionMatrix();
       // Bob with the stride, lag behind the mouse, kick with a shot and work the action, roll over for a reload.

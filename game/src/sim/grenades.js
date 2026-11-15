@@ -1,7 +1,7 @@
 // Thrown gear: a Crackler bursts, a Glare blinds whoever is looking, a Seafog hangs a cloud that blocks sight.
 import { MOVE, NADES } from '../config.js';
 import { emit, noise } from './state.js';
-import { rayWorld, sightClear, eyeHeight, hit } from './world.js';
+import { rayWorld, sightClear, eyeHeight, hit, look } from './world.js';
 import { hurt } from './damage.js';
 
 const THROW = 17, CLOUD_Y = 1.4;
@@ -9,18 +9,18 @@ const THROW = 17, CLOUD_Y = 1.4;
 export function throwNade(state, a, type) {
   const n = state.nades.find((g) => !g.live);
   if (!n) return;
-  const cp = Math.cos(a.pitch), dx = -Math.sin(a.yaw) * cp, dy = Math.sin(a.pitch), dz = -Math.cos(a.yaw) * cp;
+  const { x: dx, y: dy, z: dz } = look(a.yaw, a.pitch);
   n.live = true; n.type = type; n.owner = a.id; n.fuse = NADES[type].fuse; n.cloud = 0; n.rest = false;
   n.x = a.x + dx * 0.3; n.y = a.y + eyeHeight(a) - 0.1 + dy * 0.3; n.z = a.z + dz * 0.3; // within the thrower's body, never a wall
   n.vx = dx * THROW + a.vx * 0.5; n.vy = dy * THROW + 2.4; n.vz = dz * THROW + a.vz * 0.5;
-  emit(state, 'throw', a.id, -1, n.x, n.y, n.z, type);
+  emit(state, 'throw', a.id, -1, n.x, n.y, n.z);
 }
 
 function burst(state, n) {
   const def = NADES[n.type], owner = state.actors[n.owner];
   if (n.type === 2) { // smoke: the shell stays where it stopped and becomes the cloud
     n.cloud = def.life; n.rest = true; n.vx = n.vy = n.vz = 0;
-    emit(state, 'smoke', n.owner, -1, n.x, n.y, n.z, def.life);
+    emit(state, 'smoke', n.owner, -1, n.x, n.y, n.z);
     noise(state, n.x, n.z, 20, -1, 'nade');
     return;
   }
@@ -35,7 +35,7 @@ function burst(state, n) {
       const near = 1 - d / def.radius;
       hurt(state, a, n.owner, def.dmg * near * (a.armor > 0 ? 0.6 : 1), 'crackler');
     } else { // a flash blinds by how squarely you face it, and for half as long if a team-mate threw it
-      const cp = Math.cos(a.pitch), facing = (-Math.sin(a.yaw) * cp * (n.x - a.x) + Math.sin(a.pitch) * (n.y - ey) - Math.cos(a.yaw) * cp * (n.z - a.z)) / (d || 1);
+      const f = look(a.yaw, a.pitch), facing = (f.x * (n.x - a.x) + f.y * (n.y - ey) + f.z * (n.z - a.z)) / (d || 1);
       const t = def.blind * (0.3 + 0.7 * Math.max(0, facing)) * (1 - 0.6 * d / def.radius) * (owner.team === a.team ? 0.5 : 1);
       a.blind = Math.max(a.blind, t);
     }

@@ -7,7 +7,7 @@ const ORDERS = { z: 'A', x: 'B', g: 'me' }; // radio calls: hit or stack a site,
 
 export function createInput(canvas, state, hud) {
   const held = new Set();
-  let yaw = 0, pitch = 0, fire = false, tap = false, alt = false, jump = false, slot = -1, nade = -1, round = -1;
+  let fire = false, tap = false, alt = false, jump = false, slot = -1, nade = -1;
   const me = () => state.actors[0];
   const locked = () => document.pointerLockElement === canvas;
 
@@ -30,8 +30,8 @@ export function createInput(canvas, state, hud) {
   document.addEventListener('mousemove', (e) => {
     if (!locked()) return;
     const c = me().cmd, k = SENSITIVITY * (me().scoped ? 0.35 : 1); // straight into cmd: the camera turns at once
-    c.yaw = yaw -= e.movementX * k;
-    c.pitch = pitch = Math.max(-1.5, Math.min(1.5, pitch - e.movementY * k));
+    c.yaw -= e.movementX * k;
+    c.pitch = Math.max(-1.5, Math.min(1.5, c.pitch - e.movementY * k));
   });
   document.addEventListener('mousedown', (e) => { if (locked()) { if (e.button === 0) fire = tap = true; else if (e.button === 2) alt = true; } });
   document.addEventListener('mouseup', (e) => { if (e.button === 0) fire = false; else if (e.button === 2) alt = false; });
@@ -45,8 +45,6 @@ export function createInput(canvas, state, hud) {
     apply() {
       const a = me(), c = a.cmd;
       if (!a.human) return;
-      if (round !== state.match.round) { round = state.match.round; yaw = a.yaw; pitch = 0; } // face the way you spawned
-      c.yaw = yaw; c.pitch = pitch;
       c.mx = (held.has('KeyD') ? 1 : 0) - (held.has('KeyA') ? 1 : 0);
       c.mz = (held.has('KeyW') ? 1 : 0) - (held.has('KeyS') ? 1 : 0);
       c.duck = held.has('KeyC'); // not Ctrl: Ctrl+W would close the tab

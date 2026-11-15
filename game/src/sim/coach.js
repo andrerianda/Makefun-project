@@ -5,7 +5,6 @@ import { ATT, TEAM_SIZE, emit, sideOfTeam, countAlive } from './state.js';
 import { HOLDS, STAGE, SMOKES, SITES, zoneAt } from './map.js';
 
 const OTHER = { A: 'B', B: 'A' };
-const SITE_NAME = { A: 'Fish Market', B: 'Boathouse' };
 const ZONE_SITE = { 'Fish Market': 'A', 'Net Row': 'A', "Cooper's Cut": 'A', Boathouse: 'B', Quay: 'B', Chandlery: 'B' };
 // Where each of the five waits before the hit, per play: the 'main' door, 'mid' lane, a 'lurk' alley, a 'decoy' at the other site.
 const PLAYS = {
@@ -51,7 +50,7 @@ function hit(state, c) {
     else if (i === 1) { j.nade = 1; j.nx = site.x; j.nz = site.z; }
     else if (i === 3) { j.nade = 0; j.nx = holds[0].x; j.nz = holds[0].z; }
   });
-  radio(state, c, speaker(state, c), `Hit ${SITE_NAME[c.site]} now, smokes out`, true);
+  radio(state, c, speaker(state, c), `Hit ${SITES[c.site].name} now, smokes out`, true);
 }
 
 /** Choose the site to hit and the cobble on it where the keg goes down. */
@@ -75,16 +74,15 @@ function planAttack(state, c) {
     j.x += WEDGE[i][0]; j.z += WEDGE[i][1];
     j.quiet = role === 'lurk' || role === 'mid';
   });
-  const line = { default: `Default, then we hit ${SITE_NAME[c.site]}`, split: `Split ${SITE_NAME[c.site]} through Bell Square`, fake: `Fake ${SITE_NAME[OTHER[c.site]]}, hit ${SITE_NAME[c.site]}`, rush: `Rush ${SITE_NAME[c.site]}, go go go` };
+  const line = { default: `Default, then we hit ${SITES[c.site].name}`, split: `Split ${SITES[c.site].name} through Bell Square`, fake: `Fake ${SITES[OTHER[c.site]].name}, hit ${SITES[c.site].name}`, rush: `Rush ${SITES[c.site].name}, go go go` };
   radio(state, c, speaker(state, c), line[c.play], true);
 }
 
 function planDefence(state, c) {
   const roll = state.rng.next(), setup = roll < 0.55 ? 'standard' : roll < 0.7 ? 'stackA' : roll < 0.85 ? 'stackB' : 'mid';
   const used = { A: 0, B: 0, M: 0 };
-  c.play = setup;
   c.jobs.forEach((j, i) => { const s = SETUPS[setup][i]; post(j, HOLDS[s][used[s]++ % HOLDS[s].length], true, s); });
-  radio(state, c, speaker(state, c), setup === 'standard' ? 'Two Market, two Boathouse, one Bell Square' : setup === 'mid' ? 'Two on Bell Square, hold the gate' : `Stacking ${SITE_NAME[setup === 'stackA' ? 'A' : 'B']} this round`, true);
+  radio(state, c, speaker(state, c), setup === 'standard' ? 'Two Market, two Boathouse, one Bell Square' : setup === 'mid' ? 'Two on Bell Square, hold the gate' : `Stacking ${SITES[setup === 'stackA' ? 'A' : 'B'].name} this round`, true);
 }
 
 export function planRound(state, c) {
@@ -106,7 +104,7 @@ export function order(state, c, a, call) {
   if (call !== 'me' && c.side === ATT) { target(state, c, call); hit(state, c); return; }
   if (call !== 'me') holdSite(c, call);
   else c.jobs.forEach((j, i) => { post(j, a, false, j.site); j.x += WEDGE[i][0]; j.z += WEDGE[i][1]; });
-  radio(state, c, a, call === 'me' ? 'On me' : `Everyone ${SITE_NAME[call]}`, true);
+  radio(state, c, a, call === 'me' ? 'On me' : `Everyone ${SITES[call].name}`, true);
 }
 
 function nearestBot(state, c, x, z, preferKit) {
@@ -136,7 +134,7 @@ export function stepCoach(state, c, dt) {
     } else if (k.state === 'planted' && !c.lit) { // hold the site until the fuse runs out
       c.lit = true; c.site = k.site;
       holdSite(c, k.site);
-      radio(state, c, speaker(state, c), `Keg is lit, hold ${SITE_NAME[k.site]}`, true);
+      radio(state, c, speaker(state, c), `Keg is lit, hold ${SITES[k.site].name}`, true);
     }
     return;
   }
@@ -144,7 +142,7 @@ export function stepCoach(state, c, dt) {
     if (!c.lit) {
       c.lit = true;
       holdSite(c, k.site);
-      radio(state, c, speaker(state, c), `They lit it at ${SITE_NAME[k.site]}, retake`, true);
+      radio(state, c, speaker(state, c), `They lit it at ${SITES[k.site].name}, retake`, true);
     }
     const a = nearestBot(state, c, k.x, k.z, true);
     if (a && a.id !== c.douser) { c.douser = a.id; post(c.jobs[a.id % TEAM_SIZE], k, true, k.site); radio(state, c, a, 'Dousing, watch my back'); }
@@ -156,6 +154,6 @@ export function stepCoach(state, c, dt) {
     let moved = 0, slot = 2;
     for (const j of c.jobs) if (j.site !== hot && (j.site === 'M' || moved++ === 0)) post(j, HOLDS[hot][slot++ % HOLDS[hot].length], true, hot);
     c.rotated = true;
-    radio(state, c, speaker(state, c), `Rotating ${SITE_NAME[hot]}`, true);
+    radio(state, c, speaker(state, c), `Rotating ${SITES[hot].name}`, true);
   }
 }

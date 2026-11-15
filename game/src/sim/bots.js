@@ -1,12 +1,11 @@
 // A bot's own head: it looks and listens, walks its route to the post the coach gave it, checks the angle it was
 // told to watch, and fights the way the gunplay rewards: stop, burst, sidestep, burst again.
-import { ROUND } from '../config.js';
 import { ATT, DEF, TEAM_SIZE, sideOf } from './state.js';
 import { canSee, hear } from './perception.js';
 import { report } from './coach.js';
 import { findPath, makePath } from './nav.js';
 import { weaponOf } from './loadout.js';
-import { canPlant, canDouse } from './keg.js';
+import { canPlant, canDouse, douseTime } from './keg.js';
 import { sightClear, eyeHeight, bodyHeight } from './world.js';
 
 const TAU = Math.PI * 2;
@@ -58,9 +57,9 @@ function walkTo(a, c, x, z) {
   c.mz = (-sin * dx - cos * dz) / d; c.mx = (cos * dx - sin * dz) / d;
 }
 
-/** Follow the path to the goal; returns the distance left. Re-plans when the goal moved or time passed. */
+/** Follow the path to the goal. Re-plans when the goal moved or time passed. */
 function travel(state, a, b, c, dt) {
-  const p = b.path, left = Math.hypot(b.gx - a.x, b.gz - a.z);
+  const p = b.path;
   b.repath -= dt;
   if (b.repath <= 0 || p.n === 0 || Math.hypot(p.x[p.n - 1] - b.gx, p.z[p.n - 1] - b.gz) > 1.5) {
     findPath(p, a.x, a.z, b.gx, b.gz);
@@ -74,7 +73,6 @@ function travel(state, a, b, c, dt) {
     if (Math.hypot(a.x - b.sx, a.z - b.sz) < 0.25 && state.match.phase !== 'freeze') { c.jump = true; c.mx = state.rng.chance(0.5) ? 1 : -1; b.repath = 0; }
     b.checkT = 0.7; b.sx = a.x; b.sz = a.z;
   }
-  return left;
 }
 
 function fight(state, a, b, c, w, tgt, dt) {
@@ -142,7 +140,7 @@ export function thinkBot(state, a, dt) {
 
   if (tgt && a.blind < 0.35) {
     // Stick the douse when the fuse leaves no time for a duel; otherwise deal with the threat first.
-    const mustDouse = task === 'douse' && k.fuse < (a.kit ? ROUND.douseKitTime : ROUND.douseTime) - a.use + 1.5;
+    const mustDouse = task === 'douse' && k.fuse < douseTime(a) - a.use + 1.5;
     if (mustDouse) c.use = true; else fight(state, a, b, c, w, tgt, dt);
     return;
   }

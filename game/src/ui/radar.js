@@ -1,6 +1,6 @@
 // The radar: the map from above, your crew, any enemy a team-mate can see right now, gunfire, smoke and the keg.
 import { NADES, SIDES } from '../config.js';
-import { COLS, ROWS, CELL, tile, walk } from '../sim/map.js';
+import { COLS, ROWS, CELL, SITES, tile, walk } from '../sim/map.js';
 import { canSee } from '../sim/perception.js';
 import { sideOf } from '../sim/state.js';
 
@@ -18,8 +18,8 @@ export function createRadar(canvas) {
     b.fillRect(c * S, r * S, S + 0.5, S + 0.5);
   }
   b.fillStyle = '#f4ead8'; b.font = '800 13px sans-serif'; b.textAlign = 'center';
-  b.fillText('A', 8.5 * S, 5.9 * S); b.fillText('B', 30.5 * S, 5.9 * S);
   const px = (x) => (x / CELL + COLS / 2) * S, pz = (z) => (z / CELL + ROWS / 2) * S;
+  for (const k in SITES) b.fillText(k, px(SITES[k].x), pz(SITES[k].z) + 5);
   const spotted = new Uint8Array(10);
   let frame = 0;
 

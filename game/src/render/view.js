@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { weaponOf } from '../sim/loadout.js';
 import { drain, sideOf, overShoulder } from '../sim/state.js';
-import { eyeHeight, rayWorld } from '../sim/world.js';
+import { eyeHeight, rayWorld, look } from '../sim/world.js';
 import { makeTextures } from './textures.js';
 import { buildLevel } from './level.js';
 import { buildSky } from './sky.js';
@@ -69,7 +69,7 @@ export function createView(host, state, kit, sharp) {
       if (third) {
         // Over the shoulder: back along the aim until a wall is in the way, then turned to look at the point
         // the muzzle is on, so the crosshair still marks where the round lands.
-        const cp = Math.cos(a.pitch), dx = -Math.sin(a.yaw) * cp, dy = Math.sin(a.pitch), dz = -Math.cos(a.yaw) * cp;
+        const { x: dx, y: dy, z: dz } = look(a.yaw, a.pitch);
         const ox = Math.cos(a.yaw) * SIDE - dx * BACK, oy = 0.3 - dy * BACK, oz = -Math.sin(a.yaw) * SIDE - dz * BACK, len = Math.hypot(ox, oy, oz);
         const k = Math.max(0.1, rayWorld(ex, ey, ez, ox / len, oy / len, oz / len, len + 0.3) - 0.3) / len, aim = Math.max(4, rayWorld(ex, ey, ez, dx, dy, dz, 80));
         camera.position.set(ex + ox * k, ey + oy * k, ez + oz * k);

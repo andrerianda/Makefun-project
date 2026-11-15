@@ -7,8 +7,10 @@ let picks = 0, kills = 0, rounds = 0;
 for (let seed = 1; seed <= 4; seed++) {
   const s = createGame(seed, true); let cur = 0, kegged = 0;
   while (s.match.phase !== 'final' && s.tick < 60 * 60 * 40) {
+    const before = s.actors.map((a) => a.slots[0]), live = s.match.phase === 'live' || s.match.phase === 'planted';
     stepGame(s, TICK);
-    cur = drain(s, cur, (e) => { if (e.type === 'pickup') picks++; else if (e.type === 'kill') kills++; else if (e.type === 'round' && e.s === 'freeze') rounds++; });
+    if (live) s.actors.forEach((a, i) => { if (a.alive && !before[i] && a.slots[0]) picks++; }); // a rifle appeared mid-round: it was picked up
+    cur = drain(s, cur, (e) => { if (e.type === 'kill') kills++; else if (e.type === 'round' && e.s === 'freeze') rounds++; });
   }
 }
 console.log({ picks, kills, rounds });

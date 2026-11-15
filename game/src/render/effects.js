@@ -5,7 +5,7 @@ import { NADES } from '../config.js';
 import { DROPS, NADE_POOL, overShoulder } from '../sim/state.js';
 
 const TRACERS = 36, MARKS = 96, PUFFS = 48, CLOUD = 9, BLASTS = 4;
-const NADE_TINT = ['#4c6b3a', '#e8e2d0', '#8fa3b0'];
+const NADE_TINT = [0x4c6b3a, 0xe8e2d0, 0x8fa3b0]; // numbers, not strings: Color.set parses a string afresh
 
 export function buildEffects(scene, tex, actors, camera, kit) {
   const pool = (n, make) => { const list = []; for (let i = 0; i < n; i++) { const o = make(i); o.visible = false; scene.add(o); list.push(o); } return list; };
@@ -61,14 +61,14 @@ export function buildEffects(scene, tex, actors, camera, kit) {
         const m = marks[markI++ % MARKS];
         m.visible = true; m.position.set(e.x + e.x2 * 0.02, e.y + e.y2 * 0.02, e.z + e.z2 * 0.02);
         to.set(e.x + e.x2, e.y + e.y2, e.z + e.z2); m.lookAt(to);
-        puff(e.x + e.x2 * 0.1, e.y + e.y2 * 0.1, e.z + e.z2 * 0.1, e.n ? '#b8905a' : '#cfc2b0', 0.55, 0.4);
-      } else if (e.type === 'hurt') puff(e.x, e.y + (e.s === 'head' ? 1.62 : 1.15), e.z, '#a3231b', e.s === 'head' ? 0.7 : 0.5, 0.3); // a red spray where it struck
+        puff(e.x + e.x2 * 0.1, e.y + e.y2 * 0.1, e.z + e.z2 * 0.1, e.n ? 0xb8905a : 0xcfc2b0, 0.55, 0.4);
+      } else if (e.type === 'hurt') puff(e.x, e.y + (e.s === 'head' ? 1.62 : 1.15), e.z, 0xa3231b, e.s === 'head' ? 0.7 : 0.5, 0.3); // a red spray where it struck
       else if (e.type === 'boom') {
-        blast(e.x, e.y + 0.4, e.z, e.n ? '#ffffff' : '#ffb25a', e.n ? 7 : 9, e.n ? 0.18 : 0.32);
-        if (!e.n) for (let i = 0; i < 6; i++) puff(e.x + Math.cos(i) * 1.2, e.y + 0.5, e.z + Math.sin(i) * 1.2, '#4a4038', 3.2, 1.1);
+        blast(e.x, e.y + 0.4, e.z, e.n ? 0xffffff : 0xffb25a, e.n ? 7 : 9, e.n ? 0.18 : 0.32);
+        if (!e.n) for (let i = 0; i < 6; i++) puff(e.x + Math.cos(i) * 1.2, e.y + 0.5, e.z + Math.sin(i) * 1.2, 0x4a4038, 3.2, 1.1);
       } else if (e.type === 'kegBoom') {
-        blast(e.x, 1.5, e.z, '#ffc070', 30, 0.7);
-        for (let i = 0; i < 10; i++) puff(e.x + Math.cos(i * 0.63) * 3.5, 1 + (i % 3), e.z + Math.sin(i * 0.63) * 3.5, '#3a302a', 8, 2.2);
+        blast(e.x, 1.5, e.z, 0xffc070, 30, 0.7);
+        for (let i = 0; i < 10; i++) puff(e.x + Math.cos(i * 0.63) * 3.5, 1 + (i % 3), e.z + Math.sin(i * 0.63) * 3.5, 0x3a302a, 8, 2.2);
       } else if (e.type === 'beep') pulse = 1;
     },
 

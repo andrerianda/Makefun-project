@@ -22,23 +22,21 @@ export async function loadKit(urls) {
   for (const line of texts.join('\n').split('\n')) {
     const f = line.trim().split(/\s+/);
     if (f[0] === '@') model = models[f[1]] = [];
-    else if (f[0] === '>') model.push(bone = { name: f[1], parent: f[2], x: +f[3] || 0, y: +f[4] || 0, z: +f[5] || 0, p: [], n: [], c: [], geo: null });
+    else if (f[0] === '>') model.push(bone = { name: f[1], parent: f[2], x: +f[3] || 0, y: +f[4] || 0, z: +f[5] || 0, position: [], normal: [], color: [], geo: null });
     else if (SHAPES[f[0]]) {
       const g = SHAPES[f[0]](+f[1], +f[2], +f[3]).toNonIndexed();
       place.position.set(+f[4], +f[5], +f[6]); place.rotation.set(+f[7], +f[8], +f[9]); place.updateMatrix();
       g.applyMatrix4(place.matrix);
       tint.set(f[10]);
-      for (const v of g.attributes.position.array) bone.p.push(v);
-      for (const v of g.attributes.normal.array) bone.n.push(v);
-      for (let i = 0; i < g.attributes.position.count; i++) bone.c.push(tint.r, tint.g, tint.b);
+      for (const v of g.attributes.position.array) bone.position.push(v);
+      for (const v of g.attributes.normal.array) bone.normal.push(v);
+      for (let i = 0; i < g.attributes.position.count; i++) bone.color.push(tint.r, tint.g, tint.b);
     }
   }
   for (const name in models) for (const b of models[name]) {
-    if (!b.p.length) continue;
+    if (!b.color.length) continue;
     b.geo = new THREE.BufferGeometry();
-    b.geo.setAttribute('position', new THREE.Float32BufferAttribute(b.p, 3));
-    b.geo.setAttribute('normal', new THREE.Float32BufferAttribute(b.n, 3));
-    b.geo.setAttribute('color', new THREE.Float32BufferAttribute(b.c, 3));
+    for (const k of ['position', 'normal', 'color']) b.geo.setAttribute(k, new THREE.Float32BufferAttribute(b[k], 3));
   }
   return {
     /** One copy of a model: a group per bone, parented as the kit says, sharing the baked geometry. Returns

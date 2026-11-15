@@ -5,8 +5,8 @@ import { boxes, CELL, COLS, ROWS } from './map.js';
 
 const LIMIT_X = (COLS / 2) * CELL - 0.5, LIMIT_Z = (ROWS / 2) * CELL - 0.5;
 
-/** The last ray's result: distance, the box struck, and the struck face's normal. */
-export const hit = { t: 0, box: null, nx: 0, ny: 0, nz: 0 };
+/** The last ray's result: the box struck and the struck face's normal. */
+export const hit = { box: null, nx: 0, ny: 0, nz: 0 };
 
 /** Slab test of a ray against one box; returns the entry distance or -1, and leaves the face in `hit`. */
 function rayBox(ox, oy, oz, dx, dy, dz, b, maxT) {
@@ -38,7 +38,7 @@ export function rayWorld(ox, oy, oz, dx, dy, dz, maxT, skip = null) {
     const t = -oy / dy;
     if (t >= 0 && t < best) { best = t; found = null; nx = 0; ny = 1; nz = 0; }
   }
-  hit.t = best; hit.box = found; hit.nx = nx; hit.ny = ny; hit.nz = nz;
+  hit.box = found; hit.nx = nx; hit.ny = ny; hit.nz = nz;
   return best;
 }
 
@@ -57,6 +57,14 @@ function overlap(x, y, z, r, h) {
     if (x + r > b.x0 && x - r < b.x1 && z + r > b.z0 && z - r < b.z1 && y < b.y1 - 1e-4 && y + h > b.y0) return b;
   }
   return null;
+}
+
+/** The unit vector along a view (yaw 0 faces north, -z), written into the shared `ahead` record. */
+export const ahead = { x: 0, y: 0, z: 0 };
+export function look(yaw, pitch) {
+  const cp = Math.cos(pitch);
+  ahead.x = -Math.sin(yaw) * cp; ahead.y = Math.sin(pitch); ahead.z = -Math.cos(yaw) * cp;
+  return ahead;
 }
 
 export const bodyHeight = (a) => MOVE.standH + (MOVE.duckH - MOVE.standH) * a.duck;

@@ -4,7 +4,7 @@
 // furniture comes from the model kit and is placed by rule: what stands on a cell, what hangs on a wall.
 import * as THREE from 'three';
 import { PALETTE } from '../config.js';
-import { boxes, COLS, ROWS, CELL, cellX, cellZ, colOf, rowOf, tile, zoneAt } from '../sim/map.js';
+import { boxes, COLS, ROWS, CELL, cellX, cellZ, colOf, rowOf, tile, zoneAt, hash } from '../sim/map.js';
 import { rayWorld } from '../sim/world.js';
 import { label } from './textures.js';
 
@@ -86,7 +86,6 @@ class Batch {
 /** A level material: its texture's own light and dark double as a height map, so seams and tiles catch the sun. */
 const lit = (map, bump, extra) => new THREE.MeshLambertMaterial({ map, vertexColors: true, bumpMap: map, bumpScale: bump, ...extra });
 const colour = (hex) => new THREE.Color(hex);
-const hash = (a, b) => ((Math.round(a * 7) * 73856093) ^ (Math.round(b * 7) * 19349663)) >>> 0;
 const WHITE = colour('#ffffff');
 // What the kit draws for a solid the map lists, and what may lean against a house wall.
 const STANDS = { barrel: 'barrels', stall: 'stall', basin: 'fountain', hull: 'hull', cart: 'cart', table: 'table', nets: 'nets', sacks: 'sacks', planter: 'cypress' };
@@ -177,9 +176,9 @@ export function buildLevel(scene, tex, kit) {
   }
 
   // The campanile: a pale shaft over Bell Square, an open belfry with its bell, a tiled spire. Every lane sees it.
-  const tx0 = cellX(19) - 1.06, tx1 = cellX(20) + 1.06, tz0 = cellZ(7) - 1.06, tz1 = cellZ(8) + 1.06, mid = (tx0 + tx1) / 2, midZ = (tz0 + tz1) / 2;
-  plaster.box({ x0: tx0, x1: tx1, z0: tz0, z1: tz1, y0: 0, y1: 20 }, colour('#f0dcb8'), 3, stone, stoneTint, 1.6);
-  for (const [dx, dz] of [[tx0, tz0], [tx1 - 0.6, tz0], [tx0, tz1 - 0.6], [tx1 - 0.6, tz1 - 0.6]]) plaster.box({ x0: dx, x1: dx + 0.6, z0: dz, z1: dz + 0.6, y0: 20, y1: 23.2 }, colour('#f0dcb8'), 3);
+  const tx0 = cellX(19) - 1.06, tx1 = cellX(20) + 1.06, tz0 = cellZ(7) - 1.06, tz1 = cellZ(8) + 1.06, mid = (tx0 + tx1) / 2, midZ = (tz0 + tz1) / 2, pale = colour('#f0dcb8');
+  plaster.box({ x0: tx0, x1: tx1, z0: tz0, z1: tz1, y0: 0, y1: 20 }, pale, 3, stone, stoneTint, 1.6);
+  for (const [dx, dz] of [[tx0, tz0], [tx1 - 0.6, tz0], [tx0, tz1 - 0.6], [tx1 - 0.6, tz1 - 0.6]]) plaster.box({ x0: dx, x1: dx + 0.6, z0: dz, z1: dz + 0.6, y0: 20, y1: 23.2 }, pale, 3);
   roof.box({ x0: tx0 - 0.3, x1: tx1 + 0.3, z0: tz0 - 0.3, z1: tz1 + 0.3, y0: 23.2, y1: 23.6 }, WHITE, 2.4);
   for (const y of [0, 7.4, 13.4, 19.6]) stone.box({ x0: tx0 - 0.14, x1: tx1 + 0.14, z0: tz0 - 0.14, z1: tz1 + 0.14, y0: y, y1: y + (y ? 0.4 : 1.1) }, stoneTint, 1.6); // plinth and cornices
   for (const y of [3.4, 9.6]) for (const s of [1, -1]) { // lancet windows up the shaft

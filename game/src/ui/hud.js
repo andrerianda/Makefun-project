@@ -1,10 +1,11 @@
 // The heads-up display: reads the state every frame and writes to the DOM only what changed.
 import { NADES, ROUND, SIDES, WEAPONS } from '../config.js';
 import { ATT, drain, sideOf, sideOfTeam, countAlive } from '../sim/state.js';
-import { zoneAt } from '../sim/map.js';
+import { SITES, zoneAt } from '../sim/map.js';
 import { inaccuracy } from '../sim/weapons.js';
+import { HEAD, WALLBANG } from '../sim/damage.js';
 import { weaponOf } from '../sim/loadout.js';
-import { canPlant, canDouse } from '../sim/keg.js';
+import { canPlant, canDouse, douseTime } from '../sim/keg.js';
 import { shopOpen } from '../sim/economy.js';
 import { createRadar } from './radar.js';
 import { createShop, createBoard } from './panels.js';
@@ -43,6 +44,7 @@ export function createHud(state) {
     setTimeout(() => { li.style.opacity = 0; setTimeout(() => li.remove(), 700); }, 7000);
   };
   const banner = (e, title, sub, seconds = 3.5) => { el.banner.firstElementChild.textContent = title; el.banner.lastElementChild.textContent = sub; put(el.banner, 1, 'opacity'); bannerEnd = e.t + seconds; };
+  const watching = (id) => (id < 0 ? '' : id ? `${recap} · WATCHING ${state.actors[id].name.toUpperCase()}` : recap); // by id: no string per frame
   const named = (a) => `<em class="s${sideOf(state, a)}">${a.name}</em>`;
 
   function onEvent(e) {
@@ -50,14 +52,14 @@ export function createHud(state) {
     if (e.type === 'kill') {
       const killer = e.a >= 0 ? st.actors[e.a] : null, how = WEAPONS[e.s] ? WEAPONS[e.s].name : e.s === 'keg' ? 'the keg' : 'Crackler';
       if (e.b === 0) recap = killer ? `${killer.name} got you with ${how} · ${Math.ceil(killer.hp)} hp left` : '';
-      line(el.feed, `${killer ? named(killer) : ''}<i>${how}${e.n & 1 ? ' &middot; head' : ''}${e.n & 2 ? ' &middot; through cover' : ''}</i>${named(st.actors[e.b])}`, e.a === view || e.b === view ? 'mine' : '', 5);
+      line(el.feed, `${killer ? named(killer) : ''}<i>${how}${e.n & HEAD ? ' &middot; head' : ''}${e.n & WALLBANG ? ' &middot; through cover' : ''}</i>${named(st.actors[e.b])}`, e.a === view || e.b === view ? 'mine' : '', 5);
     } else if (e.type === 'radio' && st.actors[e.a].team === me.team) line(el.radio, `${named(st.actors[e.a])} ${e.s}`, '', 4);
     else if (e.type === 'hurt' && e.b === view && e.a !== view) { hitT = 0.18; el.hitmark.className = e.s === 'head' ? 'head' : ''; }
     else if (e.type === 'hurt' && e.a === view) {
       painT = Math.min(1, painT + e.n / 60);
       if (e.b >= 0) { fromT = 1.2; fromX = st.actors[e.b].x; fromZ = st.actors[e.b].z; } // remember where it came from
     }
-    else if (e.type === 'planted') banner(e, 'THE KEG IS LIT', `${e.s === 'A' ? 'Fish Market' : 'Boathouse'}: ${ROUND.fuse} seconds on the fuse`);
+    else if (e.type === 'planted') banner(e, 'THE KEG IS LIT', `${SITES[e.s].name}: ${ROUND.fuse} seconds on the fuse`);
     else if (e.type === 'round') {
       const m = st.match;
       if (e.s === 'freeze') banner(e, `ROUND ${m.round}`, sideOf(st, me) === ATT ? 'Light the keg at the Fish Market or the Boathouse' : 'Hold both sites; douse the keg if it is lit');
@@ -117,9 +119,9 @@ export function createHud(state) {
       if (st.time > bannerEnd) put(el.banner, 0, 'opacity');
 
       // One prompt at a time: the keg first, then the shop, then who you are watching.
-      const me = st.actors[0], need = a.kit ? ROUND.douseKitTime : ROUND.douseTime;
+      const me = st.actors[0];
       let prompt = '', progress = -1;
-      if (a.use > 0) { prompt = a.hasKeg ? 'Lighting the keg' : 'Dousing the keg'; progress = a.use / (a.hasKeg ? ROUND.plantTime : need); }
+      if (a.use > 0) { prompt = a.hasKeg ? 'Lighting the keg' : 'Dousing the keg'; progress = a.use / (a.hasKeg ? ROUND.plantTime : douseTime(a)); }
       else if (a.alive && canPlant(st, a)) prompt = 'Hold E to light the keg here';
       else if (a.alive && canDouse(st, a)) prompt = 'Hold E to douse the keg';
       else if (a === me && me.human && shopOpen(st, me) && !shop.open) prompt = 'B opens the Chandler\'s Counter';
@@ -127,7 +129,7 @@ export function createHud(state) {
       put(el.prompt.firstElementChild, prompt);
       put(el.bar, progress >= 0 ? 'block' : 'none', 'display');
       put(el.bar.firstElementChild, Math.min(100, Math.round(progress * 100)), 'width', percent);
-      put(el.watching, me.alive ? '' : `${recap}${a !== me ? ` · WATCHING ${a.name.toUpperCase()}` : ''}`);
+      put(el.watching, me.alive ? -1 : a.id, 'textContent', watching);
       radar.draw(st);
       shop.update(st); board.update(st);
     },

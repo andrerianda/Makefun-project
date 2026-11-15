@@ -1,11 +1,10 @@
 // The two panels that open over the game: the buy counter (B) and the scoreboard (Tab).
 import { GEAR, NADES, SHOP, SIDES, WEAPONS } from '../config.js';
 import { sideOfTeam } from '../sim/state.js';
-import { priceOf, shopOpen } from '../sim/economy.js';
+import { owns, priceOf, shopOpen } from '../sim/economy.js';
 
 export const SHOP_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'z', 'x', 'v'];
 const describe = (id) => WEAPONS[id] || GEAR[id] || NADES.find((n) => n.id === id);
-const owns = (a, id) => (WEAPONS[id] ? a.slots[WEAPONS[id].slot] === id : id === 'jerkin' ? a.armor >= 100 : id === 'cap' ? a.armor >= 100 && a.helmet : id === 'kit' ? a.kit : a.nades[NADES.findIndex((n) => n.id === id)] >= NADES.find((n) => n.id === id).max);
 
 export function createShop(el) {
   const rows = el.querySelector('#shopRows');

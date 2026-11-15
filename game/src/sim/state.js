@@ -26,7 +26,7 @@ function makeActor(id) {
 }
 
 /** A fresh match. `seed` fixes every dice roll; `watch` hands the player's body to a bot (attract mode). */
-export function createState(seed = 1, watch = false) {
+export function createState(seed, watch) {
   const actors = [];
   for (let i = 0; i < TEAM_SIZE * 2; i++) actors.push(makeActor(i));
   actors[0].human = !watch;

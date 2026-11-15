@@ -1,7 +1,7 @@
 // The trigger: switching, reloading, the firing cadence, and the accuracy model that makes stopping to aim pay.
 import { MOVE, SPRAY } from '../config.js';
 import { emit, noise } from './state.js';
-import { rayActor, rayWorld, eyeHeight, hit } from './world.js';
+import { rayActor, rayWorld, eyeHeight, hit, look } from './world.js';
 import { strike, WALLBANG } from './damage.js';
 import { throwNade } from './grenades.js';
 import { weaponOf } from './loadout.js';
@@ -28,7 +28,7 @@ function beginReload(state, a, w) {
 function fireBullet(state, a, w, id, cone) {
   const rng = state.rng, ang = rng.next() * 6.2832, rad = cone * Math.sqrt(rng.next());
   const yaw = a.yaw + a.punchY + Math.cos(ang) * rad, pitch = a.pitch + a.punchP + Math.sin(ang) * rad;
-  const cp = Math.cos(pitch), dx = -Math.sin(yaw) * cp, dy = Math.sin(pitch), dz = -Math.cos(yaw) * cp;
+  const { x: dx, y: dy, z: dz } = look(yaw, pitch);
   let ox = a.x, oy = a.y + eyeHeight(a), oz = a.z, left = w.range, travelled = 0, scale = 1, flags = 0, skip = null;
   for (let leg = 0; leg < 2; leg++) {
     const wall = rayWorld(ox, oy, oz, dx, dy, dz, left, skip), box = hit.box, nx = hit.nx, ny = hit.ny, nz = hit.nz;
@@ -39,7 +39,7 @@ function fireBullet(state, a, w, id, cone) {
       if (h && h.t < vt) { vt = h.t; zone = h.zone; victim = o; }
     }
     const ex = ox + dx * vt, ey = oy + dy * vt, ez = oz + dz * vt;
-    emit(state, 'tracer', a.id, victim ? victim.id : -1, ex, ey, ez, leg);
+    emit(state, 'tracer', a.id, -1, ex, ey, ez);
     if (victim) { strike(state, victim, a, w, id, zone, travelled + vt, scale, flags); return; }
     if (wall >= left) return;
     emit(state, 'impact', -1, -1, ex, ey, ez, box && box.soft ? 1 : 0, '', nx, ny, nz);
@@ -51,7 +51,7 @@ function fireBullet(state, a, w, id, cone) {
 }
 
 function stab(state, a, w) {
-  const cp = Math.cos(a.pitch), dx = -Math.sin(a.yaw) * cp, dy = Math.sin(a.pitch), dz = -Math.cos(a.yaw) * cp;
+  const { x: dx, y: dy, z: dz } = look(a.yaw, a.pitch);
   const oy = a.y + eyeHeight(a), reach = rayWorld(a.x, oy, a.z, dx, dy, dz, w.range);
   for (const o of state.actors) {
     if (!o.alive || o.team === a.team) continue;

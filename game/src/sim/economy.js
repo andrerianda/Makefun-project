@@ -4,6 +4,7 @@ import { ATT, DEF, TEAM_SIZE, emit, sideOf, sideOfTeam } from './state.js';
 import { SPAWN } from './map.js';
 import { giveWeapon } from './loadout.js';
 
+const nadeOf = (id) => NADES.findIndex((g) => g.id === id);
 const pay = (a, n) => { a.money = Math.max(0, Math.min(ECON.cap, a.money + n)); };
 
 export function rewardKill(killer, cause) {
@@ -27,7 +28,7 @@ export function priceOf(state, a, item) {
   if (WEAPONS[item]) return WEAPONS[item].price;
   if (item === 'kit') return sideOf(state, a) === DEF ? GEAR.kit.price : -1;
   if (GEAR[item]) return GEAR[item].price;
-  const n = NADES.find((g) => g.id === item);
+  const n = NADES[nadeOf(item)];
   return n ? n.price : -1;
 }
 
@@ -39,27 +40,19 @@ export function shopOpen(state, a) {
   return Math.hypot(a.x - home.x, a.z - home.z) < 16;
 }
 
-/** Try to buy one item; returns true when the money changed hands. */
+/** True when this body already has the item, or all of that grenade it may carry. */
+export const owns = (a, id) => (WEAPONS[id] ? a.slots[WEAPONS[id].slot] === id : id === 'kit' ? a.kit : GEAR[id] ? a.armor >= 100 && (id === 'jerkin' || a.helmet) : a.nades[nadeOf(id)] >= NADES[nadeOf(id)].max);
+
+/** Try to buy one item: nothing happens unless it is for sale here, affordable and not already owned. */
 export function buy(state, a, item) {
   const price = priceOf(state, a, item);
-  if (price < 0 || price > a.money || !shopOpen(state, a)) return false;
-  if (WEAPONS[item]) {
-    if (a.slots[WEAPONS[item].slot] === item) return false;
-    giveWeapon(a, item); a.slot = WEAPONS[item].slot; a.swap = 0.4; a.reload = 0;
-  } else if (item === 'jerkin' || item === 'cap') {
-    if (a.armor >= 100 && (item === 'jerkin' || a.helmet)) return false;
-    a.armor = 100; if (item === 'cap') a.helmet = true;
-  } else if (item === 'kit') {
-    if (a.kit) return false;
-    a.kit = true;
-  } else {
-    const i = NADES.findIndex((g) => g.id === item);
-    if (a.nades[i] >= NADES[i].max) return false;
-    a.nades[i]++; if (a.nadeSel < 0) a.nadeSel = i;
-  }
+  if (price < 0 || price > a.money || owns(a, item) || !shopOpen(state, a)) return;
+  if (WEAPONS[item]) { giveWeapon(a, item); a.slot = WEAPONS[item].slot; a.swap = 0.4; a.reload = 0; }
+  else if (item === 'kit') a.kit = true;
+  else if (GEAR[item]) { a.armor = 100; if (item === 'cap') a.helmet = true; }
+  else { const i = nadeOf(item); a.nades[i]++; if (a.nadeSel < 0) a.nadeSel = i; }
   pay(a, -price);
-  emit(state, 'buy', a.id, -1, a.x, a.y, a.z, price, item);
-  return true;
+  emit(state, 'buy', a.id, -1, a.x, a.y, a.z);
 }
 
 /** A bot's shopping for the round: armour or grenades on a pistol round, a full buy when it can afford one,

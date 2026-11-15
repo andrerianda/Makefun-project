@@ -67,10 +67,10 @@ export const boxes = [];
 /** 1 where a body may stand: the nav grid. */
 export const walk = new Uint8Array(COLS * ROWS);
 export const SPAWN = [[], []]; // [attackers' cells, defenders' cells] as {x, z}
-export const SITES = { A: { cells: [], x: 0, z: 0 }, B: { cells: [], x: 0, z: 0 } };
+export const SITES = { A: { name: 'Fish Market', cells: [], x: 0, z: 0 }, B: { name: 'Boathouse', cells: [], x: 0, z: 0 } };
 const ROOF = { c0: 27, r0: 1, c1: 36, r1: 10, y: 5.6 }; // the Boathouse is the one roofed room
 
-const hash = (c, r) => ((c * 73856093) ^ (r * 19349663)) >>> 0;
+export const hash = (c, r) => ((c * 73856093) ^ (r * 19349663)) >>> 0;
 const box = (x0, y0, z0, x1, y1, z1, kind, soft, style = 0) => boxes.push({ x0, y0, z0, x1, y1, z1, kind, soft, style });
 
 (function build() {

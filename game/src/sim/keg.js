@@ -20,6 +20,9 @@ export const canPlant = (state, a) => a.hasKeg && a.ground && state.match.phase 
 export const canDouse = (state, a) => state.keg.state === 'planted' && sideOf(state, a) === DEF && a.ground &&
   Math.hypot(a.x - state.keg.x, a.z - state.keg.z) < 1.4 && (state.keg.douser < 0 || state.keg.douser === a.id);
 
+/** Seconds a douse takes this body: a Douse Kit halves it. */
+export const douseTime = (a) => (a.kit ? ROUND.douseKitTime : ROUND.douseTime);
+
 export function stepKeg(state, dt) {
   const k = state.keg;
   if (k.state === 'carried') {
@@ -39,7 +42,7 @@ export function stepKeg(state, dt) {
   } else if (k.state === 'dropped') {
     for (const a of state.actors) {
       if (a.alive && sideOf(state, a) === ATT && Math.hypot(a.x - k.x, a.z - k.z) < 1.2) {
-        giveKeg(state, a); emit(state, 'pickup', a.id, -1, a.x, a.y, a.z); break;
+        giveKeg(state, a); break;
       }
     }
   } else if (k.state === 'planted') {
@@ -56,7 +59,7 @@ export function stepKeg(state, dt) {
       douser = a.id;
       if (a.use === 0) { emit(state, 'dousing', a.id, -1, k.x, k.y, k.z); noise(state, k.x, k.z, 16, a.team, 'douse'); }
       a.use += dt;
-      if (a.use >= (a.kit ? ROUND.douseKitTime : ROUND.douseTime)) {
+      if (a.use >= douseTime(a)) {
         a.use = 0; a.money = Math.min(ECON.cap, a.money + ECON.douseSelf); k.state = 'doused';
         emit(state, 'doused', a.id, -1, k.x, k.y, k.z);
       }
