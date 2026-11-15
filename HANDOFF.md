@@ -69,27 +69,22 @@ Keseimbangan terakhir (32 pertandingan bot): penyerang 52% ronde; tim A 13, tim 
 6. Ambil ulang 4 screenshot (JPEG/PNG ≤256 KiB, sisi panjang ≤1280, pendek ≥480), perbarui README (gambar + angka).
 7. Bundle transkrip → `check` → submit → cek status.
 
-## Submit
+## Submit: BUKAN tugas sesi ini
 
-Rahasia **tidak ada di repo**; minta ke pemilik:
-- API key make.fun → simpan di file env di luar repo (`MAKEFUN_API_KEY`, `MAKEFUN_KEYPAIR_PATH`, `NODE_USE_ENV_PROXY=1`).
-- Keypair dompet `HVCkezgCgsdEsDLAF1NrWiLNgkCwm4krvPNuKzQdz8VS` (sama dengan `.makefun/owner.json`): pemilik punya file cadangan `makefun-wallet-BACKUP.txt`.
-- Environment cloud harus mengizinkan domain `make.fun` dan `*.make.fun`.
+Submit dilakukan oleh **sesi pertama** (yang menulis catatan ini) setelah limitnya pulih: API key, keypair, kit dan log sesi pertama semuanya sudah ada di container itu. Sesi lanjutan **tidak perlu** API key, keypair, atau akses ke make.fun, dan pemilik tidak perlu menyerahkan file apa pun.
 
-**Transkrip wajib dari semua sesi yang membangun entri.** Log sesi pertama hanya ada di container sesi itu; pemilik memegang arsipnya (`campanile-sesi1-log.tar.gz`, berisi log mentah termasuk sub-agen: jangan di-commit). Ekstrak di luar repo dan berikan tiap `.jsonl` dengan `--session`.
+Tugas sesi lanjutan hanya:
 
-```sh
-# dari dalam folder kit yang sudah diekstrak
-node cli/makefun.mjs bundle --repo <repo> --out ../transcripts.tar.gz --no-context \
-  --instructions "withheld:harness-provided skill files, none written for this build" \
-  --mcp "claude-code-remote=https://api.anthropic.com/v1/code/sessions" --effort xhigh \
-  --notes "claude-code-remote is the session-control MCP server that Claude Code on the web provides to its cloud sessions in-process; it has no launch command of its own, so the URL given is the Anthropic API base it calls." \
-  --session <tiap file .jsonl sesi lain dan sub-agen>
-node cli/makefun.mjs check --kit . --repo <repo> --transcripts ../transcripts.tar.gz
-node cli/makefun.mjs submit --competition threejs-fps-02 --repo-url https://github.com/andrerianda/Makefun-project \
-  --commit <sha> --title "<nama publik>" --bundle ../transcripts.tar.gz --keypair <file keypair>
-node cli/makefun.mjs status --submission <id>
-```
+1. Lanjutkan pekerjaan di daftar atas, commit dan push ke branch `claude/makefun-bounty-setup-dzhuji` sesering mungkin.
+2. **Setiap kali berhenti (dan di akhir), push log sesi sendiri ke repo**, karena make.fun mewajibkan transkrip semua sesi yang membangun entri:
 
-Tambahkan `--redact "<nama asli pemilik>"` pada `bundle`. Setelah bundle, pastikan tidak ada API key, email, atau keypair di dalamnya.
+   ```sh
+   tar -czf sesi2-log.tar.gz -C ~/.claude/projects -- "$(ls ~/.claude/projects | grep -i makefun | head -1)"
+   git add -f sesi2-log.tar.gz && git commit -m "Add the second session's logs for the transcript bundle" && git push
+   ```
+
+   Log itu ikut publik, jadi **jangan pernah menempel API key, keypair, atau rahasia lain di sesi lanjutan** (repo yang riwayatnya memuat rahasia otomatis ditolak make.fun: `committed_secret`). Sesi pertama akan menghapus file itu dari commit final setelah membundelnya.
+3. Perbarui bagian "Yang masih harus dikerjakan" di file ini supaya sesi pertama tahu apa yang sudah beres.
+
+Yang nanti dijalankan sesi pertama (untuk catatan): `bundle` dengan `--session` untuk tiap `.jsonl` sesi lain dan sub-agen, lalu `check`, `submit`, `status` dari folder kit.
 Check yang harus lolos: lencana README, About repo (website + topik `makefun`), LICENSE dengan baris SPDX, `.makefun/owner.json`, three.js 0.187.0 byte-per-byte + satu import map, semua referensi relatif di dalam `game/`, dossier identik dengan `buildDossier`, transkrip mencakup ≥30% baris kode.
