@@ -111,4 +111,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 #menu td:nth-child(odd) { font-family: var(--mono); color: var(--run); white-space: nowrap; }
 #menu .tip { color: var(--dim); font-size: 13px; }
 #deploy { font: 800 16px var(--ui); letter-spacing: 0.12em; padding: 11px 30px; border: 0; border-radius: 5px; background: var(--run); color: #1a1c2c; cursor: pointer; }
-#attract { display: block; margin-top: 10px; color: var(--dim); font-size: 12px; }
+#links { margin-top: 10px; color: var(--dim); font-size: 12px; }
+#links a { color: var(--run); margin: 0 3px; }
+/* A narrow screen: the score bar moves right of the radar, the kill feed under it. */
+@media (max-width: 1040px) { #top { left: auto; right: 12px; transform: none; } #feed { top: 80px; } }

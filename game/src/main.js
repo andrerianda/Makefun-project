@@ -27,7 +27,7 @@ import { createInput } from './input.js';
 
 const query = new URLSearchParams(location.search);
 const watch = query.has('watch'); // attract mode: a bot plays your body and the match runs by itself
-const state = createGame(Number(query.get('seed')) || (Date.now() & 0xffff) + 1, watch);
+const state = createGame(Number(query.get('seed')) || (Date.now() & 0xffff) + 1, watch, Number(query.get('level') ?? 1));
 const view = createView(document.getElementById('game'), state, await loadKit(['assets/kit.txt', 'assets/props.txt']));
 const hud = createHud(state), audio = createAudio(state), input = createInput(view.canvas, state, hud);
 const INTRO = document.getElementById('menuLine').textContent;

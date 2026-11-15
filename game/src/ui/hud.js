@@ -23,7 +23,7 @@ export function createHud(state) {
   });
   const radar = createRadar($('#radar canvas')), shop = createShop($('#shop')), board = createBoard($('#board'));
   const slotEls = [...el.slots.children], last = new Map();
-  let cursor = state.events.seq, hitT = 0, painT = 0, bannerEnd = 0;
+  let cursor = state.events.seq, hitT = 0, painT = 0, bannerEnd = 0, recap = '';
 
   /** Write text (or a style value) only when it differs from what is on screen. */
   const put = (node, value, prop = 'textContent') => { const key = node.id + prop; if (last.get(key) !== value) { last.set(key, value); if (prop === 'textContent') node.textContent = value; else node.style[prop] = value; } };
@@ -41,6 +41,7 @@ export function createHud(state) {
     const view = st.viewId, me = st.actors[view];
     if (e.type === 'kill') {
       const killer = e.a >= 0 ? st.actors[e.a] : null, how = WEAPONS[e.s] ? WEAPONS[e.s].name : e.s === 'keg' ? 'the keg' : 'Crackler';
+      if (e.b === 0) recap = killer ? `${killer.name} got you with ${how} · ${Math.ceil(killer.hp)} hp left · ` : '';
       line(el.feed, `${killer ? named(killer) : ''}<i>${how}${e.n & 1 ? ' &middot; head' : ''}${e.n & 2 ? ' &middot; through cover' : ''}</i>${named(st.actors[e.b])}`, e.a === view || e.b === view ? 'mine' : '', 5);
     } else if (e.type === 'radio' && st.actors[e.a].team === me.team) line(el.radio, `${named(st.actors[e.a])} ${e.s}`, '', 4);
     else if (e.type === 'hurt' && e.b === view && e.a !== view) { hitT = 0.18; el.hitmark.className = e.s === 'head' ? 'head' : ''; }
@@ -75,7 +76,7 @@ export function createHud(state) {
       put(el.time, clockText(m.t));
       put(el.phase, m.phase === 'freeze' ? 'BUY TIME' : lit ? 'KEG LIT' : m.phase === 'live' ? (sideOfTeam(st, a.team) === ATT ? 'ATTACK' : 'DEFEND') : 'ROUND OVER');
       put(el.clock, lit ? 'lit' : '', 'className');
-      put(el.roundNo, `ROUND ${m.round} OF ${ROUND.max}`);
+      put(el.roundNo, `ROUND ${m.round} / ${ROUND.max}`);
       put(el.zone, zoneAt(a.x, a.z));
       put(el.hp, String(Math.ceil(a.hp))); put(el.hpBar, `${a.hp}%`, 'width');
       put(el.ap, `${Math.ceil(a.armor)}${a.helmet ? '+C' : ''}`); put(el.apBar, `${a.armor}%`, 'width');
@@ -111,7 +112,7 @@ export function createHud(state) {
       put(el.prompt.firstElementChild, prompt);
       put(el.bar, progress >= 0 ? 'block' : 'none', 'display');
       el.bar.firstElementChild.style.width = `${Math.min(100, progress * 100)}%`;
-      put(el.watching, a !== me ? `WATCHING ${a.name.toUpperCase()}` : '');
+      put(el.watching, me.alive ? '' : `${recap}${a !== me ? `WATCHING ${a.name.toUpperCase()}` : ''}`);
       radar.draw(st);
       shop.update(st); board.update(st);
     },

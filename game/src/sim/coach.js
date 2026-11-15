@@ -52,15 +52,20 @@ function hit(state, c) {
   radio(state, c, speaker(state, c), `Hit ${SITE_NAME[c.site]} now, smokes out`, true);
 }
 
+/** Choose the site to hit and the cobble on it where the keg goes down. */
+function target(state, c, site) {
+  const cell = state.rng.pick(SITES[site].cells);
+  c.site = site; c.px = cell.x; c.pz = cell.z;
+}
+
 function planAttack(state, c) {
   const rng = state.rng, poor = state.actors.filter((a) => a.team === c.team).reduce((s, a) => s + a.money, 0) / TEAM_SIZE < 1800;
   c.site = rng.chance(0.65) ? OTHER[c.lastSite] : c.lastSite;
   c.lastSite = c.site;
+  target(state, c, c.site);
   const roll = rng.next();
   c.play = poor ? (roll < 0.6 ? 'rush' : 'split') : roll < 0.4 ? 'default' : roll < 0.65 ? 'split' : roll < 0.85 ? 'fake' : 'rush';
   c.hitAt = c.play === 'rush' ? 0 : c.play === 'split' ? rng.range(12, 18) : rng.range(22, 32);
-  const cell = rng.pick(SITES[c.site].cells);
-  c.px = cell.x; c.pz = cell.z;
   const stage = STAGE[c.site], other = STAGE[OTHER[c.site]];
   PLAYS[c.play].forEach((role, i) => {
     const j = c.jobs[i];
@@ -91,6 +96,17 @@ export function report(state, a, enemy) {
   const c = state.coach[a.team], zone = zoneAt(enemy.x, enemy.z), site = ZONE_SITE[zone];
   if (site) c.threat[site] += enemy.hasKeg ? 2.5 : 1;
   radio(state, c, a, enemy.hasKeg ? `Keg carrier, ${zone}` : `Contact ${zone}`);
+}
+
+/** The player's call on the radio: the crew hits (or stacks) a site, or falls in on the caller. */
+export function order(state, c, a, call) {
+  if (state.keg.state === 'planted') return;
+  if (call !== 'me' && c.side === ATT) { target(state, c, call); hit(state, c); return; }
+  c.jobs.forEach((j, i) => {
+    if (call !== 'me') post(j, HOLDS[call][i % HOLDS[call].length], true, call);
+    else { post(j, a, false, j.site); j.x += WEDGE[i][0]; j.z += WEDGE[i][1]; }
+  });
+  radio(state, c, a, call === 'me' ? 'On me' : `Everyone ${SITE_NAME[call]}`, true);
 }
 
 function nearestBot(state, c, x, z, preferKit) {
@@ -135,7 +151,7 @@ export function stepCoach(state, c, dt) {
     return;
   }
   const lead = c.threat.A - c.threat.B;
-  if (!c.rotated && Math.abs(lead) > 1.6) { // one side is loud: the middle and one far defender come over
+  if (!c.rotated && Math.abs(lead) > 1) { // one side is loud: the middle and one far defender come over
     const hot = lead > 0 ? 'A' : 'B';
     let moved = 0, slot = 2;
     for (const j of c.jobs) if (j.site !== hot && (j.site === 'M' || moved++ === 0)) post(j, HOLDS[hot][slot++ % HOLDS[hot].length], true, hot);

@@ -18,7 +18,7 @@ function makeActor(id) {
     blind: 0, slow: 0, stride: 0, hasKeg: false, use: 0, deadT: 0,
     kills: 0, deaths: 0, plants: 0, hurtBy: -1,
     // What this body wants to do this tick: the keyboard and mouse fill it for the player, a brain for a bot.
-    cmd: { mx: 0, mz: 0, yaw: 0, pitch: 0, jump: false, duck: false, walk: false, fire: false, alt: false, reload: false, use: false, slot: -1, nade: -1, buy: null },
+    cmd: { mx: 0, mz: 0, yaw: 0, pitch: 0, jump: false, duck: false, walk: false, fire: false, alt: false, reload: false, use: false, slot: -1, nade: -1, buy: null, order: '' },
     bot: null,
   };
 }
@@ -36,7 +36,7 @@ export function createState(seed = 1, watch = false) {
   const nades = [];
   for (let i = 0; i < NADE_POOL; i++) nades.push({ live: false, type: 0, owner: -1, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, fuse: 0, cloud: 0, rest: false });
   return {
-    tick: 0, time: 0, rng: makeRng(seed), actors, viewId: 0, nades,
+    tick: 0, time: 0, rng: makeRng(seed), actors, viewId: 0, third: false, nades, // whose eyes, and from over the shoulder or not
     match: { round: 0, score: [0, 0], attackers: 0, phase: 'freeze', t: 0, streak: [0, 0], over: false, champion: -1, last: null },
     keg: { state: 'carried', carrier: -1, x: 0, y: 0, z: 0, fuse: 0, site: '', douser: -1, beep: 0 },
     coach: [null, null],
@@ -47,6 +47,9 @@ export function createState(seed = 1, watch = false) {
 /** Which side (ATT or DEF) a team plays this half. */
 export const sideOfTeam = (state, team) => (team === state.match.attackers ? ATT : DEF);
 export const sideOf = (state, a) => sideOfTeam(state, a.team);
+
+/** True while the camera sits over the shoulder: the player asked for it, and the body is up and not on a scope. */
+export const overShoulder = (state) => { const a = state.actors[state.viewId]; return state.third && a.alive && !a.scoped; };
 
 /** Record something that happened; the view layers drain these, the simulation never waits on them. */
 export function emit(state, type, a = -1, b = -1, x = 0, y = 0, z = 0, n = 0, s = '', x2 = 0, y2 = 0, z2 = 0) {

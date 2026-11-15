@@ -17,8 +17,9 @@ const turnTo = (from, to, max) => {
 };
 const yawTo = (a, x, z) => Math.atan2(a.x - x, a.z - z); // the yaw that faces a point (forward is -sin, -cos)
 
-export function makeBrain(a, rng) {
-  a.skill = 0.45 + rng.next() * 0.4;
+/** Both crews field the same ladder of five, weakest to sharpest, so a match is decided by play, not by the draw. */
+export function makeBrain(a, rng, level) {
+  a.skill = Math.min(1, 0.3 + 0.2 * level + 0.09 * (a.id % TEAM_SIZE));
   a.bot = {
     target: -1, react: 0, lost: 9, lx: 0, lz: 0, ex: 0, ey: 0, errT: 0,
     path: makePath(), gx: 1e9, gz: 0, repath: 0, checkT: 0, sx: 0, sz: 0,
@@ -39,7 +40,7 @@ function sense(state, a, b, dt) {
   if (best) {
     if (best.id !== b.target || b.lost > 0.6) {
       // A bot already standing on its post with the angle covered is quicker on the trigger than one walking in.
-      b.react = (0.14 + (1 - a.skill) * 0.3 + state.rng.next() * 0.1) * (b.settled ? 0.72 : 1);
+      b.react = (0.14 + (1 - a.skill) * 0.3 + state.rng.next() * 0.1) * (b.settled ? 0.58 : 1);
       report(state, a, best);
     }
     b.target = best.id; b.lost = 0; b.lx = best.x; b.lz = best.z;

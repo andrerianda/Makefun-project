@@ -1,6 +1,6 @@
 // Money: what a round pays, what a kill pays, and the buy counter (for the player's menu and the bots alike).
 import { ECON, GEAR, NADES, ROUND, WEAPONS } from '../config.js';
-import { ATT, DEF, emit, sideOf, sideOfTeam } from './state.js';
+import { ATT, DEF, TEAM_SIZE, emit, sideOf, sideOfTeam } from './state.js';
 import { SPAWN } from './map.js';
 import { giveWeapon } from './loadout.js';
 
@@ -67,8 +67,8 @@ export function buy(state, a, item) {
 export function botShop(state, a) {
   const m = state.match, side = sideOf(state, a), pistols = m.round === 1 || m.round === ROUND.half + 1;
   let want = [];
-  if (pistols) want = a.id % 2 ? ['jerkin'] : ['glare', 'seafog', 'crackler'];
+  if (pistols) want = a.id % TEAM_SIZE % 2 ? ['jerkin'] : ['glare', 'seafog', 'crackler'];
   else if (a.slots[0] || a.money >= 3700) want = [a.slots[0] ? '' : side === ATT ? 'corsa' : 'tramont', 'cap', 'jerkin', side === DEF ? 'kit' : '', 'seafog', 'glare', 'crackler'];
-  else if (a.money >= 2000 && m.streak[a.team] >= 2) want = [a.id % 2 ? 'cicada' : 'brine', 'jerkin', 'glare']; // a force buy to break the streak
+  else if (a.money >= 2000 && m.streak[a.team] >= 2) want = [a.id % TEAM_SIZE % 2 ? 'cicada' : 'brine', 'jerkin', 'glare']; // a force buy to break the streak
   for (const item of want) if (item) buy(state, a, item); // otherwise: save for a full buy next round
 }

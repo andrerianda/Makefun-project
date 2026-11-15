@@ -1,36 +1,38 @@
 // Porto Vesper: the one map, drawn as text so its lanes read at a glance. One character is a 2 m cell.
 // North is up. The Wardens start in the Customs Yard (T), the Smugglers on the Low Road (R). Three lanes
 // run north: Net Row to the Fish Market (site A), Bell Lane through the gate under the campanile, and
-// the Quay to the Boathouse (site B). Two offset alleys, Cooper's Cut and the Chandlery, link them.
+// the Quay to the Boathouse (site B). Each lane is a chicane, never a straight shooting gallery: a house
+// juts in from one side, then the other. Two offset alleys, Cooper's Cut and the Chandlery, link the lanes.
 //   # house   a archway   . cobbles   , market flags   ; boathouse planks   ~ sea   w low wall
 //   c crate   C crate stack   b barrels   p planter   s market stall   f fountain   h hull on stocks
+//   v handcart   t cafe table   n fishing nets   k sacks
 const ROWS_TEXT = [
   '########################################',
-  '###..........#..TTTTTTTT..#..........###',
-  '###.s........a..TTTTTTTT..a........h.###',
-  '###.s..,,,,..a............a..;;;;....###',
-  '###....,AA,..######..######..;BB;..c.###',
-  '###.c..,AA,.c#....p..p....#..;BB;....###',
-  '###....,AA,..#............#c.;BB;.h..###',
-  '###..f.,,,,..a.....##.....a..;;;;....###',
-  '###..........a.....##.....a........c.###',
-  '###.s.....C..#............#..C.......###',
-  '###.s........#..w......w..#..........###',
+  '###..........#..TTTTTTTT..#....h.....###',
+  '###.s..s.....a..TTTTTTTT..a........C.###',
+  '###....,,,,..a............a..;;;;....###',
+  '###.s..,AA,.c######..######k.;BB;.n..###',
+  '###....,AA,..#..p......p..#..;BB;....###',
+  '###.f..,AA,.v#.t........t.#..;BB;.h..###',
+  '###....,,,,..a.....##.....a..;;;;....###',
+  '###.c........a.....##.....a..c.....c.###',
+  '###....s..C..#..........v.#..C..##...###',
+  '###.s..s.....#..w......w..#..........###',
   '####aa#############aa############aa#####',
   '###....###########....##########....w~~~',
-  '###....###########....##########....w~~~',
-  '###..c.###########....##########.c..w~~~',
-  '###....###########.b..##########....w~~~',
-  '###.......c...........##########....w~~~',
-  '###..............C....##########..b.w~~~',
+  '###..c.###########..c.##########...nw~~~',
+  '###....#############..##########....w~~~',
+  '#####..###########....############..w~~~',
+  '###.......c...........##########..v.w~~~',
+  '###..............C....##########....w~~~',
   '###....###########....##########....w~~~',
   '###....###########.......c..........w~~~',
-  '###.b..###########...C..............w~~~',
-  '###....###########....##########....w~~~',
+  '###.b..###########...C.........n....w~~~',
+  '###..#############..############....w~~~',
   '###....###########....##########.c..w~~~',
   '###....###########....##########....w~~~',
   '###.................................####',
-  '###.........#..RRRRRRRR..#..........####',
+  '###...v.....#..RRRRRRRR..#......k...####',
   '###.........#..RRRRRRRR..#..........####',
   '########################################',
 ];
@@ -54,6 +56,10 @@ const PROPS = {
   s: { kind: 'stall', w: 1.7, h: 1, soft: true },
   f: { kind: 'basin', w: 1.9, h: 0.7, soft: false },
   h: { kind: 'hull', w: 1.8, h: 1.5, soft: true },
+  v: { kind: 'cart', w: 1.5, h: 1.3, soft: true },
+  t: { kind: 'table', w: 1, h: 0.8, soft: true },
+  n: { kind: 'nets', w: 1.4, h: 1, soft: true },
+  k: { kind: 'sacks', w: 1.3, h: 0.9, soft: true },
 };
 
 /** Every solid as an axis-aligned box; the collision, the bullets and the level mesh all read this list. */
@@ -127,20 +133,20 @@ export function zoneAt(x, z) {
 }
 export const ZONE_LABELS = ZONES.map((q) => ({ name: q[0], x: (cellX(q[1]) + cellX(q[3])) / 2, z: (cellZ(q[2]) + cellZ(q[4])) / 2 }));
 
-// Tactical points, in cells (fractions allowed), turned into metres below.
+// Tactical points, in cells (a whole number is a cell's centre; fractions allowed), turned into metres below.
 const at = (c, r) => ({ x: cellX(c), z: cellZ(r) });
 const hold = (c, r, wc, wr) => ({ x: cellX(c), z: cellZ(r), wx: cellX(wc), wz: cellZ(wr) });
 /** Where a defender (or a post-plant attacker) stands, and the choke it watches. */
 export const HOLDS = {
-  A: [hold(11, 8.4, 4.5, 11), hold(5.2, 2.6, 13, 7.5), hold(11.4, 4.2, 4.5, 11), hold(3.6, 6.4, 13, 7.5)],
-  B: [hold(28.4, 8.6, 33.5, 11), hold(35.6, 3, 26, 7.5), hold(28, 4.8, 33.5, 11), hold(36, 9, 26, 7.5)],
-  M: [hold(15.4, 9, 19.5, 11), hold(23.6, 9, 19.5, 11), hold(17, 5.6, 19.5, 11)],
+  A: [hold(11, 8.4, 4.5, 11), hold(5.2, 2.6, 13, 7.5), hold(11.4, 4.2, 4.5, 11), hold(3.2, 6.3, 13, 7.5)],
+  B: [hold(28.4, 8.6, 33.5, 11), hold(35.6, 3, 26, 7.5), hold(28, 4.8, 33.5, 11), hold(35.6, 8.4, 26, 7.5)],
+  M: [hold(15.4, 9, 19.5, 11), hold(23.2, 9, 19.5, 11), hold(17, 5.6, 19.5, 11)],
 };
 /** Where attackers gather before a hit: the main door, and the link from Bell Square. */
 export const STAGE = {
-  A: { main: at(4.5, 13.2), link: at(15.2, 7.5), lurk: at(12, 16.5) },
+  A: { main: at(4.4, 13.2), link: at(15.2, 7.5), lurk: at(12, 16.5) },
   B: { main: at(33.5, 13.2), link: at(23.8, 7.5), lurk: at(27, 19.5) },
-  mid: at(19.5, 13.4),
+  mid: at(19.4, 13.4),
 };
 /** Smoke targets that cut the defenders' rotations into each site. */
 export const SMOKES = { A: [at(12.2, 2.5), at(12.2, 7.5)], B: [at(26.8, 2.5), at(26.8, 7.5)], M: [at(19.5, 5)] };

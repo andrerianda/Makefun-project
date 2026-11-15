@@ -2,6 +2,7 @@
 // All of it comes from fixed pools made at load; a firefight allocates nothing.
 import * as THREE from 'three';
 import { NADES } from '../config.js';
+import { overShoulder } from '../sim/state.js';
 
 const TRACERS = 36, MARKS = 96, PUFFS = 48, CLOUD = 9, BLASTS = 4;
 const NADE_TINT = ['#4c6b3a', '#e8e2d0', '#8fa3b0'];
@@ -57,7 +58,7 @@ export function buildEffects(scene, tex, actors, camera) {
         const a = state.actors[e.a], t = tracers[tracerI++ % TRACERS];
         to.set(e.x, e.y, e.z);
         // Your own tracer leaves the gun in your hands; everyone else's leaves their figure's muzzle.
-        if (e.a === state.viewId) from.set(0.16, -0.13, -0.9).applyMatrix4(camera.matrixWorld); else actors.muzzle(a, from);
+        if (e.a === state.viewId && !overShoulder(state)) from.set(0.16, -0.13, -0.9).applyMatrix4(camera.matrixWorld); else actors.muzzle(a, from);
         const len = from.distanceTo(to);
         if (len < 1.5) return;
         t.visible = true; t.position.copy(from).lerp(to, 0.5); t.lookAt(to); t.scale.set(0.014, 0.014, len);
