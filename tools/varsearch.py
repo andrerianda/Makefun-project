@@ -112,7 +112,7 @@ def work(s, vs=None):
             g = res["games"][0]
             r = {"engine": EHASH, "opponent": s[0], "colour": s[1], "opening": s[2], "variant": v, "nodes": BUDGET[run.OPPONENTS.index(s[0])], "outcome": g["outcome"],
                  "reason": g["reason"], "plies": g["plies"], "think_sum": round(res["think_avg"] * res["moves"]),
-                 "think_max": res["think_max"], "moves": " ".join(g["moves"]), "wall": round(time.time() - t0, 1), "code": res["code"]}
+                 "think_max": res["think_max"], "moves": " ".join(g["moves"]), "wall": round(time.time() - t0, 1), "code": res["code"], "host": os.environ.get("HOST_TAG", "local")}
             if res["code"] != 0 or g["reason"] in ("abandoned", "unplayed"):
                 # the engine did not finish the game (killed, crashed): not a result, never recorded
                 print(f"!! {s} v{v}: engine exit {res['code']}, game {g['reason']}: not recorded", flush=True)

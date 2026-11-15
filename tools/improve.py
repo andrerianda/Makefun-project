@@ -66,7 +66,7 @@ def one(k, v, cap):
     r = {"engine": EHASH, "opponent": k[0], "colour": k[1], "opening": k[2], "variant": v, "nodes": BUDGET[run.OPPONENTS.index(k[0])],
          "outcome": out, "reason": g["reason"] if out != "capped" else "capped", "plies": g["plies"], "cap": cap,
          "think_sum": round(res["think_avg"] * res["moves"]), "think_max": res["think_max"], "moves": " ".join(g["moves"]),
-         "wall": round(time.time() - t0, 1), "code": res["code"]}
+         "wall": round(time.time() - t0, 1), "code": res["code"], "host": os.environ.get("HOST_TAG", "local")}
     with open(a.db, "a") as fh:
         fh.write(json.dumps(r) + "\n")
     return k, v, cap, r
