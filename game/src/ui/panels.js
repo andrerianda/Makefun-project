@@ -17,8 +17,8 @@ export function createShop(el) {
   return {
     get open() { return open; },
     toggle(state, on = !open) { cash = -1; open = on && shopOpen(state, state.actors[0]); el.style.display = open ? 'block' : 'none'; },
-    /** The item a key buys, or null. */
-    pick: (key) => SHOP[SHOP_KEYS.indexOf(key.toLowerCase())] || null,
+    /** The item a key buys. */
+    pick: (key) => SHOP[SHOP_KEYS.indexOf(key)],
     update(state) {
       const a = state.actors[0];
       if (!open) return;

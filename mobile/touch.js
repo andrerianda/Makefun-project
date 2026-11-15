@@ -51,6 +51,7 @@ function button(label, css, down, up, mode = 'tap') {
     if (mode !== 'toggle') { b.classList.remove('on'); if (up) up(); }
   }, { passive: false });
   root.appendChild(b);
+  if (mode === 'toggle') document.addEventListener('pointerlockchange', () => { if (playing && on) down(); }); // a latched key, pressed again on resume
 }
 const hold = (code) => [() => key('keydown', code), () => key('keyup', code)];
 

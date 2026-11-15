@@ -3,18 +3,18 @@
 // run north: Net Row to the Fish Market (site A), Bell Lane through the gate under the campanile, and
 // the Quay to the Boathouse (site B). Each lane is a chicane, never a straight shooting gallery: a house
 // juts in from one side, then the other. Two offset alleys, Cooper's Cut and the Chandlery, link the lanes.
-//   # house   K campanile   a archway   . cobbles   , market flags   ; boathouse planks   ~ sea   w low wall
+//   # house   K campanile   a archway   . paving   ~ sea   w low wall
 //   c crate   C crate stack   b barrels   p planter   s market stall   f fountain   h hull on stocks
 //   v handcart   t cafe table   n fishing nets   k sacks
 const ROWS_TEXT = [
   '########################################',
   '###..........#..TTTTTTTT..#....h.....###',
   '###.s..s.....a..TTTTTTTT..a........C.###',
-  '###....,,,,..a............a..;;;;....###',
-  '###.s..,AA,.c######..######k.;BB;.n..###',
-  '###....,AA,..#..p......p..#..;BB;....###',
-  '###.f..,AA,.v#.t........t.#..;BB;.h..###',
-  '###....,,,,..a.....KK.....a..;;;;....###',
+  '###..........a............a..........###',
+  '###.s...AA..c######..######k..BB..n..###',
+  '###.....AA...#..p......p..#...BB.....###',
+  '###.f...AA..v#.t........t.#...BB..h..###',
+  '###..........a.....KK.....a..........###',
   '###.c........a.....KK.....a..c.....c.###',
   '###....s..C..#..........v.#..C..##...###',
   '###.s..s.....#..w......w..#..........###',

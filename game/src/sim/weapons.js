@@ -44,7 +44,7 @@ function fireBullet(state, a, w, id, cone) {
     if (wall >= left) return;
     emit(state, 'impact', -1, -1, ex, ey, ez, box && box.soft ? 1 : 0, '', nx, ny, nz);
     if (!box || !box.soft || w.pen < 0.2 || leg) return;
-    // Wood and canvas do not stop a rifle round: carry on past the cover with part of the damage.
+    // Wood and canvas do not stop a round: carry on past the cover with part of the damage.
     scale *= 0.3 + 0.45 * w.pen; flags |= WALLBANG; skip = box;
     travelled += vt; left -= vt; ox = ex; oy = ey; oz = ez;
   }

@@ -139,8 +139,9 @@ export function stepCoach(state, c, dt) {
   }
   if (k.state === 'planted') { // retake: one douses, the rest cover the doors
     if (!c.lit) {
-      c.lit = true;
+      c.lit = c.go = true;
       holdSite(c, k.site);
+      for (const j of c.jobs) { j.nade = 1; j.nx = k.x; j.nz = k.z; } // a flash onto the keg before going in
       announce(state, c, `They lit it at ${SITES[k.site].name}, retake`);
     }
     const a = nearestBot(state, c, k.x, k.z, true);

@@ -1,6 +1,6 @@
 // Models are data, not code. The asset files list every figure, weapon and street prop as boxes, cylinders,
 // spheres, capsules and cones hung on named bones; this reads it and bakes each bone's parts into one mesh
-// with vertex colours, so a figure of forty parts is a dozen draw calls and a pose is a few bone rotations.
+// with vertex colours, so a figure of ninety parts is a dozen draw calls and a pose is a few bone rotations.
 //
 //   @ name                       starts a model
 //   > bone parent x y z          a bone, placed in its parent's space ('-' for the root)

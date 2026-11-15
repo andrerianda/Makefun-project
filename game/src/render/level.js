@@ -99,7 +99,7 @@ export function buildLevel(scene, tex, kit) {
   const halos = [], at = new THREE.Vector3(); // where the lamps hang, for the haze around them
   const still = { position: [], normal: [], color: [] }; // every prop that never moves, gathered into one mesh
   /** Stand a kit model in the world. One that `moves` stays an object; the rest are baked into the town's mesh,
-   *  so three hundred pieces of street furniture cost one draw call. */
+   *  so some 240 pieces of street furniture cost one draw call. */
   const prop = (name, x, y, z, yaw = 0, moves = false) => {
     const b = kit.build(name, paint);
     b.root.position.set(x, y, z); b.root.rotation.y = yaw;
@@ -176,7 +176,7 @@ export function buildLevel(scene, tex, kit) {
   for (const [dx, dz] of [[tx0, tz0], [tx1 - 0.6, tz0], [tx0, tz1 - 0.6], [tx1 - 0.6, tz1 - 0.6]]) plaster.box({ x0: dx, x1: dx + 0.6, z0: dz, z1: dz + 0.6, y0: 20, y1: 23.2 }, pale, 3);
   roof.box({ x0: tx0 - 0.3, x1: tx1 + 0.3, z0: tz0 - 0.3, z1: tz1 + 0.3, y0: 23.2, y1: 23.6 }, WHITE, 2.4);
   for (const y of [0, 7.4, 13.4, 19.6]) stone.box({ x0: tx0 - 0.14, x1: tx1 + 0.14, z0: tz0 - 0.14, z1: tz1 + 0.14, y0: y, y1: y + (y ? 0.4 : 1.1) }, stoneTint, 1.6); // plinth and cornices
-  for (const y of [3.4, 9.6]) for (const s of [1, -1]) { // lancet windows up the shaft
+  for (const y of [3.4, 9.6]) for (const s of [1, -1]) { // arched shutters up the shaft: the trim's door cells
     trim.decal(mid, y, s > 0 ? tz1 : tz0, [s, 0, 0], [0, 0, s], 0.9, 2.3, 6);
     trim.decal(s > 0 ? tx1 : tx0, y, midZ, [0, 0, -s], [s, 0, 0], 0.9, 2.3, 7);
   }

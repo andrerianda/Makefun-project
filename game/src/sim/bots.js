@@ -140,7 +140,7 @@ export function thinkBot(state, a, dt) {
 
   if (tgt && a.blind < 0.35) {
     // Stick the douse when the fuse leaves no time for a duel; otherwise deal with the threat first.
-    const left = douseTime(a) - a.use, mustDouse = task === 'douse' && (k.fuse < left + 1.5 || left < 1.5);
+    const need = douseTime(a) - a.use, mustDouse = task === 'douse' && (k.fuse < need + 1.5 || need < 1.5);
     if (mustDouse) c.use = true; else fight(state, a, b, c, w, tgt, dt);
     return;
   }

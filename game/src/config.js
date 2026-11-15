@@ -22,7 +22,7 @@ export const ECON = {
   plantLoss: 800, plantSelf: 300, douseSelf: 300,
 };
 
-// Spray drift, shared by every automatic: first shots climb, then the muzzle walks left and right.
+// Spray drift, shared by every gun: first shots climb, then the muzzle walks left and right.
 export const SPRAY = [0, 0.1, -0.2, 0.3, 0.7, 0.9, 0.5, -0.3, -0.9, -1, -0.7, -0.1, 0.6, 1, 0.8, 0.2, -0.5, -0.9, -0.6, 0.1];
 
 // dmg at the muzzle; falloff multiplies it every 20 m; armorPen is the share that passes a jerkin;

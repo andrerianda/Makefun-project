@@ -15,7 +15,7 @@ export function canSee(state, a, b) {
   return !smokeBetween(state, ex, ey, ez, b.x, chest, b.z);
 }
 
-/** The nearest noise newer than `since` that this body is in earshot of and did not make itself. */
+/** The nearest noise newer than `since` in this body's earshot, not made by its own crew. */
 export function hear(state, a, since) {
   let best = null, bestD = Infinity;
   for (const s of state.sounds) {

@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { PALETTE } from '../config.js';
 
-/** The direction to the sun: low in the east-south-east, so the lanes get long raking shadows. */
+/** The direction to the sun: low over the sea, so the lanes get long raking shadows. */
 const SUN = new THREE.Vector3(0.7, 0.4, 0.34).normalize();
 
 const SKY_VERTEX = 'varying vec3 dir; void main() { dir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';

@@ -46,9 +46,9 @@ A rifle falls where its owner dies; walk over it with no rifle of your own and i
 - `game/src/ui/`, `audio.js` and `input.js` are the HUD, the synthesised sound and the controls.
 - `main.ts` hands the entry in: it copies `game/` and `screenshots/` to the output directory and writes the dossier.
 
-The two sides are tuned against each other by playing bot-only matches headless: over 128 matches of twelve rounds the attackers took 52% of the rounds, and each crew won 50 matches, with 28 drawn.
+The two sides are tuned against each other by playing bot-only matches headless: over 192 matches of up to twelve rounds the attacking side took 51% of the rounds.
 
-Every map, name, texture and sound here is original; three.js 0.187.0 (MIT) is the only third-party code.
+Every map, name, texture and sound here is original; three.js 0.187.0 (MIT) is the only third-party code in the game.
 
 ---
 

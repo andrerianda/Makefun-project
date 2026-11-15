@@ -87,7 +87,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .meter i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
 #cash { color: #ffd27a; }
 #cash::before { content: '$'; }
-#ap.cap::after { content: '+C'; }
+#ap.cap::after { content: ' +cap'; }
 #gun { text-transform: uppercase; }
 #gun.busy::after { content: ' · reloading'; }
 #res:not(:empty)::before { content: '/ '; }

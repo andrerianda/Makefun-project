@@ -1,5 +1,5 @@
 // Geometry queries against the map's boxes: body collision, ray casts and hitboxes. No allocation per call:
-// results come back in the module's one `hit` record.
+// results come back in the module's shared records.
 import { MOVE } from '../config.js';
 import { boxes, CELL, COLS, ROWS } from './map.js';
 
@@ -60,7 +60,7 @@ function overlap(x, y, z, r, h) {
 }
 
 /** The unit vector along a view (yaw 0 faces north, -z), written into the shared `ahead` record. */
-export const ahead = { x: 0, y: 0, z: 0 };
+const ahead = { x: 0, y: 0, z: 0 };
 export function look(yaw, pitch) {
   const cp = Math.cos(pitch);
   ahead.x = -Math.sin(yaw) * cp; ahead.y = Math.sin(pitch); ahead.z = -Math.cos(yaw) * cp;

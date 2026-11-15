@@ -51,7 +51,7 @@ export function createHud(state) {
     const st = state, view = st.viewId, me = st.actors[view];
     if (e.type === 'kill') {
       const killer = e.a >= 0 ? st.actors[e.a] : null, how = WEAPONS[e.s] ? WEAPONS[e.s].name : e.s === 'keg' ? 'the keg' : 'Crackler';
-      if (e.b === 0) recap = killer ? `${killer.name} got you with ${how} · ${Math.ceil(killer.hp)} hp left` : '';
+      if (e.b === 0) recap = killer ? `${killer.name} got you with ${how} · ${Math.ceil(killer.hp)} hp left` : how;
       line(el.feed, `${killer ? named(killer) : ''}<i>${how}${e.n & HEAD ? ' &middot; head' : ''}${e.n & WALLBANG ? ' &middot; through cover' : ''}</i>${named(st.actors[e.b])}`, e.a === view || e.b === view ? 'mine' : '', 5);
     } else if (e.type === 'radio' && st.actors[e.a].team === me.team) line(el.radio, `${named(st.actors[e.a])} ${e.s}`, '', 4);
     else if (e.type === 'hurt' && e.b === view && e.a !== view) { hitT = 0.18; el.hitmark.className = e.s === 'head' ? 'head' : ''; }
@@ -76,7 +76,7 @@ export function createHud(state) {
       if (text) { el.menuLine.textContent = text; el.deploy.textContent = button; }
     },
     update(st, dt) {
-      cursor = drain(st, cursor, onEvent);
+      cursor = drain(st, cursor, onEvent, 7);
       const m = st.match, a = st.actors[st.viewId], w = weaponOf(a), lit = m.phase === 'planted';
       for (let t = 0; t < 2; t++) { // your crew on the left, in the colours of the side it plays this half
         const s = sides[t], side = SIDES[sideOfTeam(st, t)];
@@ -118,7 +118,7 @@ export function createHud(state) {
       put(el.blind, Math.min(1, Math.round(a.blind * 16) / 20), 'opacity');
       if (st.time > bannerEnd) put(el.banner, 0, 'opacity');
 
-      // One prompt at a time: the keg first, then the shop, then who you are watching.
+      // One prompt at a time: the keg first, then the shop.
       const me = st.actors[0];
       let prompt = '', progress = -1;
       if (a.use > 0) { prompt = a.hasKeg ? 'Lighting the keg' : 'Dousing the keg'; progress = a.use / (a.hasKeg ? ROUND.plantTime : douseTime(a)); }

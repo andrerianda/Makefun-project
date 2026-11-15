@@ -36,7 +36,7 @@ function burst(state, n) {
       hurt(state, a, n.owner, def.dmg * near * (a.armor > 0 ? 0.6 : 1), 'crackler');
     } else { // a flash blinds by how squarely you face it, and not at all if a team-mate threw it
       const f = look(a.yaw, a.pitch), facing = (f.x * (n.x - a.x) + f.y * (n.y - ey) + f.z * (n.z - a.z)) / (d || 1);
-      const t = def.blind * (0.3 + 0.7 * Math.max(0, facing)) * (1 - 0.6 * d / def.radius) * (owner.team === a.team ? 0 : 1);
+      const t = def.blind * (0.3 + 0.7 * Math.max(0, facing)) * (1 - 0.6 * d / def.radius) * (owner === a || owner.team !== a.team);
       a.blind = Math.max(a.blind, t);
     }
   }
