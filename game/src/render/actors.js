@@ -2,7 +2,7 @@
 // smuggler's and a warden's: a crew changes sides at half-time and wears the kit of the side it plays.
 import * as THREE from 'three';
 import { NADES, SIDES } from '../config.js';
-import { sideOf } from '../sim/state.js';
+import { sideOf, overShoulder } from '../sim/state.js';
 import { label } from './textures.js';
 
 const MODELS = ['smuggler', 'warden'];
@@ -40,14 +40,14 @@ export function buildActors(scene, state, tex, kit) {
     /** Where a body's muzzle is in the world, for tracers that start at the gun. */
     muzzle: (a, out) => rigs[a.id][0].flash.getWorldPosition(out),
     update(st, alpha, dt) {
-      const view = st.actors[st.viewId];
+      const view = st.actors[st.viewId], unseen = overShoulder(st) ? -1 : st.viewId; // your own body shows only from behind it
       for (const a of st.actors) {
         const side = sideOf(st, a), f = rigs[a.id][side], b = f.b, r = b.root, id = a.slots[a.slot] || NADES[a.nadeSel].id;
         // A figure carries the model the player holds in first person, built when first needed.
         const g = f.guns[id] ||= kit.build(`fp_${id}`, cloth);
         if (g.root.parent !== b.gun) { b.gun.clear(); b.gun.add(g.root); g.root.position.copy(g.carry.position); g.tip.add(f.flash); }
         rigs[a.id][1 - side].b.root.visible = false;
-        r.visible = (a.alive || a.deadT < 6) && !(a.id === st.viewId && a.alive);
+        r.visible = (a.alive || a.deadT < 6) && !(a.id === unseen && a.alive);
         f.fall = a.alive ? 0 : Math.min(1, f.fall + dt * 3); // the dead tip over backwards and lie there
         r.position.set(a.px + (a.x - a.px) * alpha, a.py + (a.y - a.py) * alpha + f.fall * 0.16, a.pz + (a.z - a.pz) * alpha);
         r.rotation.set(f.fall * 1.45, a.yaw, 0, 'YXZ');

@@ -103,12 +103,20 @@ export function buildLevel(scene, tex, kit) {
   const openAir = (x, y, z) => y > 5.9 || tile(Math.floor(x / CELL + COLS / 2), Math.floor(z / CELL + ROWS / 2)) !== '#';
   const paint = new THREE.MeshLambertMaterial({ vertexColors: true }), glow = new THREE.MeshBasicMaterial({ color: '#ffe2b0', fog: false });
   const halos = [], at = new THREE.Vector3(); // where the lamps hang, for the haze around them
-  /** Stand a kit model in the world. */
-  const prop = (name, x, y, z, yaw = 0) => {
+  const still = { position: [], normal: [], color: [] }; // every prop that never moves, gathered into one mesh
+  /** Stand a kit model in the world. One that `moves` stays an object; the rest are baked into the town's mesh,
+   *  so three hundred pieces of street furniture cost one draw call. */
+  const prop = (name, x, y, z, yaw = 0, moves = false) => {
     const b = kit.build(name, paint);
     b.root.position.set(x, y, z); b.root.rotation.y = yaw;
-    scene.add(b.root);
-    if (b.glow) { b.glow.children[0].material = glow; b.root.updateMatrixWorld(); b.glow.getWorldPosition(at); halos.push(at.x, at.y, at.z); }
+    b.root.updateMatrixWorld();
+    if (moves) scene.add(b.root);
+    else b.root.traverse((o) => {
+      if (!o.isMesh) return;
+      const g = o.geometry.clone().applyMatrix4(o.matrixWorld);
+      for (const k in still) for (const v of g.attributes[k].array) still[k].push(v);
+    });
+    if (b.glow) { b.glow.getWorldPosition(at); halos.push(at.x, at.y, at.z); }
     return b.root;
   };
 
@@ -212,7 +220,7 @@ export function buildLevel(scene, tex, kit) {
 
   // The quay: mooring posts on the sea wall, boats riding at anchor; out in the bay, the lighthouse and the far shore.
   for (let r = 12; r < 24; r += 3) prop('bollard', cellX(36), 1.1, cellZ(r));
-  const afloat = [prop('boat', cellX(38.4), 0, cellZ(13.5), 0.3), prop('rowboat', cellX(37.9), 0, cellZ(18.5), 1.3), prop('boat', cellX(39.3), 0, cellZ(22), -0.5)];
+  const afloat = [prop('boat', cellX(38.4), 0, cellZ(13.5), 0.3, true), prop('rowboat', cellX(37.9), 0, cellZ(18.5), 1.3, true), prop('boat', cellX(39.3), 0, cellZ(22), -0.5, true)];
   prop('lighthouse', 120, 0, -38); prop('shore', 0, 0, 0);
 
   // The harbour haze catching the light: a soft additive disc around every lamp and every bulb.
@@ -222,6 +230,10 @@ export function buildLevel(scene, tex, kit) {
     scene.add(new THREE.Points(g, new THREE.PointsMaterial({ map: tex.puff, color: '#ffb060', size, opacity, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })));
   };
   haze(halos, 4, 0.3); haze(bulbs, 1.1, 0.5);
+
+  const town = new THREE.BufferGeometry();
+  for (const k in still) town.setAttribute(k, new THREE.Float32BufferAttribute(still[k], 3));
+  scene.add(Object.assign(new THREE.Mesh(town, paint), { castShadow: true, receiveShadow: true }));
 
   for (const [text, c, r, y, turn, height] of SIGNS) {
     const map = label(text, height > 1 ? 'rgba(242,162,58,0.95)' : 'rgba(250,240,220,0.9)');
