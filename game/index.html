@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAMPANILE: a tactical FPS in a harbour town</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud">
+  <div id="shade"></div>
+  <div id="pain"></div>
+  <div id="blind"></div>
+  <div id="scope"><i></i><i></i></div>
+
+  <div id="top">
+    <div class="side" id="side0"><b class="name"></b><span class="pips"></span><b class="score">0</b></div>
+    <div id="clock"><small id="phase">BUY</small><b id="time">0:00</b><small id="roundNo">ROUND 1 OF 12</small></div>
+    <div class="side right" id="side1"><b class="score">0</b><span class="pips"></span><b class="name"></b></div>
+  </div>
+
+  <div id="radar"><canvas width="220" height="154"></canvas><div id="zone"></div></div>
+  <ul id="radio"></ul>
+  <ul id="feed"></ul>
+
+  <div id="cross"><i></i><i></i><i></i><i></i><u></u></div>
+  <div id="hitmark"></div>
+
+  <div id="prompt"><span></span><div id="bar"><i></i></div></div>
+  <div id="banner"><b></b><span></span></div>
+  <div id="watching"></div>
+
+  <div id="vitals">
+    <div class="stat"><small>HEALTH</small><b id="hp">100</b><i class="meter"><i id="hpBar"></i></i></div>
+    <div class="stat"><small>ARMOUR</small><b id="ap">0</b><i class="meter"><i id="apBar"></i></i></div>
+    <div class="stat"><small>CASH</small><b id="cash">$800</b></div>
+    <div class="stat" id="kegTag"><small>CARRYING</small><b>KEG</b></div>
+  </div>
+
+  <div id="arms">
+    <small id="gun"></small>
+    <div id="ammo"><b id="mag">12</b><span id="res">/ 36</span></div>
+    <div id="slots"><i id="slot0"></i><i id="slot1"></i><i id="slot2"></i><i id="slot3"></i></div>
+  </div>
+
+  <div id="shop" class="panel">
+    <h2>Chandler's Counter <small>B closes &middot; press a key to buy</small></h2>
+    <div id="shopRows"></div>
+  </div>
+
+  <div id="board" class="panel"></div>
+
+  <div id="menu" class="panel">
+    <h1>CAMPANILE</h1>
+    <p id="menuLine">Five Runners carry a powder keg into Porto Vesper. Light it at the Fish Market or the Boathouse, or stop the Tollers dousing it. First crew to seven rounds takes the town; sides swap after six.</p>
+    <table>
+      <tr><td>W A S D</td><td>move</td><td>Mouse</td><td>aim, fire, scope (right button)</td></tr>
+      <tr><td>Shift</td><td>walk silently</td><td>Ctrl / C</td><td>crouch: steadier aim</td></tr>
+      <tr><td>Space</td><td>jump</td><td>R</td><td>reload</td></tr>
+      <tr><td>1 2 3 4</td><td>rifle, sidearm, blade, grenade</td><td>E (hold)</td><td>light or douse the keg</td></tr>
+      <tr><td>B</td><td>buy, in the first seconds of a round</td><td>Tab</td><td>scoreboard</td></tr>
+    </table>
+    <p class="tip">Stand still to shoot straight. Running opens the cone; a crouch tightens it; the first rounds climb, then the spray walks left and right.</p>
+    <button id="deploy">Click to deploy</button>
+    <a id="attract" href="?watch=1">or watch the bots play a match</a>
+  </div>
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

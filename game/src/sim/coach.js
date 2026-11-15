@@ -1,0 +1,145 @@
+// The team's plan. Each round a coach picks a play, gives every bot a post and a job, and changes them as the
+// round unfolds: the hit on a site, a rotation when one side lights up, the hold or the retake after a plant.
+import { ROUND } from '../config.js';
+import { ATT, TEAM_SIZE, emit, sideOfTeam, countAlive } from './state.js';
+import { HOLDS, STAGE, SMOKES, SITES, zoneAt } from './map.js';
+
+const OTHER = { A: 'B', B: 'A' };
+const SITE_NAME = { A: 'Fish Market', B: 'Boathouse' };
+const ZONE_SITE = { 'Fish Market': 'A', 'Net Row': 'A', "Cooper's Cut": 'A', Boathouse: 'B', Quay: 'B', Chandlery: 'B' };
+// Where each of the five stands before the hit, per play: 'main' door, the 'link' via Bell Square, a 'lurk' alley.
+const PLAYS = {
+  default: ['main', 'main', 'mid', 'lurk', 'decoy'],
+  split: ['main', 'main', 'main', 'mid', 'mid'],
+  fake: ['main', 'main', 'main', 'decoy', 'decoy'],
+  rush: ['main', 'main', 'main', 'main', 'main'],
+};
+const SETUPS = { standard: 'AAMBB', stackA: 'AAAMB', stackB: 'ABBMB', mid: 'AMMBB' };
+
+// A stack at a door stands in a loose wedge, not on one cobble.
+const WEDGE = [[0, 0], [1.4, 0.9], [-1.4, 0.9], [0.7, 2.2], [-0.7, 2.2]];
+const makeJob = () => ({ x: 0, z: 0, wx: 0, wz: 0, hold: false, quiet: false, nade: -1, nx: 0, nz: 0, site: 'M' });
+
+export function makeCoach(team) {
+  const jobs = [];
+  for (let i = 0; i < TEAM_SIZE; i++) jobs.push(makeJob());
+  return { team, side: ATT, play: 'default', site: 'A', hitAt: 0, go: false, lit: false, jobs, threat: { A: 0, B: 0 }, rotated: false, saidT: -9, think: 0, douser: -1, fetcher: -1, px: 0, pz: 0, lastSite: 'B' };
+}
+
+function post(j, p, hold, site) {
+  j.x = p.x; j.z = p.z; j.wx = p.wx === undefined ? p.x : p.wx; j.wz = p.wz === undefined ? p.z : p.wz;
+  j.hold = hold; j.site = site; j.nade = -1; j.quiet = false;
+}
+
+/** A line on the team radio, at most one every few seconds so the feed stays readable. */
+function radio(state, c, a, text, force = false) {
+  if (!a || (!force && state.time - c.saidT < 3)) return;
+  c.saidT = state.time;
+  emit(state, 'radio', a.id, -1, a.x, a.y, a.z, 0, text);
+}
+const speaker = (state, c) => state.actors.find((a) => a.team === c.team && a.alive && a.bot);
+
+/** Send the team into the site: every bot takes a post inside, with a smoke, a flash or a frag to throw first. */
+function hit(state, c) {
+  c.go = true;
+  const holds = HOLDS[c.site], smokes = SMOKES[c.site], site = SITES[c.site];
+  c.jobs.forEach((j, i) => {
+    post(j, holds[i % holds.length], true, c.site);
+    if (i === 0 || i === 2) { j.nade = 2; j.nx = smokes[i >> 1].x; j.nz = smokes[i >> 1].z; }
+    else if (i === 1) { j.nade = 1; j.nx = site.x; j.nz = site.z; }
+    else if (i === 3) { j.nade = 0; j.nx = holds[0].x; j.nz = holds[0].z; }
+  });
+  radio(state, c, speaker(state, c), `Hit ${SITE_NAME[c.site]} now, smokes out`, true);
+}
+
+function planAttack(state, c) {
+  const rng = state.rng, poor = state.actors.filter((a) => a.team === c.team).reduce((s, a) => s + a.money, 0) / TEAM_SIZE < 1800;
+  c.site = rng.chance(0.65) ? OTHER[c.lastSite] : c.lastSite;
+  c.lastSite = c.site;
+  const roll = rng.next();
+  c.play = poor ? (roll < 0.6 ? 'rush' : 'split') : roll < 0.4 ? 'default' : roll < 0.65 ? 'split' : roll < 0.85 ? 'fake' : 'rush';
+  c.hitAt = c.play === 'rush' ? 0 : c.play === 'split' ? rng.range(12, 18) : rng.range(22, 32);
+  const cell = rng.pick(SITES[c.site].cells);
+  c.px = cell.x; c.pz = cell.z;
+  const stage = STAGE[c.site], other = STAGE[OTHER[c.site]];
+  PLAYS[c.play].forEach((role, i) => {
+    const j = c.jobs[i];
+    post(j, role === 'main' ? stage.main : role === 'mid' ? STAGE.mid : role === 'lurk' ? stage.lurk : other.main, false, c.site);
+    j.x += WEDGE[i][0]; j.z += WEDGE[i][1];
+    j.quiet = role === 'lurk' || role === 'mid';
+  });
+  const line = { default: `Default, then we hit ${SITE_NAME[c.site]}`, split: `Split ${SITE_NAME[c.site]} through Bell Square`, fake: `Fake ${SITE_NAME[OTHER[c.site]]}, hit ${SITE_NAME[c.site]}`, rush: `Rush ${SITE_NAME[c.site]}, go go go` };
+  radio(state, c, speaker(state, c), line[c.play], true);
+}
+
+function planDefence(state, c) {
+  const roll = state.rng.next(), setup = roll < 0.55 ? 'standard' : roll < 0.7 ? 'stackA' : roll < 0.85 ? 'stackB' : 'mid';
+  const used = { A: 0, B: 0, M: 0 };
+  c.play = setup;
+  c.jobs.forEach((j, i) => { const s = SETUPS[setup][i]; post(j, HOLDS[s][used[s]++ % HOLDS[s].length], true, s); });
+  radio(state, c, speaker(state, c), setup === 'standard' ? 'Two Market, two Boathouse, one Bell Square' : setup === 'mid' ? 'Two on Bell Square, hold the gate' : `Stacking ${SITE_NAME[setup === 'stackA' ? 'A' : 'B']} this round`, true);
+}
+
+export function planRound(state, c) {
+  c.side = sideOfTeam(state, c.team);
+  c.go = false; c.lit = false; c.rotated = false; c.douser = -1; c.fetcher = -1; c.threat.A = 0; c.threat.B = 0; c.saidT = -9;
+  if (c.side === ATT) planAttack(state, c); else planDefence(state, c);
+}
+
+/** A bot saw an enemy: tell the team, and count it towards the site that lane leads to. */
+export function report(state, a, enemy) {
+  const c = state.coach[a.team], zone = zoneAt(enemy.x, enemy.z), site = ZONE_SITE[zone];
+  if (site) c.threat[site] += enemy.hasKeg ? 2.5 : 1;
+  radio(state, c, a, enemy.hasKeg ? `Keg carrier, ${zone}` : `Contact ${zone}`);
+}
+
+function nearestBot(state, c, x, z, preferKit) {
+  let best = null, bestD = Infinity;
+  for (const a of state.actors) {
+    if (!a.alive || a.team !== c.team || !a.bot) continue;
+    const d = Math.hypot(a.x - x, a.z - z) - (preferKit && a.kit ? 8 : 0);
+    if (d < bestD) { best = a; bestD = d; }
+  }
+  return best;
+}
+
+export function stepCoach(state, c, dt) {
+  c.think -= dt;
+  if (c.think > 0) return;
+  c.think = 0.25;
+  const m = state.match, k = state.keg;
+  c.threat.A *= 0.96; c.threat.B *= 0.96;
+  if (m.phase !== 'live' && m.phase !== 'planted') return;
+  if (c.side === ATT) {
+    if (!c.go && (ROUND.live - m.t >= c.hitAt || m.t < 50 || countAlive(state, c.team) <= 3)) hit(state, c);
+    if (k.state === 'dropped') { // someone fetch the keg
+      const a = nearestBot(state, c, k.x, k.z, false);
+      if (a) { c.fetcher = a.id; post(c.jobs[a.id % TEAM_SIZE], k, true, c.site); radio(state, c, a, `Keg is down at ${zoneAt(k.x, k.z)}, I have it`); }
+    } else if (c.fetcher >= 0 && k.state === 'carried') { // picked up: back to the plan
+      post(c.jobs[c.fetcher % TEAM_SIZE], HOLDS[c.site][0], true, c.site); c.fetcher = -1;
+    } else if (k.state === 'planted' && !c.lit) { // hold the site until the fuse runs out
+      c.lit = true; c.site = k.site;
+      c.jobs.forEach((j, i) => post(j, HOLDS[k.site][i % HOLDS[k.site].length], true, k.site));
+      radio(state, c, speaker(state, c), `Keg is lit, hold ${SITE_NAME[k.site]}`, true);
+    }
+    return;
+  }
+  if (k.state === 'planted') { // retake: one douses, the rest cover the doors
+    if (!c.lit) {
+      c.lit = true;
+      c.jobs.forEach((j, i) => post(j, HOLDS[k.site][i % HOLDS[k.site].length], true, k.site));
+      radio(state, c, speaker(state, c), `They lit it at ${SITE_NAME[k.site]}, retake`, true);
+    }
+    const a = nearestBot(state, c, k.x, k.z, true);
+    if (a && a.id !== c.douser) { c.douser = a.id; post(c.jobs[a.id % TEAM_SIZE], k, true, k.site); radio(state, c, a, 'Dousing, watch my back'); }
+    return;
+  }
+  const lead = c.threat.A - c.threat.B;
+  if (!c.rotated && Math.abs(lead) > 1.6) { // one side is loud: the middle and one far defender come over
+    const hot = lead > 0 ? 'A' : 'B';
+    let moved = 0, slot = 2;
+    for (const j of c.jobs) if (j.site !== hot && (j.site === 'M' || moved++ === 0)) post(j, HOLDS[hot][slot++ % HOLDS[hot].length], true, hot);
+    c.rotated = true;
+    radio(state, c, speaker(state, c), `Rotating ${SITE_NAME[hot]}`, true);
+  }
+}
