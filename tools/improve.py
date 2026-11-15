@@ -9,7 +9,7 @@ played with the env's ply cap set just under that best: it is cut there and reco
 longest wins first, then the bests are read again.
 
 usage: improve.py --engine engine.py [--opps a,b] [--variants 0-35] [--rounds N] [--jobs 4]
-                  [--min-plies P] [--worst N] [--db FILE] [--hours H]
+                  [--min-plies P] [--worst N] [--scenarios o:c:b,...] [--db FILE] [--hours H]
 """
 import argparse, hashlib, json, os, re, sys, tempfile, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -25,6 +25,7 @@ ap.add_argument("--rounds", type=int, default=99)
 ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--min-plies", type=int, default=0, help="leave scenarios already won in at most this many plies")
 ap.add_argument("--hours", type=float, default=99.0)
+ap.add_argument("--scenarios", default="", help="only these, as opponent:colour:opening,... (overrides --opps)")
 ap.add_argument("--worst", type=int, default=0, help="each round, only the N scenarios with the longest wins so far (0: all of them)")
 ap.add_argument("--order", default="asc", help="asc: lowest untried variant first; desc: highest first (two machines can then share a scenario)")
 ap.add_argument("--db", default="/root/makefun-work/var/db.jsonl")
@@ -40,6 +41,7 @@ EHASH = a.tag
 LEGACY = {"7d66ad0d28f2dc41": "v7"}
 lo, hi = (int(x) for x in a.variants.split("-"))
 opps = a.opps.split(",")
+only = {tuple(x.split(":")) for x in a.scenarios.split(",")} if a.scenarios else None
 tmpdir = tempfile.mkdtemp(prefix="var-")
 files = {}
 for v in [x for x in range(lo, hi + 1) if x != 44]:
@@ -81,7 +83,7 @@ for rnd in range(a.rounds):
     best, tried = load()
     todo = []
     for k, p in sorted(best.items(), key=lambda kv: -kv[1]):
-        if k[0] not in opps or p <= a.min_plies:
+        if (k not in only if only else k[0] not in opps) or p <= a.min_plies:
             continue
         nxt = [v for v in range(lo, hi + 1) if v != 44 and v not in tried.get(k, ())]
         if nxt:
@@ -104,5 +106,5 @@ for rnd in range(a.rounds):
                 for f2 in futs:
                     f2.cancel()
     best2, _ = load()
-    sel = [p for k, p in best2.items() if k[0] in opps]
+    sel = [p for k, p in best2.items() if (k in only if only else k[0] in opps)]
     print(f"round {rnd}: {len(todo)} games in {time.time() - t0:.0f}s, plies gained {gain}, mean best {sum(sel) / max(1, len(sel)):.1f} over {len(sel)} scenarios", flush=True)
