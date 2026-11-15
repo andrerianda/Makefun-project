@@ -11,14 +11,15 @@
 //     economy.js       pay and the buy counter             round.js     phases, wins, half-time
 //     coach.js         team plays and rotations            bots.js      one bot's eyes, ears and trigger
 //     nav.js           A* and string-pulling               step.js      one fixed step, systems in order
-//   render/          draws the state: baked level, sky, actors, effects, the weapon in hand
+//   render/          draws the state: baked level, sky, actors, effects, the weapon in hand; kit.js reads the models
 //   ui/              HUD, radar, buy counter, scoreboard   audio.js   synthesised sound   input.js  keys to cmd
 //
 // The loop below steps the simulation at a fixed 60 Hz and renders as fast as the display asks,
 // interpolating between the last two steps.
-import { TICK, TEAMS } from './config.js';
+import { TICK } from './config.js';
 import { createGame, stepGame } from './sim/step.js';
 import { startMatch } from './sim/round.js';
+import { loadKit } from './render/kit.js';
 import { createView } from './render/view.js';
 import { createHud } from './ui/hud.js';
 import { createAudio } from './audio.js';
@@ -27,7 +28,7 @@ import { createInput } from './input.js';
 const query = new URLSearchParams(location.search);
 const watch = query.has('watch'); // attract mode: a bot plays your body and the match runs by itself
 const state = createGame(Number(query.get('seed')) || (Date.now() & 0xffff) + 1, watch);
-const view = createView(document.getElementById('game'), state);
+const view = createView(document.getElementById('game'), state, await loadKit(['assets/kit.txt', 'assets/props.txt']));
 const hud = createHud(state), audio = createAudio(state), input = createInput(view.canvas, state, hud);
 const INTRO = document.getElementById('menuLine').textContent;
 
@@ -60,7 +61,7 @@ function frame(now) {
 function menu() {
   const m = state.match;
   if (running()) hud.menu(null);
-  else if (m.phase === 'final') hud.menu(m.champion < 0 ? `A draw, ${m.score[0]} all.` : `${TEAMS[m.champion].name} take Porto Vesper, ${m.score[0]} to ${m.score[1]}.`, 'Play again');
+  else if (m.phase === 'final') hud.menu(m.champion < 0 ? `A draw, ${m.score[0]} all.` : `${m.champion ? 'The other crew takes' : 'Your crew takes'} Porto Vesper, ${m.score[0]} to ${m.score[1]}.`, 'Play again');
   else hud.menu(m.round > 1 || m.phase !== 'freeze' ? 'Paused. The match waits for you.' : INTRO, m.round > 1 ? 'Click to resume' : 'Click to deploy');
 }
 

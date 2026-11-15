@@ -1,5 +1,5 @@
 // Porto Vesper: the one map, drawn as text so its lanes read at a glance. One character is a 2 m cell.
-// North is up. The Tollers start in the Customs Yard (T), the Runners on the Low Road (R). Three lanes
+// North is up. The Wardens start in the Customs Yard (T), the Smugglers on the Low Road (R). Three lanes
 // run north: Net Row to the Fish Market (site A), Bell Lane through the gate under the campanile, and
 // the Quay to the Boathouse (site B). Two offset alleys, Cooper's Cut and the Chandlery, link them.
 //   # house   a archway   . cobbles   , market flags   ; boathouse planks   ~ sea   w low wall

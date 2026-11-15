@@ -1,5 +1,5 @@
 // The heads-up display: reads the state every frame and writes to the DOM only what changed.
-import { NADES, ROUND, TEAMS, WEAPONS } from '../config.js';
+import { NADES, ROUND, SIDES, WEAPONS } from '../config.js';
 import { ATT, drain, sideOf, sideOfTeam } from '../sim/state.js';
 import { zoneAt } from '../sim/map.js';
 import { inaccuracy } from '../sim/weapons.js';
@@ -18,9 +18,8 @@ export function createHud(state) {
   for (const id of ['phase', 'time', 'roundNo', 'clock', 'zone', 'radio', 'feed', 'cross', 'hitmark', 'prompt', 'bar', 'banner', 'watching', 'hp', 'hpBar', 'ap', 'apBar', 'cash', 'kegTag', 'gun', 'mag', 'res', 'ammo', 'slots', 'pain', 'blind', 'scope', 'menu', 'menuLine', 'deploy']) el[id] = $(`#${id}`);
   const sides = [0, 1].map((t) => {
     const root = $(`#side${t}`), pips = root.querySelector('.pips');
-    root.querySelector('.name').textContent = TEAMS[t].name.toUpperCase();
     pips.innerHTML = '<i></i>'.repeat(5);
-    return { score: root.querySelector('.score'), pips: [...pips.children] };
+    return { root, name: root.querySelector('.name'), score: root.querySelector('.score'), pips: [...pips.children] };
   });
   const radar = createRadar($('#radar canvas')), shop = createShop($('#shop')), board = createBoard($('#board'));
   const slotEls = [...el.slots.children], last = new Map();
@@ -36,7 +35,7 @@ export function createHud(state) {
     setTimeout(() => { li.style.opacity = 0; setTimeout(() => li.remove(), 700); }, 7000);
   };
   const banner = (e, title, sub, seconds = 3.5) => { el.banner.firstElementChild.textContent = title; el.banner.lastElementChild.textContent = sub; el.banner.style.opacity = 1; last.set('banneropacity', '1'); bannerEnd = e.t + seconds; };
-  const named = (a) => `<em class="t${a.team}">${a.name}</em>`;
+  const named = (a) => `<em class="s${sideOf(state, a)}">${a.name}</em>`;
 
   function onEvent(e, st) {
     const view = st.viewId, me = st.actors[view];
@@ -50,8 +49,8 @@ export function createHud(state) {
     else if (e.type === 'round') {
       const m = st.match;
       if (e.s === 'freeze') banner(e, `ROUND ${m.round}`, sideOf(st, me) === ATT ? 'Light the keg at the Fish Market or the Boathouse' : 'Hold both sites; douse the keg if it is lit');
-      else if (e.s === 'final') banner(e, m.champion < 0 ? 'A DRAW' : `${TEAMS[m.champion].name.toUpperCase()} TAKE PORTO VESPER`, `${m.score[0]} : ${m.score[1]}`, 60);
-      else if (e.s !== 'live') banner(e, `${TEAMS[e.n].name.toUpperCase()} WIN THE ROUND`, REASONS[e.s], ROUND.post - 0.5);
+      else if (e.s === 'final') banner(e, m.champion < 0 ? 'A DRAW' : m.champion ? 'THE OTHER CREW TAKES PORTO VESPER' : 'YOUR CREW TAKES PORTO VESPER', `${m.score[0]} : ${m.score[1]}`, 60);
+      else if (e.s !== 'live') banner(e, `${SIDES[sideOfTeam(st, e.n)].name.toUpperCase()} WIN THE ROUND`, REASONS[e.s], ROUND.post - 0.5);
     }
   }
 
@@ -65,8 +64,10 @@ export function createHud(state) {
     update(st, dt) {
       cursor = drain(st, cursor, (e) => onEvent(e, st));
       const m = st.match, a = st.actors[st.viewId], w = weaponOf(a), lit = m.phase === 'planted';
-      for (let t = 0; t < 2; t++) {
-        put(sides[t].score, String(m.score[t]));
+      for (let t = 0; t < 2; t++) { // your crew on the left, in the colours of the side it plays this half
+        const side = SIDES[sideOfTeam(st, t)];
+        if (last.get(`side${t}`) !== side) { last.set(`side${t}`, side); sides[t].name.textContent = side.name.toUpperCase(); sides[t].root.style.color = side.color; }
+        if (last.get(`score${t}`) !== m.score[t]) { last.set(`score${t}`, m.score[t]); sides[t].score.textContent = m.score[t]; }
         let alive = 0;
         for (const o of st.actors) if (o.team === t && o.alive) alive++;
         if (last.get(`pips${t}`) !== alive) { last.set(`pips${t}`, alive); sides[t].pips.forEach((p, i) => { p.className = i < alive ? 'up' : ''; }); }

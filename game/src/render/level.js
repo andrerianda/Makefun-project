@@ -104,7 +104,7 @@ function dressWall(trim, b) {
 }
 
 /** Build Porto Vesper into `scene`. */
-export function buildLevel(scene, tex) {
+export function buildLevel(scene, tex, kit) {
   const P = PALETTE;
   const plaster = new Batch(lit(tex.plaster)), roof = new Batch(lit(tex.roof)), cobble = new Batch(lit(tex.cobble));
   const flag = new Batch(lit(tex.flag)), plank = new Batch(lit(tex.plank)), site = new Batch(lit(tex.site)), stone = new Batch(lit(tex.stone));

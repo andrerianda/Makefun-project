@@ -64,7 +64,7 @@ export function stepRound(state, dt) {
     else if (countAlive(state, teamOnSide(state, ATT)) === 0) endRound(state, DEF, 'wiped');
     else if (countAlive(state, teamOnSide(state, DEF)) === 0) endRound(state, ATT, 'wiped');
     else if (m.t <= 0) endRound(state, DEF, 'time');
-  } else if (m.phase === 'planted') { // a lit keg still wins it for dead Runners; only a douse stops it
+  } else if (m.phase === 'planted') { // a lit keg still wins it for dead Smugglers; only a douse stops it
     m.t = Math.max(0, k.fuse);
     if (k.state === 'doused') endRound(state, DEF, 'doused');
     else if (k.state === 'blown') endRound(state, ATT, 'blast');

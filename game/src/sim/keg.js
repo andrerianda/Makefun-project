@@ -1,4 +1,4 @@
-// The objective: one Runner carries the powder keg, plants it on a site, and the Tollers must douse the fuse.
+// The objective: one Smuggler carries the powder keg, plants it on a site, and the Wardens must douse the fuse.
 import { ECON, ROUND } from '../config.js';
 import { ATT, DEF, emit, noise, sideOf } from './state.js';
 import { siteAt } from './map.js';

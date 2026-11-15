@@ -1,7 +1,8 @@
 // The radar: the map from above, your crew, any enemy a team-mate can see right now, gunfire, smoke and the keg.
-import { NADES, TEAMS } from '../config.js';
+import { NADES, SIDES } from '../config.js';
 import { COLS, ROWS, CELL, tile, walk } from '../sim/map.js';
 import { canSee } from '../sim/perception.js';
+import { sideOf } from '../sim/state.js';
 
 const S = 5.5; // pixels per cell
 
@@ -52,7 +53,7 @@ export function createRadar(canvas) {
       for (const a of state.actors) {
         if (!a.alive || (a.team !== me.team && !spotted[a.id])) continue;
         const x = px(a.x), z = pz(a.z);
-        g.fillStyle = a.team === me.team ? TEAMS[a.team].color : '#ff5d4a';
+        g.fillStyle = a.team === me.team ? SIDES[sideOf(state, a)].color : '#ff5d4a';
         if (a === me) { // you: an arrow along your view
           g.save(); g.translate(x, z); g.rotate(-a.yaw);
           g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(0, -6); g.lineTo(4, 5); g.lineTo(0, 2.5); g.lineTo(-4, 5); g.fill();

@@ -2,7 +2,7 @@
 // positions between the last two fixed steps, then the weapon is drawn on top.
 import * as THREE from 'three';
 import { WEAPONS } from '../config.js';
-import { drain } from '../sim/state.js';
+import { drain, sideOf } from '../sim/state.js';
 import { eyeHeight } from '../sim/world.js';
 import { makeTextures } from './textures.js';
 import { buildLevel } from './level.js';
@@ -13,7 +13,7 @@ import { buildViewmodel } from './viewmodel.js';
 
 const FOV = 74;
 
-export function createView(host, state) {
+export function createView(host, state, kit) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
@@ -27,8 +27,8 @@ export function createView(host, state) {
   camera.rotation.order = 'YXZ';
   const tex = makeTextures();
   buildSky(scene);
-  buildLevel(scene, tex);
-  const actors = buildActors(scene, state, tex), effects = buildEffects(scene, tex, actors, camera), gun = buildViewmodel(tex);
+  buildLevel(scene, tex, kit);
+  const actors = buildActors(scene, state, tex, kit), effects = buildEffects(scene, tex, actors, camera), gun = buildViewmodel(tex, kit);
   let cursor = state.events.seq, fov = FOV, shake = 0, aspect = 1;
 
   const resize = () => {
@@ -61,7 +61,7 @@ export function createView(host, state) {
       renderer.clear();
       renderer.render(scene, camera);
       if (a.alive && !a.scoped) {
-        gun.update(a, dt, aspect);
+        gun.update(a, sideOf(st, a), dt, aspect);
         renderer.clearDepth();
         renderer.render(gun.scene, gun.camera);
       }

@@ -55,10 +55,10 @@ export const GEAR = {
 // The buy menu's rows, in order; keys 1-9 and 0 pick them.
 export const SHOP = ['sparrow', 'mastiff', 'cicada', 'brine', 'corsa', 'tramont', 'meridian', 'jerkin', 'cap', 'kit', 'crackler', 'glare', 'seafog'];
 
-export const TEAMS = [
-  { name: 'Runners', tag: 'RUN', color: '#f2a23a', dark: '#8a4b12', names: ['You', 'Brannoch', 'Isolde', 'Quill', 'Marrow'] },
-  { name: 'Tollers', tag: 'TOL', color: '#35b8ad', dark: '#12575a', names: ['Hale', 'Verity', 'Osric', 'Tamsin', 'Corwen'] },
-];
+// A side is a job and a uniform: Smugglers attack with the keg, Wardens defend the sites. The two crews swap
+// sides at half-time, so you play both.
+export const SIDES = [{ name: 'Smugglers', color: '#f2a23a' }, { name: 'Wardens', color: '#35b8ad' }];
+export const CREWS = [['You', 'Brannoch', 'Isolde', 'Quill', 'Marrow'], ['Hale', 'Verity', 'Osric', 'Tamsin', 'Corwen']];
 
 // The look: one dusk palette, used by the level, the actors and the HUD alike.
 export const PALETTE = {

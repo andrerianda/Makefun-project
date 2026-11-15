@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/threejs-fps-02/andrerianda/Makefun-project/rank.svg)](https://make.fun/bounty/threejs-fps-02/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=threejs-fps-02)
 [![reward](https://make.fun/badge/threejs-fps-02/andrerianda/Makefun-project/reward.svg)](https://make.fun/bounty/threejs-fps-02?utm_source=github&utm_medium=readme&utm_campaign=threejs-fps-02)
 
-CAMPANILE is a 5v5 round-based tactical first-person shooter on three.js, set in a pastel harbour town at dusk. The Runners carry a powder keg to the Fish Market or the Boathouse and light it; the Tollers hold both sites and douse the fuse. Money between rounds buys rifles, armour and grenades, standing still shoots straight, and the bots run plays, rotate and call their contacts on the radio.
+CAMPANILE is a 5v5 round-based tactical first-person shooter on three.js, set in a pastel harbour town at dusk. The Smugglers carry a powder keg to the Fish Market or the Boathouse and light it; the Wardens hold both sites and douse the fuse, and the two crews swap sides at half-time. Money between rounds buys rifles, armour and grenades, standing still shoots straight, and the bots run plays, rotate and call their contacts on the radio.
 
 ![A firefight in the Fish Market](screenshots/1-firefight.jpg)
 

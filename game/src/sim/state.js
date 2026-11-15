@@ -1,6 +1,6 @@
 // The whole game state lives in the one object createState returns. Systems read and write it; the renderer,
 // the HUD and the audio only read it and drain its event ring.
-import { ECON, TEAMS } from '../config.js';
+import { CREWS, ECON } from '../config.js';
 import { makeRng } from './rng.js';
 
 export const ATT = 0, DEF = 1; // a side: attacking or defending this half
@@ -10,7 +10,7 @@ const EVENTS = 256, SOUNDS = 32, NADE_POOL = 12;
 function makeActor(id) {
   const team = id < TEAM_SIZE ? 0 : 1;
   return {
-    id, team, name: TEAMS[team].names[id % TEAM_SIZE], human: false, skill: 0.5,
+    id, team, name: CREWS[team][id % TEAM_SIZE], human: false, skill: 0.5,
     alive: false, hp: 0, armor: 0, helmet: false, kit: false, money: ECON.start,
     x: 0, y: 0, z: 0, px: 0, py: 0, pz: 0, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, ground: true, duck: 0,
     slots: [null, 'sparrow', 'knife'], mag: [0, 0, 0], res: [0, 0, 0], slot: 1, nades: [0, 0, 0], nadeSel: -1,
