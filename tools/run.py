@@ -81,7 +81,7 @@ def parse_games(spec):
     return games
 
 
-def play(engine, games, py="python3", limit_ms=10000, env_extra=None, timeout=None, keep=False):
+def play(engine, games, py="python3", limit_ms=10000, env_extra=None, timeout=None, keep=False, max_plies=200):
     """Play `games` [(opponent, colour, opening)] and return the result records."""
     tmp = tempfile.mkdtemp(prefix="tc-")
     try:
@@ -90,7 +90,7 @@ def play(engine, games, py="python3", limit_ms=10000, env_extra=None, timeout=No
         gauntlet = {
             "schema": "tiny-chess-01/gauntlet/v1",
             "house_seed": "e56bc4f9fbec70672010a01cd7d0f8077a629c3f4bba25aa6067a6d701800c25",
-            "max_plies": 200, "adjudication_margin": 5, "move_limit_ms": limit_ms,
+            "max_plies": max_plies, "adjudication_margin": 5, "move_limit_ms": limit_ms,
             "games": [{"game": i + 1, "opponent": o, "colour": c, "opening": BOOK[b]}
                       for i, (o, c, b) in enumerate(games)],
         }
