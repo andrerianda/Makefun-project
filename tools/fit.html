@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"/home/user/Makefun-project/game/vendor/three/three.module.min.js"}}</script>
+</head><body>
+<script type="module">
+// Dev tool: how well a kit model fills the collision box the simulation gives it.
+// ?m=name=WxH[+WxH...],name2=WxH&extra=/abs/a.txt,/abs/b.txt
+// For each model, orthographic silhouettes (front, side, top) clipped at 2 m, 1 px per cm:
+//   fill   share of the box's projection the model covers (front/side up to the box height, top over the square)
+//   out    m² of silhouette outside the box's footprint below 2 m (the player walks through it: should be ~0)
+//   over   m² of silhouette inside the footprint but above the box top, below 2 m (bullets pass through it)
+//   bbox   the model's bounds
+import * as THREE from 'three';
+const q = new URLSearchParams(location.search), repo = q.get('repo') || '/home/user/Makefun-project';
+const { loadKit } = await import(repo + '/game/src/render/kit.js');
+const extra = (q.get('extra') || '').split(',').filter(Boolean);
+const kit = await loadKit([repo + '/game/assets/kit.txt', repo + '/game/assets/props.txt', repo + '/game/assets/land.txt', ...extra]);
+const PX = 100, CLIP = +(q.get('clip') || 2);
+const renderer = new THREE.WebGLRenderer({ antialias: false });
+renderer.localClippingEnabled = true;
+const mat = new THREE.MeshBasicMaterial({ color: '#ffffff', side: THREE.DoubleSide, clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, -1, 0), CLIP)] });
+const out = {};
+for (const spec of (q.get('m') || '').split(',').filter(Boolean)) {
+  const [name, b = ''] = spec.split('=');
+  const boxes = b.split('+').filter(Boolean).map((s) => s.split('x').map(Number));
+  const scene = new THREE.Scene(), root = kit.build(name, mat).root;
+  scene.add(root); root.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(root);
+  const R = Math.max(1.5, ...boxes.map((x) => x[0]), Math.abs(bb.min.x), bb.max.x, Math.abs(bb.min.z), bb.max.z) + 0.1;
+  const inBox = (u, v, y) => boxes.some(([w, h]) => Math.abs(u) <= w / 2 && Math.abs(v) <= w / 2 && y <= h);
+  const inFoot = (u, v) => boxes.some(([w]) => Math.abs(u) <= w / 2 && Math.abs(v) <= w / 2);
+  const res = { bbox: [bb.min, bb.max].map((p) => [p.x, p.y, p.z].map((n) => +n.toFixed(2))) };
+  for (const view of ['front', 'side', 'top']) {
+    const W = Math.round(2 * R * PX), H = view === 'top' ? W : Math.round((CLIP + 0.2) * PX);
+    const cam = view === 'top' ? new THREE.OrthographicCamera(-R, R, R, -R, 0.01, 100) : new THREE.OrthographicCamera(-R, R, CLIP, -0.2, 0.01, 100);
+    if (view === 'front') cam.position.set(0, 0, 50); else if (view === 'side') { cam.position.set(50, 0, 0); cam.lookAt(0, 0, 0); } else { cam.position.set(0, 50, 0); cam.up.set(0, 0, -1); cam.lookAt(0, 0, 0); }
+    cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+    const rt = new THREE.WebGLRenderTarget(W, H);
+    renderer.setRenderTarget(rt); renderer.setClearColor('#000000'); renderer.clear(); renderer.render(scene, cam);
+    const px = new Uint8Array(W * H * 4); renderer.readRenderTargetPixels(rt, 0, 0, W, H, px);
+    let inside = 0, covered = 0, outA = 0, overA = 0;
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+      const hit = px[(j * W + i) * 4] > 128, u = -R + (i + 0.5) / PX;
+      if (view === 'top') {
+        const v = R - (j + 0.5) / PX; // rows run bottom-up; the camera's up is -z
+        const foot = inFoot(u, v);
+        if (foot) { inside++; if (hit) covered++; } else if (hit) outA++;
+      } else {
+        const y = -0.2 + (j + 0.5) / PX, box = inBox(u, 0, y), foot = inFoot(u, 0);
+        if (y < 0) continue;
+        if (box) { inside++; if (hit) covered++; } else if (hit) { if (foot) overA++; else outA++; }
+      }
+    }
+    res[view] = { fill: inside ? +(covered / inside).toFixed(3) : null, out: +(outA / PX / PX).toFixed(3), ...(view === 'top' ? {} : { over: +(overA / PX / PX).toFixed(3) }) };
+    rt.dispose();
+  }
+  out[name] = res;
+}
+window.result = out; window.done = true;
+</script></body></html>

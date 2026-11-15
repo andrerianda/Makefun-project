@@ -9,8 +9,8 @@ import { rayWorld } from './sim/world.js';
 const GUNS = { pistol: [0.3, 0.1, 2600], smg: [0.24, 0.07, 3300], rifle: [0.4, 0.14, 1900], shotgun: [0.5, 0.26, 1100], sniper: [0.6, 0.4, 900] };
 const rnd = (a, b) => a + Math.random() * (b - a);
 
-/** The synth on any audio context (tests render it offline); returns frame(state, cursor) -> cursor. */
-export function createSynth(ctx) {
+/** The synth on an audio context; returns frame(state, cursor) -> cursor. */
+function createSynth(ctx) {
   const sr = ctx.sampleRate, hiss = ctx.createBuffer(1, sr * 2, sr), ir = ctx.createBuffer(2, sr * 1.7, sr);
   const out = ctx.createDynamicsCompressor(), verb = ctx.createConvolver(), bed = ctx.createGain(), wash = ctx.createBufferSource(), tone = ctx.createBiquadFilter();
   let live = 0, next = 2, st, me, who, now, spot, near, pan, cut, wet;

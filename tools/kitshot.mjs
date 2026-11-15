@@ -8,7 +8,7 @@ const page = await browser.newPage({ viewport: { width: +w, height: +h } });
 const logs = [];
 page.on('console', (m) => { if (m.type() === 'error') logs.push(m.text()); });
 page.on('pageerror', (e) => logs.push('pageerror: ' + e.message));
-await page.goto('http://localhost:8127/root/makefun/tools/preview.html?repo=' + (process.env.REPO || '/home/user/Makefun-project') + '&' + query, { waitUntil: 'load' });
+await page.goto('http://localhost:8127' + (process.env.REPO || '/home/user/Makefun-project') + '/tools/preview.html?repo=' + (process.env.REPO || '/home/user/Makefun-project') + '&' + query, { waitUntil: 'load' });
 await page.waitForFunction('window.done === true', null, { timeout: 20000 }).catch(() => logs.push('timeout'));
 await page.screenshot({ path: out, type: 'jpeg', quality: 85 });
 console.log(JSON.stringify({ out, logs: logs.slice(0, 6) }));
