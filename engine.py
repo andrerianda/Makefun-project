@@ -55,7 +55,7 @@ def G(b,H):
      ap((h[t],f,t))
    if p==6:
     for r,d in(0,-1),(7,1):
-     if b[r]==7 and not any(b[x]&15 for x in range(min(f,r)+1,max(f,r)))and not(A(b,f)or A(b,f+d)):ap((0,f,f+2*d))
+     if b[r]==7 and not b[f+d]&15 and not any(b[x]&15 for x in range(min(f,r)+1,max(f,r)))and not(A(b,f)or A(b,f+d)):ap((0,f,f+2*d))
  return L
 def C(b):
  L=[];ap=L.append
@@ -192,7 +192,7 @@ def go(b,L,lim):
  NM=ph>2
  WW=w,o=mk(b,ph),mk(b.translate(T)[::-1],ph)
  s=sum(w[p][i]if p<8 else-o[p-8][63-i]for i,p in enumerate(b)if p&15)
- best=L[0]
+ best=L[0];HS.add(b)
  if len(L)<2:return best
  try:
   for d in range(1,64):
@@ -237,8 +237,8 @@ while g['status']!='done':
    if i==7:kk=int.from_bytes(b,'big')%207
   if j<10:
    TT.clear();oi='2 3 4 10 25 50 1M 2M'.split().index(g['opponent'][6:8])
-   NZ=random.Random(int(TB[KY.index(kk)*16+oi*2+j%2],16)).choices(range(-6,7),k=448)
-   LN=int(os.environ.get('NODES',(3,4,6,25,25,25,25,25)[oi]*10000))
+   NZ=random.Random(int(TB[KY.index(kk)*16+oi*2+j%2],36)).choices(range(-6,7),k=448)
+   LN=int(os.environ.get('NODES',(15,15,15,25,25,25,25,25)[oi]*10000))
   L=[(sq(u,j),sq(u[2:],j))for u in g['legal_moves']if u[4:]in('','q')]
   f,t=go(b,L,LN if j<110 else LN//3)
   u=nm(f,j)+nm(t,j)

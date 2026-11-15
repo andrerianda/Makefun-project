@@ -16,8 +16,8 @@ a = ap.parse_args()
 code = open(a.src).read().split("\nE=os.environ")[0]
 hook = "\n   g=a\n"
 assert hook in code
-code = code.replace(hook, "\n   g=a;DEPTHS.append((d,N,a,best))\n")
-ns = {"DEPTHS": []}
+code = code.replace(hook, "\n   g=a;DEPTHS.append((d,N,a,best,TIME()))\n")
+ns = {"DEPTHS": [], "TIME": time.process_time}
 exec(compile(code, a.src, "exec"), ns)
 G, M, A, F, go, B0, sq, name = (ns[k] for k in "G M A F go B0 sq nm".split())
 ZERO = [[0] * 64 for _ in range(64)]
@@ -68,21 +68,25 @@ for line in picks:
 positions += [from_fen(f) for f in (FENS if a.set != "small" else FENS[:6])]
 
 per_depth = {}
+per_time = {}
 reached = []
-t0 = time.time()
+t0 = time.process_time()
 tot_nodes = 0
 for b in positions:
     ns["HS"] = set()
     k = b.index(6)
     L = [(f, t) for _, f, t in G(b, ZERO) if not A(M(b, f, t), t if f == k else k)]
     ns["DEPTHS"].clear()
+    tpos = time.process_time()
     go(b, L, a.nodes)
     tot_nodes += ns["N"]
-    for d, n, sc, best in ns["DEPTHS"]:
+    for d, n, sc, best, tm in ns["DEPTHS"]:
         per_depth.setdefault(d, []).append(n)
+        per_time.setdefault(d, []).append(tm - tpos)
     reached.append(ns["DEPTHS"][-1][0] if ns["DEPTHS"] else 0)
-dt = time.time() - t0
+dt = time.process_time() - t0
 print(f"positions {len(positions)}  time {dt:.1f}s  nps {tot_nodes / dt:.0f}  depth reached: min {min(reached)} avg {sum(reached) / len(reached):.2f} max {max(reached)}")
 full = [d for d in sorted(per_depth) if len(per_depth[d]) == len(positions)]
 print("nodes to finish depth (all positions):", "  ".join(f"d{d}:{sum(per_depth[d])}" for d in full))
+print("cpu seconds to finish depth (all positions):", "  ".join(f"d{d}:{sum(per_time[d]):.2f}" for d in full))
 print("reached:", reached)

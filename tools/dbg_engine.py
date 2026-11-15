@@ -33,6 +33,12 @@ while g["status"] != "done":
             hs.add(b)
             b = F(M(b, sq(u, i), sq(u[2:], i), "  nbrq".find(u[4:] or "q")))
         ns["HS"] = hs
+        ns["J"] = j
+        if os.environ.get("VAR") is not None:
+            import random
+            ns["NZ"] = random.Random(int(os.environ["VAR"])).choices(range(-6, 7), k=448)
+        if j < 10:
+            ns["TT"].clear()
         k = b.index(6)
         mine = set()
         for _, f, t in G(b, ZERO):

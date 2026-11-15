@@ -35,7 +35,11 @@ a = ap.parse_args()
 SRC = open(a.engine).read()
 TB_RE = re.compile(r"^TB=.*$", re.M)
 assert len(TB_RE.findall(SRC)) == 1, "engine has no single TB= line"
-EHASH = hashlib.sha256(TB_RE.sub("TB=", SRC).encode()).hexdigest()[:16]
+LN_RE = re.compile(r"\((\d+(?:,\d+){7})\)\[oi\]\*10000")
+assert len(LN_RE.findall(SRC)) == 1, "engine has no single per-opponent budget tuple"
+BUDGET = [int(x) * 10000 for x in LN_RE.search(SRC).group(1).split(",")]
+# the hash leaves out the variant table and the budget tuple: a result holds for its own budget
+EHASH = hashlib.sha256(LN_RE.sub("()[oi]*10000", TB_RE.sub("TB=", SRC)).encode()).hexdigest()[:16]
 BOOK_ORDER = list(run.BOOK)
 os.makedirs(os.path.dirname(a.db), exist_ok=True)
 
@@ -45,7 +49,7 @@ def load():
     if os.path.exists(a.db):
         for line in open(a.db):
             r = json.loads(line)
-            if r["engine"] == EHASH:
+            if r["engine"] == EHASH and r.get("nodes") == BUDGET[run.OPPONENTS.index(r["opponent"])]:
                 out[(r["opponent"], r["colour"], r["opening"], r["variant"])] = r
     return out
 
@@ -68,7 +72,7 @@ if a.table or a.stats:
         if k not in cover or rank(r) < rank(cover[k]):
             cover[k] = r
     for (o, c, b), r in cover.items():
-        tb[scen_index(o, c, b)] = "%x" % r["variant"]
+        tb[scen_index(o, c, b)] = "0123456789abcdefghijklmnopqrstuvwxyz"[r["variant"]]
     if a.table:
         print("".join(tb))
     for o in run.OPPONENTS:
@@ -89,7 +93,7 @@ tmpdir = tempfile.mkdtemp(prefix="var-")
 files = {}
 for v in range(lo, hi + 1):
     p = os.path.join(tmpdir, f"engine_v{v}.py")
-    open(p, "w").write(TB_RE.sub("TB='%x'*640" % v, SRC))
+    open(p, "w").write(TB_RE.sub("TB='%s'*640" % "0123456789abcdefghijklmnopqrstuvwxyz"[v], SRC))
     files[v] = p
 
 
@@ -103,7 +107,7 @@ def work(s):
             t0 = time.time()
             res = run.play(files[v], [s], limit_ms=600000)
             g = res["games"][0]
-            r = {"engine": EHASH, "opponent": s[0], "colour": s[1], "opening": s[2], "variant": v, "outcome": g["outcome"],
+            r = {"engine": EHASH, "opponent": s[0], "colour": s[1], "opening": s[2], "variant": v, "nodes": BUDGET[run.OPPONENTS.index(s[0])], "outcome": g["outcome"],
                  "reason": g["reason"], "plies": g["plies"], "think_sum": round(res["think_avg"] * res["moves"]),
                  "think_max": res["think_max"], "moves": " ".join(g["moves"]), "wall": round(time.time() - t0, 1), "code": res["code"]}
             with open(a.db, "a") as fh:
