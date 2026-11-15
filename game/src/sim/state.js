@@ -40,7 +40,8 @@ export function createState(seed, watch) {
   const drops = []; // rifles the dead let fall, for anyone without one to take
   for (let i = 0; i < DROPS; i++) drops.push({ live: false, id: '', x: 0, z: 0, mag: 0, res: 0 });
   return {
-    tick: 0, time: 0, rng: makeRng(seed), actors, viewId: 0, third: false, nades, // whose eyes, and from over the shoulder or not
+    tick: 0, time: 0, rng: makeRng(seed), actors, nades,
+    viewId: 0, third: false, // whose eyes the screen uses, and from over the shoulder: state, so the HUD, sound and radar agree
     match: { round: 0, score: [0, 0], attackers: 0, phase: 'freeze', t: 0, streak: [0, 0], over: false, champion: -1 },
     keg: { state: 'carried', carrier: -1, x: 0, y: 0, z: 0, fuse: 0, site: '', douser: -1, beep: 0 },
     coach: [null, null],
