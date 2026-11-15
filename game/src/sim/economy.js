@@ -69,6 +69,6 @@ export function botShop(state, a) {
   let want = [];
   if (pistols) want = a.id % TEAM_SIZE % 2 ? ['jerkin'] : ['glare', 'seafog', 'crackler'];
   else if (a.slots[0] || a.money >= 3700) want = [a.slots[0] ? '' : side === ATT ? 'corsa' : 'tramont', 'cap', 'jerkin', side === DEF ? 'kit' : '', 'seafog', 'glare', 'crackler'];
-  else if (a.money >= 2000 && m.streak[a.team] >= 2) want = [a.id % TEAM_SIZE % 2 ? 'cicada' : 'brine', 'jerkin', 'glare']; // a force buy to break the streak
+  else if (a.money >= 2000 && m.streak[a.team] >= 1) want = [a.id % TEAM_SIZE % 2 ? 'cicada' : 'brine', 'jerkin', 'glare']; // a force buy to break the streak
   for (const item of want) if (item) buy(state, a, item); // otherwise: save for a full buy next round
 }

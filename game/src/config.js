@@ -18,7 +18,7 @@ export const ROUND = {
 };
 
 export const ECON = {
-  start: 800, cap: 16000, win: 3250, lose: 1400, loseStep: 500, loseMax: 3400,
+  start: 800, cap: 16000, win: 3250, lose: 1900, loseStep: 500, loseMax: 3400,
   plantLoss: 800, plantSelf: 300, douseSelf: 300,
 };
 
