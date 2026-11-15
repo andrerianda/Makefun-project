@@ -1,0 +1,29 @@
+# --- Secrets: never commit ---
+.env
+.env.*
+!.env.example
+*keypair*.json
+id.json
+*.pem
+*.key
+.secrets/
+secrets/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# --- Node ---
+node_modules/
+
+# --- OS / editor ---
+.DS_Store
+*.swp
+.idea/
+.vscode/
