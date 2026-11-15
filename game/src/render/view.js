@@ -28,7 +28,7 @@ export function createView(host, state, kit) {
   const tex = makeTextures();
   buildSky(scene);
   const town = buildLevel(scene, tex, kit);
-  const actors = buildActors(scene, state, tex, kit), effects = buildEffects(scene, tex, actors, camera), gun = buildViewmodel(tex, kit);
+  const actors = buildActors(scene, state, tex, kit), effects = buildEffects(scene, tex, actors, camera, kit), gun = buildViewmodel(tex, kit);
   let cursor = state.events.seq, fov = FOV, shake = 0, aspect = 1;
 
   const resize = () => {

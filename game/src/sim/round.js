@@ -25,6 +25,7 @@ export function startRound(state) {
   m.round++; m.phase = 'freeze'; m.t = ROUND.freeze; m.last = null;
   state.actors.forEach((a, i) => spawn(state, a, i % TEAM_SIZE));
   for (const n of state.nades) n.live = false;
+  for (const d of state.drops) d.live = false;
   state.viewId = 0;
   // The keg goes to a bot on the attacking side; the player may take it over if it is dropped.
   const base = m.attackers * TEAM_SIZE;

@@ -5,7 +5,7 @@ import { makeRng } from './rng.js';
 
 export const ATT = 0, DEF = 1; // a side: attacking or defending this half
 export const TEAM_SIZE = 5;
-const EVENTS = 256, SOUNDS = 32, NADE_POOL = 12;
+const EVENTS = 256, SOUNDS = 32, NADE_POOL = 12, DROPS = 8;
 
 function makeActor(id) {
   const team = id < TEAM_SIZE ? 0 : 1;
@@ -35,12 +35,14 @@ export function createState(seed = 1, watch = false) {
   for (let i = 0; i < SOUNDS; i++) sounds.push({ x: 0, z: 0, radius: 0, team: -1, t: -9, kind: '' });
   const nades = [];
   for (let i = 0; i < NADE_POOL; i++) nades.push({ live: false, type: 0, owner: -1, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, fuse: 0, cloud: 0, rest: false });
+  const drops = []; // rifles the dead let fall, for anyone without one to take
+  for (let i = 0; i < DROPS; i++) drops.push({ live: false, id: '', x: 0, z: 0, mag: 0, res: 0 });
   return {
     tick: 0, time: 0, rng: makeRng(seed), actors, viewId: 0, third: false, nades, // whose eyes, and from over the shoulder or not
     match: { round: 0, score: [0, 0], attackers: 0, phase: 'freeze', t: 0, streak: [0, 0], over: false, champion: -1, last: null },
     keg: { state: 'carried', carrier: -1, x: 0, y: 0, z: 0, fuse: 0, site: '', douser: -1, beep: 0 },
     coach: [null, null],
-    events: { list, seq: 0 }, sounds, soundSeq: 0,
+    events: { list, seq: 0 }, sounds, soundSeq: 0, drops, dropSeq: 0,
   };
 }
 

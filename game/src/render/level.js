@@ -110,6 +110,12 @@ export function buildLevel(scene, tex, kit) {
     return b.root;
   };
 
+  // Painted site letters and street names, so the map explains itself: text, cell, height up the wall,
+  // quarter turns, letter height. Windows keep clear of them.
+  const SIGNS = [['A', 2.52, 5, 3.2, 1, 2.6], ['FISH MARKET', 2.52, 8, 4.6, 1, 0.7], ['B', 36.48, 5, 3.2, -1, 2.6], ['BOATHOUSE', 36.48, 8, 4.4, -1, 0.7],
+    ['BELL GATE', 19.5, 11.52, 3.4, 0, 0.6], ['NET ROW', 2.52, 17, 3.4, 1, 0.6], ['QUAY', 31.48, 17, 3.4, -1, 0.6]];
+  const signed = (x, z) => SIGNS.some((s) => Math.hypot(x - cellX(s[1]), z - cellZ(s[2])) < 1 + s[5] * s[0].length * 0.35);
+
   // Ground: one square per cell, its paving chosen by where it is; a lamp where a lane meets a wall.
   let lamps = 0;
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
@@ -137,7 +143,7 @@ export function buildLevel(scene, tex, kit) {
         const lo = alongX ? b.x0 : b.z0, hi = alongX ? b.x1 : b.z1, yaw = Math.atan2(n[0], n[2]);
         for (let s = lo + 1.2; s < hi - 0.5; s += 2.4) {
           const x = alongX ? s : edge, z = alongX ? edge : s, q = hash(x, z), cell = q % 6, u = (cell % 4) / 4, v = cell < 4 ? 0.5 : 0;
-          if (!openAir(x + n[0], 0, z + n[2])) continue;
+          if (!openAir(x + n[0], 0, z + n[2]) || signed(x, z)) continue;
           trim.decal(x, 3.1, z, r, n, 1.5, 1.7, u, v, u + 0.25, v + 0.5);
           if (b.y1 > 7.6) {
             trim.decal(x, 5.7, z, r, n, 1.5, 1.7, ((q >>> 4) % 4) / 4, 0.5, ((q >>> 4) % 4) / 4 + 0.25, 1);
@@ -209,14 +215,10 @@ export function buildLevel(scene, tex, kit) {
   for (let r = 12; r < 24; r += 3) prop('bollard', cellX(36), 1.1, cellZ(r));
   const afloat = [prop('boat', cellX(38.4), 0, cellZ(13.5), 0.3), prop('rowboat', cellX(37.9), 0, cellZ(18.5), 1.3), prop('boat', cellX(39.3), 0, cellZ(22), -0.5)];
 
-  // Painted site letters and street names, so the map explains itself.
-  const sign = (text, c, r, y, yaw, height, color = 'rgba(250,240,220,0.9)') => {
-    const map = label(text, color);
-    add(new THREE.PlaneGeometry(height * map.userData.aspect, height), new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false }), cellX(c), y, cellZ(r)).rotation.y = yaw;
-  };
-  sign('A', 2.52, 5, 3.2, Math.PI / 2, 2.6, 'rgba(242,162,58,0.95)'); sign('FISH MARKET', 2.52, 8, 4.6, Math.PI / 2, 0.7);
-  sign('B', 36.48, 5, 3.2, -Math.PI / 2, 2.6, 'rgba(242,162,58,0.95)'); sign('BOATHOUSE', 36.48, 8, 4.4, -Math.PI / 2, 0.7);
-  sign('BELL GATE', 19.5, 11.52, 3.4, 0, 0.6); sign('NET ROW', 2.52, 17, 3.4, Math.PI / 2, 0.6); sign('QUAY', 31.48, 17, 3.4, -Math.PI / 2, 0.6);
+  for (const [text, c, r, y, turn, height] of SIGNS) {
+    const map = label(text, height > 1 ? 'rgba(242,162,58,0.95)' : 'rgba(250,240,220,0.9)');
+    add(new THREE.PlaneGeometry(height * map.userData.aspect, height), new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false }), cellX(c), y, cellZ(r)).rotation.y = turn * Math.PI / 2;
+  }
 
   return (time) => afloat.forEach((boat, i) => { boat.position.y = -0.82 + Math.sin(time * 0.9 + i * 2) * 0.07; boat.rotation.z = Math.sin(time * 0.7 + i) * 0.05; });
 }

@@ -7,7 +7,7 @@ import { overShoulder } from '../sim/state.js';
 const TRACERS = 36, MARKS = 96, PUFFS = 48, CLOUD = 9, BLASTS = 4;
 const NADE_TINT = ['#4c6b3a', '#e8e2d0', '#8fa3b0'];
 
-export function buildEffects(scene, tex, actors, camera) {
+export function buildEffects(scene, tex, actors, camera, kit) {
   const pool = (n, make) => { const list = []; for (let i = 0; i < n; i++) { const o = make(i); o.visible = false; scene.add(o); list.push(o); } return list; };
   let tracerI = 0, markI = 0, puffI = 0, blastI = 0;
   const from = new THREE.Vector3(), to = new THREE.Vector3();
@@ -21,6 +21,7 @@ export function buildEffects(scene, tex, actors, camera) {
   const blasts = pool(BLASTS, () => sprite(THREE.AdditiveBlending));
   const shells = pool(NADES.length * 4, (i) => new THREE.Mesh(new THREE.IcosahedronGeometry(0.07, 0), new THREE.MeshLambertMaterial({ color: NADE_TINT[i % 3] })));
   const clouds = [];
+  const fallen = pool(8, () => new THREE.Group()), steel = new THREE.MeshLambertMaterial({ vertexColors: true }); // dropped rifles
   const flare = new THREE.PointLight('#ffb060', 0, 22, 1.5);
   scene.add(flare);
 
@@ -103,6 +104,18 @@ export function buildEffects(scene, tex, actors, camera) {
           s.position.set(n.x + Math.cos(a) * r, 1.5 + (j % 4) * 0.55 + Math.sin(state.time * 0.5 + j) * 0.12, n.z + Math.sin(a) * r);
           s.scale.setScalar(4.6 + (j % 3) * 0.7); s.material.opacity = fade * 0.92; s.material.rotation = a * 0.3;
         });
+      });
+
+      state.drops.forEach((d, i) => {
+        const g = fallen[i];
+        g.visible = d.live;
+        if (!d.live) return;
+        g.position.set(d.x, 0.07, d.z);
+        if (g.name === d.id) return;
+        g.name = d.id; g.clear(); // a different rifle fell here: lay its model on its side
+        const gun = kit.build(`fp_${d.id}`, steel).root;
+        gun.position.set(0, 0, 0); gun.rotation.set(0, i * 2.4, 1.45);
+        g.add(gun);
       });
 
       const k = state.keg;

@@ -2,6 +2,7 @@
 import { MOVE } from '../config.js';
 import { emit, noise } from './state.js';
 import { rewardKill } from './economy.js';
+import { dropWeapon } from './loadout.js';
 
 export const HEAD = 1, WALLBANG = 2; // kill flags, for the feed
 
@@ -14,6 +15,7 @@ export function hurt(state, victim, attackerId, dmg, cause, flags = 0) {
   emit(state, 'hurt', victim.id, attackerId, victim.x, victim.y, victim.z, dmg, flags & HEAD ? 'head' : 'body');
   if (victim.hp > 0) return false;
   victim.hp = 0; victim.alive = false; victim.deaths++; victim.deadT = 0; victim.use = 0; victim.scoped = false;
+  dropWeapon(state, victim);
   const killer = attackerId >= 0 ? state.actors[attackerId] : null;
   if (killer && killer.team !== victim.team) { killer.kills++; rewardKill(killer, cause); }
   emit(state, 'kill', attackerId, victim.id, victim.x, victim.y, victim.z, flags, cause);

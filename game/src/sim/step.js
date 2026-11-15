@@ -6,6 +6,7 @@ import { crowd, stepMovement } from './movement.js';
 import { stepWeapon } from './weapons.js';
 import { stepNades } from './grenades.js';
 import { stepKeg } from './keg.js';
+import { stepDrops } from './loadout.js';
 import { buy } from './economy.js';
 import { startMatch, stepRound } from './round.js';
 
@@ -42,6 +43,7 @@ export function stepGame(state, dt) {
   }
   stepNades(state, dt);
   stepKeg(state, dt);
+  stepDrops(state);
   stepRound(state, dt);
   followTheLiving(state);
 }

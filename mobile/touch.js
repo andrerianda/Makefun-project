@@ -64,6 +64,11 @@ button('USE', 'right:300px;bottom:150px', ...hold('KeyE'));
 button('BUY', 'right:60px;top:84px', () => tapKey('KeyB', 'b'));
 button('SCORE', 'right:150px;top:84px', ...hold('Tab'));
 button('PAUSE', 'right:250px;top:84px', () => setPlaying(false));
+button('CAM', 'right:350px;top:84px', () => tapKey('KeyV', 'v'));
+// Radio orders: the crew to site A, to site B, or on me.
+button('GO A', 'right:250px;top:150px', () => tapKey('KeyZ', 'z'));
+button('GO B', 'right:150px;top:150px', () => tapKey('KeyX', 'x'));
+button('ON ME', 'right:60px;top:150px', () => tapKey('KeyG', 'g'));
 ['1', '2', '3', '4'].forEach((n, i) => button(n, `left:${350 + i * 86}px;bottom:20px`, () => tapKey(`Digit${n}`, n)));
 
 // The buy counter's rows answer a tap with the key printed on them.
