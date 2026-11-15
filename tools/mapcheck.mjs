@@ -11,9 +11,9 @@ const ok = (pt) => walk[rowOf(pt.z) * COLS + colOf(pt.x)] === 1;
 let bad = 0;
 const check = (name, pt) => { if (!ok(pt)) { bad++; console.log('NOT WALKABLE', name, 'cell', colOf(pt.x), rowOf(pt.z), JSON.stringify(tile(colOf(pt.x), rowOf(pt.z)))); } };
 for (const k of ['A', 'B', 'M']) HOLDS[k].forEach((h, i) => { check(`HOLD ${k}${i}`, h); const see = sightClear(h.x, 1.5, h.z, h.wx, 1.2, h.wz); if (!see) console.log(`  hold ${k}${i} cannot see its watch point (may be intended cover)`); });
-for (const k of ['A', 'B']) { check(`STAGE ${k}.main`, STAGE[k].main); check(`STAGE ${k}.link`, STAGE[k].link); check(`STAGE ${k}.lurk`, STAGE[k].lurk); }
+for (const k of ['A', 'B']) { check(`STAGE ${k}.main`, STAGE[k].main); check(`STAGE ${k}.lurk`, STAGE[k].lurk); }
 check('STAGE mid', STAGE.mid);
-for (const k of ['A', 'B', 'M']) SMOKES[k].forEach((s, i) => check(`SMOKE ${k}${i}`, s));
+for (const k of ['A', 'B']) SMOKES[k].forEach((s, i) => check(`SMOKE ${k}${i}`, s));
 const att = SPAWN[0][3], def = SPAWN[1][3];
 const secs = (d) => (d / 5.6).toFixed(1) + 's';
 console.log('boxes', boxes.length, '| walkable cells', walk.reduce((a, b) => a + b, 0));

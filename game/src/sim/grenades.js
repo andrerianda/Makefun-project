@@ -11,7 +11,7 @@ export function throwNade(state, a, type) {
   if (!n) return;
   const cp = Math.cos(a.pitch), dx = -Math.sin(a.yaw) * cp, dy = Math.sin(a.pitch), dz = -Math.cos(a.yaw) * cp;
   n.live = true; n.type = type; n.owner = a.id; n.fuse = NADES[type].fuse; n.cloud = 0; n.rest = false;
-  n.x = a.x + dx * 0.5; n.y = a.y + eyeHeight(a) - 0.1 + dy * 0.5; n.z = a.z + dz * 0.5;
+  n.x = a.x + dx * 0.3; n.y = a.y + eyeHeight(a) - 0.1 + dy * 0.3; n.z = a.z + dz * 0.3; // within the thrower's body, never a wall
   n.vx = dx * THROW + a.vx * 0.5; n.vy = dy * THROW + 2.4; n.vz = dz * THROW + a.vz * 0.5;
   emit(state, 'throw', a.id, -1, n.x, n.y, n.z, type);
 }

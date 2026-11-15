@@ -12,7 +12,6 @@ export function giveKeg(state, a) {
 function dropKeg(state, a) {
   const k = state.keg;
   a.hasKeg = false; k.state = 'dropped'; k.carrier = -1; k.x = a.x; k.y = 0; k.z = a.z;
-  emit(state, 'drop', a.id, -1, a.x, 0, a.z);
 }
 
 /** True when this body may start (or keep) planting: it holds the keg, stands on a site, and the round is live. */

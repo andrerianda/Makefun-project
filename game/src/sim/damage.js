@@ -11,7 +11,6 @@ export function hurt(state, victim, attackerId, dmg, cause, flags = 0) {
   if (!victim.alive || dmg <= 0) return false;
   victim.hp -= dmg;
   victim.slow = MOVE.tagTime;
-  victim.hurtBy = attackerId;
   emit(state, 'hurt', victim.id, attackerId, victim.x, victim.y, victim.z, dmg, flags & HEAD ? 'head' : 'body');
   if (victim.hp > 0) return false;
   victim.hp = 0; victim.alive = false; victim.deaths++; victim.deadT = 0; victim.use = 0; victim.scoped = false;

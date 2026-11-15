@@ -51,6 +51,7 @@ export function sightClear(x0, y0, z0, x1, y1, z1) {
 
 /** The first box a standing volume (feet at x,y,z; half-width r; height h) overlaps, or null. */
 function overlap(x, y, z, r, h) {
+  r -= 1e-4; // pushed out to a face is not inside it
   for (let i = 0; i < boxes.length; i++) {
     const b = boxes[i];
     if (x + r > b.x0 && x - r < b.x1 && z + r > b.z0 && z - r < b.z1 && y < b.y1 - 1e-4 && y + h > b.y0) return b;

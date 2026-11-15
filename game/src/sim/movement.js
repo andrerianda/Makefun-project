@@ -58,7 +58,7 @@ export function stepMovement(state, a, dt) {
     const add = wish - (a.vx * wx + a.vz * wz);
     if (add > 0) { const k = Math.min(MOVE.airAccel * dt, add); a.vx += wx * k; a.vz += wz * k; }
   }
-  if (!a.ground) a.vy -= MOVE.gravity * dt;
+  a.vy -= MOVE.gravity * dt; // grounded too: it settles back each step
   moveBody(a, dt);
 
   const speed = Math.hypot(a.vx, a.vz);

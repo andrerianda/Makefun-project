@@ -1,7 +1,7 @@
 // The camera and the frame. Reads the simulation, never writes it: the world is drawn from interpolated
 // positions between the last two fixed steps, then the weapon is drawn on top.
 import * as THREE from 'three';
-import { WEAPONS } from '../config.js';
+import { weaponOf } from '../sim/loadout.js';
 import { drain, sideOf, overShoulder } from '../sim/state.js';
 import { eyeHeight, rayWorld } from '../sim/world.js';
 import { makeTextures } from './textures.js';
@@ -58,7 +58,7 @@ export function createView(host, state, kit, sharp) {
       const a = st.actors[st.viewId];
       cursor = drain(st, cursor, onEvent, 0.15);
       shake = Math.max(0, shake - dt * 3);
-      const w = a.slot === 3 ? null : WEAPONS[a.slots[a.slot]];
+      const w = weaponOf(a);
       fov += ((a.scoped && w && w.scopeFov ? w.scopeFov : FOV) - fov) * Math.min(1, dt * 14);
       camera.fov = fov; camera.aspect = aspect; camera.updateProjectionMatrix();
       const jitter = shake * 0.02;

@@ -1,7 +1,7 @@
 // CAMPANILE: a 5v5 round-based tactical shooter in a pastel harbour town, on three.js.
 //
 // How the code is laid out (one job per module):
-//   config.js        every number: movement, rounds, economy, the armoury, the palette
+//   config.js        the tables: movement, rounds, economy, the armoury, the palette
 //   sim/             the game itself, no DOM and no three.js: it runs headless in Node
 //     state.js         the one state object, its event ring and noises
 //     map.js           Porto Vesper as text: lanes, sites, posts, smoke targets

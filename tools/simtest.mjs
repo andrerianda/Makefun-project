@@ -17,7 +17,7 @@ for (const seed of seeds) {
       else if (e.type === 'planted') plants++;
       else if (e.type === 'throw') nadesN++;
       else if (e.type === 'radio' && radio.length < 14) radio.push(`${s.actors[e.a].name}: ${e.s}`);
-      else if (e.type === 'round' && !['freeze', 'live', 'final'].includes(e.s)) { rounds.push(`${e.s}${s.match.last.side ? 'D' : 'A'}@${Math.round(s.time)}s`); reasons[e.s] = (reasons[e.s] || 0) + 1; TOTALS[s.match.last.side ? 'D' : 'A']++; TOTALS.why[e.s + (s.match.last.side ? 'D' : 'A')] = (TOTALS.why[e.s + (s.match.last.side ? 'D' : 'A')] || 0) + 1; }
+      else if (e.type === 'round' && !['freeze', 'live', 'final'].includes(e.s)) { rounds.push(`${e.s}${(e.n === s.match.attackers ? 'A' : 'D')}@${Math.round(s.time)}s`); reasons[e.s] = (reasons[e.s] || 0) + 1; TOTALS[(e.n === s.match.attackers ? 'A' : 'D')]++; TOTALS.why[e.s + ((e.n === s.match.attackers ? 'A' : 'D'))] = (TOTALS.why[e.s + ((e.n === s.match.attackers ? 'A' : 'D'))] || 0) + 1; }
     });
   }
   console.log(`seed ${seed}: ${s.match.round} rounds, score ${s.match.score.join('-')}, ${Math.round(s.time)}s game time in ${Date.now() - t0}ms wall, ticks/s ${(s.tick / ((Date.now() - t0) / 1000)).toFixed(0)}`);

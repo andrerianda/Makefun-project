@@ -1,5 +1,5 @@
 // Everything that flashes, drifts or lingers: tracers, bullet marks, dust, smoke clouds, blasts and the keg.
-// All of it comes from fixed pools made at load; a firefight allocates nothing.
+// All of it comes from fixed pools, made at load or on first use; a firefight allocates nothing.
 import * as THREE from 'three';
 import { NADES } from '../config.js';
 import { DROPS, overShoulder } from '../sim/state.js';
@@ -106,7 +106,7 @@ export function buildEffects(scene, tex, actors, camera, kit) {
         g.position.set(d.x, 0.07, d.z);
         if (g.name === d.id) continue;
         g.name = d.id; g.clear(); // a different rifle fell here: lay its model on its side
-        const gun = kit.build(`fp_${d.id}`, steel).root;
+        const gun = g.userData[d.id] ||= kit.build(`fp_${d.id}`, steel).root;
         gun.position.set(0, 0, 0); gun.rotation.set(0, i * 2.4, 1.45);
         g.add(gun);
       }

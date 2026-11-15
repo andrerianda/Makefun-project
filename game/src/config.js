@@ -1,4 +1,4 @@
-// Every tunable of CAMPANILE in one place: timing, movement, economy, the armoury and the palette.
+// CAMPANILE's tables in one place: timing, movement, economy, the armoury and the palette.
 // The simulation reads these tables; nothing here touches the DOM or three.js.
 
 export const TICK = 1 / 60; // fixed simulation step, seconds
@@ -52,7 +52,7 @@ export const GEAR = {
   kit: { name: 'Douse Kit', hint: 'halves the douse', price: 400 },
 };
 
-// The buy menu's rows, in order; keys 1-9 and 0 pick them.
+// The buy menu's rows, in order; keys 1-9, 0, Z, X and V pick them.
 export const SHOP = ['sparrow', 'mastiff', 'cicada', 'brine', 'corsa', 'tramont', 'meridian', 'jerkin', 'cap', 'kit', 'crackler', 'glare', 'seafog'];
 
 // A side is a job and a uniform: Smugglers attack with the keg, Wardens defend the sites. The two crews swap

@@ -4,7 +4,7 @@
 // furniture comes from the model kit and is placed by rule: what stands on a cell, what hangs on a wall.
 import * as THREE from 'three';
 import { PALETTE } from '../config.js';
-import { boxes, COLS, ROWS, CELL, cellX, cellZ, tile, zoneAt } from '../sim/map.js';
+import { boxes, COLS, ROWS, CELL, cellX, cellZ, colOf, rowOf, tile, zoneAt } from '../sim/map.js';
 import { rayWorld } from '../sim/world.js';
 import { label } from './textures.js';
 
@@ -100,7 +100,7 @@ export function buildLevel(scene, tex, kit) {
   const crate = new Batch(lit(tex.crate, 2)), trim = new Batch(lit(tex.trim, 0, { emissive: '#ffffff', emissiveMap: tex.glow })); // lit panes glow
   const stucco = P.stucco.map(colour), stoneTint = colour(P.stone), crateTint = colour(P.crate), plankTint = colour('#c79a6a'), woodTint = colour('#7a5334');
   const street = colour('#c2b2a2'), market = colour('#d9c8b0');
-  const openAir = (x, y, z) => y > 5.9 || tile(Math.floor(x / CELL + COLS / 2), Math.floor(z / CELL + ROWS / 2)) !== '#';
+  const openAir = (x, y, z) => y > 5.9 || tile(colOf(x), rowOf(z)) !== '#';
   const paint = new THREE.MeshLambertMaterial({ vertexColors: true }), glow = new THREE.MeshBasicMaterial({ color: '#ffe2b0', fog: false });
   const halos = [], at = new THREE.Vector3(); // where the lamps hang, for the haze around them
   const still = { position: [], normal: [], color: [] }; // every prop that never moves, gathered into one mesh

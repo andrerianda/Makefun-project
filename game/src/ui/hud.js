@@ -1,6 +1,6 @@
 // The heads-up display: reads the state every frame and writes to the DOM only what changed.
 import { NADES, ROUND, SIDES, WEAPONS } from '../config.js';
-import { ATT, drain, sideOf, sideOfTeam } from '../sim/state.js';
+import { ATT, drain, sideOf, sideOfTeam, countAlive } from '../sim/state.js';
 import { zoneAt } from '../sim/map.js';
 import { inaccuracy } from '../sim/weapons.js';
 import { weaponOf } from '../sim/loadout.js';
@@ -12,7 +12,7 @@ import { createShop, createBoard } from './panels.js';
 const $ = (q) => document.querySelector(q);
 const REASONS = { wiped: 'the other crew is down', time: 'the clock ran out', doused: 'the keg is doused', blast: 'the keg went up' };
 const clockText = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; // from whole seconds
-const percent = (v) => `${v}%`;
+const percent = (v) => `${v}%`, turn = (v) => `rotate(${v / 50}rad)`;
 const roundText = (n) => `ROUND ${n} / ${ROUND.max}`;
 
 export function createHud(state) {
@@ -80,8 +80,7 @@ export function createHud(state) {
         const s = sides[t], side = SIDES[sideOfTeam(st, t)];
         if (s.side !== side) { s.side = side; s.name.textContent = side.name; s.root.style.color = side.color; }
         put(s.score, m.score[t]);
-        let alive = 0;
-        for (const o of st.actors) if (o.team === t && o.alive) alive++;
+        const alive = countAlive(st, t);
         if (s.alive !== alive) { s.alive = alive; for (let i = 0; i < 5; i++) s.pips[i].className = i < alive ? 'up' : ''; }
       }
       put(el.time, Math.max(0, Math.floor(m.t)), 'textContent', clockText);
@@ -113,7 +112,7 @@ export function createHud(state) {
       // An arc on the ring around the crosshair points at whoever just hit you.
       fromT = Math.max(0, fromT - dt);
       put(el.from, Math.min(1, Math.round(fromT * 10) / 5), 'opacity');
-      if (fromT > 0) el.from.style.transform = `rotate(${(a.yaw - Math.atan2(a.x - fromX, a.z - fromZ)).toFixed(2)}rad)`;
+      if (fromT > 0) put(el.from, Math.round((a.yaw - Math.atan2(a.x - fromX, a.z - fromZ)) * 50), 'transform', turn);
       put(el.blind, Math.min(1, Math.round(a.blind * 16) / 20), 'opacity');
       if (st.time > bannerEnd) put(el.banner, 0, 'opacity');
 
@@ -127,7 +126,7 @@ export function createHud(state) {
       put(el.prompt, prompt ? 'block' : 'none', 'display');
       put(el.prompt.firstElementChild, prompt);
       put(el.bar, progress >= 0 ? 'block' : 'none', 'display');
-      if (progress >= 0) el.bar.firstElementChild.style.width = percent(Math.min(100, progress * 100));
+      put(el.bar.firstElementChild, Math.min(100, Math.round(progress * 100)), 'width', percent);
       put(el.watching, me.alive ? '' : `${recap}${a !== me ? `WATCHING ${a.name.toUpperCase()}` : ''}`);
       radar.draw(st);
       shop.update(st); board.update(st);

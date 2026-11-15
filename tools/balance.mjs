@@ -20,7 +20,7 @@ for (let seed = from; seed < from + N; seed++) {
       if (e.type === 'planted') plants++;
       else if (e.type === 'kill' && !fk && e.a >= 0) { fk = true; firstKill[s.actors[e.a].team === s.match.attackers ? 0 : 1]++; }
       else if (e.type === 'round' && e.s === 'freeze') fk = false;
-      else if (e.type === 'round' && !['freeze', 'live', 'final'].includes(e.s)) { const L = s.match.last; win[L.team][L.side]++; half[s.match.round > 6 ? 1 : 0][L.side]++; byRound[s.match.round][L.side]++; why[e.s + 'AD'[L.side]] = (why[e.s + 'AD'[L.side]] || 0) + 1; rounds++; }
+      else if (e.type === 'round' && !['freeze', 'live', 'final'].includes(e.s)) { const L = { team: e.n, side: e.n === s.match.attackers ? 0 : 1 }; win[L.team][L.side]++; half[s.match.round > 6 ? 1 : 0][L.side]++; byRound[s.match.round][L.side]++; why[e.s + 'AD'[L.side]] = (why[e.s + 'AD'[L.side]] || 0) + 1; rounds++; }
     });
   }
   time += s.time;

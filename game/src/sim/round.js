@@ -1,4 +1,4 @@
-// The match: freeze, live, lit, over. Who wins a round and why, the half-time swap, and the reset between rounds.
+// The match: freeze, live, planted, over, final. Who wins a round and why, the half-time swap, and the reset between rounds.
 import { ECON, ROUND } from '../config.js';
 import { ATT, DEF, TEAM_SIZE, emit, sideOf, countAlive } from './state.js';
 import { SPAWN, STAGE } from './map.js';
@@ -22,7 +22,7 @@ function spawn(state, a, index) {
 
 function startRound(state) {
   const m = state.match;
-  m.round++; m.phase = 'freeze'; m.t = ROUND.freeze; m.last = null;
+  m.round++; m.phase = 'freeze'; m.t = ROUND.freeze;
   state.actors.forEach((a, i) => spawn(state, a, i % TEAM_SIZE));
   for (const n of state.nades) n.live = false;
   for (const d of state.drops) d.live = false;
@@ -48,7 +48,7 @@ function endRound(state, side, reason) {
   const m = state.match, team = teamOnSide(state, side);
   m.score[team]++;
   payRound(state, team, state.keg.state !== 'carried' && state.keg.state !== 'dropped');
-  m.phase = 'over'; m.t = ROUND.post; m.last = { team, side, reason };
+  m.phase = 'over'; m.t = ROUND.post;
   if (m.score[team] >= ROUND.toWin || m.round >= ROUND.max) { m.over = true; m.champion = m.score[0] === m.score[1] ? -1 : m.score[0] > m.score[1] ? 0 : 1; }
   emit(state, 'round', -1, -1, 0, 0, 0, team, reason);
 }

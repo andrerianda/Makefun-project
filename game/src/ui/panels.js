@@ -14,16 +14,18 @@ export function createShop(el) {
     return `<div class="row" data-id="${id}"><kbd>${SHOP_KEYS[i].toUpperCase()}</kbd><span>${d.name} <em>${d.hint || d.kind}</em></span><b></b></div>`;
   }).join('');
   const cells = [...rows.children];
-  let open = false;
+  let open = false, cash = -1;
   return {
     get open() { return open; },
-    toggle(state, on = !open) { open = on && shopOpen(state, state.actors[0]); el.style.display = open ? 'block' : 'none'; },
+    toggle(state, on = !open) { cash = -1; open = on && shopOpen(state, state.actors[0]); el.style.display = open ? 'block' : 'none'; },
     /** The item a key buys, or null. */
     pick: (key) => SHOP[SHOP_KEYS.indexOf(key.toLowerCase())] || null,
     update(state) {
       const a = state.actors[0];
       if (!open) return;
       if (!shopOpen(state, a)) { this.toggle(state, false); return; }
+      if (a.money === cash) return; // every buy moves the cash: redraw only then
+      cash = a.money;
       for (const row of cells) {
         const id = row.dataset.id, price = priceOf(state, a, id), have = owns(a, id);
         row.className = `row${have ? ' have' : price < 0 || price > a.money ? ' poor' : ''}`;
@@ -34,11 +36,11 @@ export function createShop(el) {
 }
 
 export function createBoard(el) {
-  let open = false;
+  let open = false, beat = 0;
   return {
-    show(on) { open = on; el.style.display = on ? 'block' : 'none'; },
+    show(on) { open = on; beat = 0; el.style.display = on ? 'block' : 'none'; },
     update(state) {
-      if (!open) return;
+      if (!open || beat++ % 20) return; // three times a second, not every frame
       const m = state.match;
       el.innerHTML = [0, 1].map((team) => {
         const side = sideOfTeam(state, team);

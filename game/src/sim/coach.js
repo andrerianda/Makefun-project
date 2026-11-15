@@ -7,7 +7,7 @@ import { HOLDS, STAGE, SMOKES, SITES, zoneAt } from './map.js';
 const OTHER = { A: 'B', B: 'A' };
 const SITE_NAME = { A: 'Fish Market', B: 'Boathouse' };
 const ZONE_SITE = { 'Fish Market': 'A', 'Net Row': 'A', "Cooper's Cut": 'A', Boathouse: 'B', Quay: 'B', Chandlery: 'B' };
-// Where each of the five stands before the hit, per play: 'main' door, the 'link' via Bell Square, a 'lurk' alley.
+// Where each of the five waits before the hit, per play: the 'main' door, 'mid' lane, a 'lurk' alley, a 'decoy' at the other site.
 const PLAYS = {
   default: ['main', 'main', 'mid', 'lurk', 'decoy'],
   split: ['main', 'main', 'main', 'mid', 'mid'],
@@ -30,6 +30,8 @@ function post(j, p, hold, site) {
   j.x = p.x; j.z = p.z; j.wx = p.wx === undefined ? p.x : p.wx; j.wz = p.wz === undefined ? p.z : p.wz;
   j.hold = hold; j.site = site; j.nade = -1; j.quiet = false;
 }
+
+const holdSite = (c, site) => c.jobs.forEach((j, i) => post(j, HOLDS[site][i % HOLDS[site].length], true, site));
 
 /** A line on the team radio, at most one every few seconds so the feed stays readable. */
 function radio(state, c, a, text, force = false) {
@@ -102,10 +104,8 @@ export function report(state, a, enemy) {
 export function order(state, c, a, call) {
   if (state.keg.state === 'planted') return;
   if (call !== 'me' && c.side === ATT) { target(state, c, call); hit(state, c); return; }
-  c.jobs.forEach((j, i) => {
-    if (call !== 'me') post(j, HOLDS[call][i % HOLDS[call].length], true, call);
-    else { post(j, a, false, j.site); j.x += WEDGE[i][0]; j.z += WEDGE[i][1]; }
-  });
+  if (call !== 'me') holdSite(c, call);
+  else c.jobs.forEach((j, i) => { post(j, a, false, j.site); j.x += WEDGE[i][0]; j.z += WEDGE[i][1]; });
   radio(state, c, a, call === 'me' ? 'On me' : `Everyone ${SITE_NAME[call]}`, true);
 }
 
@@ -135,7 +135,7 @@ export function stepCoach(state, c, dt) {
       post(c.jobs[c.fetcher % TEAM_SIZE], HOLDS[c.site][0], true, c.site); c.fetcher = -1;
     } else if (k.state === 'planted' && !c.lit) { // hold the site until the fuse runs out
       c.lit = true; c.site = k.site;
-      c.jobs.forEach((j, i) => post(j, HOLDS[k.site][i % HOLDS[k.site].length], true, k.site));
+      holdSite(c, k.site);
       radio(state, c, speaker(state, c), `Keg is lit, hold ${SITE_NAME[k.site]}`, true);
     }
     return;
@@ -143,7 +143,7 @@ export function stepCoach(state, c, dt) {
   if (k.state === 'planted') { // retake: one douses, the rest cover the doors
     if (!c.lit) {
       c.lit = true;
-      c.jobs.forEach((j, i) => post(j, HOLDS[k.site][i % HOLDS[k.site].length], true, k.site));
+      holdSite(c, k.site);
       radio(state, c, speaker(state, c), `They lit it at ${SITE_NAME[k.site]}, retake`, true);
     }
     const a = nearestBot(state, c, k.x, k.z, true);

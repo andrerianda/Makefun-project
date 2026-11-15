@@ -114,7 +114,7 @@ const box = (x0, y0, z0, x1, y1, z1, kind, soft, style = 0) => boxes.push({ x0, 
   }
 })();
 
-/** 'A', 'B' or null: the plant zone under a point (the lettered cells and their ring). */
+/** 'A', 'B' or null: the plant zone under a point (the lettered cells). */
 export function siteAt(x, z) {
   const t = tile(colOf(x), rowOf(z));
   return t === 'A' || t === 'B' ? t : null;
@@ -141,11 +141,11 @@ export const HOLDS = {
   B: [hold(28.4, 8.6, 33.5, 11), hold(35.6, 3, 26, 7.5), hold(28, 4.8, 33.5, 11), hold(35.6, 8.4, 26, 7.5)],
   M: [hold(15.4, 9, 19.5, 11), hold(23.2, 9, 19.5, 11), hold(17, 5.6, 19.5, 11)],
 };
-/** Where attackers gather before a hit: the main door, and the link from Bell Square. */
+/** Where attackers gather before a hit: the main door, a lurk alley, and the middle of Bell Lane. */
 export const STAGE = {
-  A: { main: at(4.4, 13.2), link: at(15.2, 7.5), lurk: at(12, 16.5) },
-  B: { main: at(33.5, 13.2), link: at(23.8, 7.5), lurk: at(27, 19.5) },
+  A: { main: at(4.4, 13.2), lurk: at(12, 16.5) },
+  B: { main: at(33.5, 13.2), lurk: at(27, 19.5) },
   mid: at(19.4, 13.4),
 };
 /** Smoke targets that cut the defenders' rotations into each site. */
-export const SMOKES = { A: [at(12.2, 2.5), at(12.2, 7.5)], B: [at(26.8, 2.5), at(26.8, 7.5)], M: [at(19.5, 5)] };
+export const SMOKES = { A: [at(12.2, 2.5), at(12.2, 7.5)], B: [at(26.8, 2.5), at(26.8, 7.5)] };

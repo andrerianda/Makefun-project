@@ -66,7 +66,7 @@ function pull(state, a, w, id) {
     if (a.res[a.slot] > 0) beginReload(state, a, w); else { a.cool = 0.3; emit(state, 'empty', a.id, -1, a.x, a.y, a.z); }
     return;
   }
-  a.mag[a.slot]--; a.cool = 60 / w.rpm;
+  a.mag[a.slot]--; a.cool += 60 / w.rpm; // the remainder carries: the rate holds
   const cone = inaccuracy(a, w);
   for (let i = 0; i < (w.pellets || 1); i++) fireBullet(state, a, w, id, cone);
   // Recoil: the first rounds climb hard, then the pattern walks sideways; bloom widens the cone while you hold.
@@ -80,7 +80,7 @@ function pull(state, a, w, id) {
 
 export function stepWeapon(state, a, dt) {
   const c = a.cmd;
-  a.cool = Math.max(0, a.cool - dt);
+  if (a.cool > 0) a.cool -= dt;
   a.sinceShot += dt;
   if (a.sinceShot > 0.28) a.shots = 0; // let go of the trigger and the pattern starts over
   const ease = Math.min(1, 8 * dt);

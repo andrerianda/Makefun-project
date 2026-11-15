@@ -1,4 +1,4 @@
-// One fixed step of the whole simulation, systems in a fixed order. Nothing in here knows about the screen.
+// One fixed step of the whole simulation, systems in a fixed order. Nothing in here touches the DOM or three.js.
 import { createState } from './state.js';
 import { makeCoach, stepCoach, order } from './coach.js';
 import { makeBrain, thinkBot } from './bots.js';
