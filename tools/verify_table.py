@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that an entry plays the games its variant table was chosen for.
 
-usage: verify_table.py --entry main.py --engine engine.py [--sample N] [--trials] [--jobs 4]
+usage: verify_table.py --entry main.py --engine engine.py [--sample N] [--seed S] [--changed-from OLD.py] [--trials] [--full8] [--jobs 4]
 It reads the TB string from engine.py and the variant search database, then
   --trials   plays the kit's three practice instances with the entry, each as one process
              (6 games in a row, as a trial runs), and compares every game with the database;
@@ -22,6 +22,8 @@ ap.add_argument("--sample", type=int, default=0)
 ap.add_argument("--trials", action="store_true")
 ap.add_argument("--full8", action="store_true", help="with --trials: play all 8 games of each practice instance")
 ap.add_argument("--jobs", type=int, default=4)
+ap.add_argument("--seed", type=int, default=12345, help="seed of the --sample draw")
+ap.add_argument("--changed-from", help="an older engine file: --sample draws only from the scenarios whose table entry differs from its table")
 a = ap.parse_args()
 
 SRC = open(a.engine).read()
@@ -72,9 +74,14 @@ if a.trials:
                 print("  " + ln)
                 bad += ln.startswith("DIFF")
 if a.sample:
-    rng = random.Random(12345)
+    rng = random.Random(a.seed)
     scen = [(o, c, b) for o in run.OPPONENTS for b in ORDER for c in ("white", "black")]
-    pick = rng.sample(scen, a.sample)
+    if a.changed_from:
+        old = re.search(r"^TB='(.{640})'$", open(a.changed_from).read(), re.M).group(1)
+        at = lambda s: ORDER.index(s[2]) * 16 + run.OPPONENTS.index(s[0]) * 2 + (s[1] == "black")
+        scen = [s for s in scen if old[at(s)] != TB[at(s)]]
+        print(f"scenarios whose table entry changed: {len(scen)}")
+    pick = rng.sample(scen, min(a.sample, len(scen)))
     def one(s):
         r = run.play(a.entry, [s], limit_ms=600000)
         return compare(s, r["games"][0])

@@ -9,7 +9,7 @@ played with the env's ply cap set just under that best: it is cut there and reco
 longest wins first, then the bests are read again.
 
 usage: improve.py --engine engine.py [--opps a,b] [--variants 0-35] [--rounds N] [--jobs 4]
-                  [--min-plies P] [--db FILE] [--hours H]
+                  [--min-plies P] [--worst N] [--db FILE] [--hours H]
 """
 import argparse, hashlib, json, os, re, sys, tempfile, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -25,6 +25,7 @@ ap.add_argument("--rounds", type=int, default=99)
 ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--min-plies", type=int, default=0, help="leave scenarios already won in at most this many plies")
 ap.add_argument("--hours", type=float, default=99.0)
+ap.add_argument("--worst", type=int, default=0, help="each round, only the N scenarios with the longest wins so far (0: all of them)")
 ap.add_argument("--order", default="asc", help="asc: lowest untried variant first; desc: highest first (two machines can then share a scenario)")
 ap.add_argument("--db", default="/root/makefun-work/var/db.jsonl")
 ap.add_argument("--tag", default=os.environ.get("ENGINE_TAG", "v7"), help="label of the engine's search and evaluation; results are valid for one label")
@@ -85,6 +86,8 @@ for rnd in range(a.rounds):
         nxt = [v for v in range(lo, hi + 1) if v != 44 and v not in tried.get(k, ())]
         if nxt:
             todo.append((k, nxt[0] if a.order == "asc" else nxt[-1], p))
+    if a.worst:
+        todo = todo[:a.worst]
     if not todo or time.time() > t_end:
         break
     t0 = time.time()
