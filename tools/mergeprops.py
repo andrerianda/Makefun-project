@@ -17,6 +17,11 @@ def blocks(text):
             if cur is None: header.append(line)
             else: cur[1] += pending + [line]; pending = []
     if cur: out.append(cur)
+    # the file's own header is its first comment paragraph; comment lines after it belong to the first model
+    cut = header.index('') if '' in header else len(header)
+    extra = [l for l in header[cut:] if l.strip()]
+    header = header[:cut]
+    if out and extra: out[0][1] = extra[-1:] + [l for l in out[0][1] if not (l.startswith('#') and l in extra)]
     clean = lambda b: '\n'.join(b).strip('\n')
     # comments right above the next model belong to it, so trailing comment lines of a block are dropped here
     return '\n'.join(header).rstrip('\n'), [(n, clean(b)) for n, b in out]
