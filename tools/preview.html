@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"/home/user/Makefun-project/game/vendor/three/three.module.min.js"}}</script>
+<style>html,body{margin:0;background:#93a3b8}canvas{display:block}</style></head><body>
+<script type="module">
+// Dev tool: show kit models side by side. ?m=a,b,c&d=dist&h=height&yaw=&gap=
+import * as THREE from 'three';
+const q = new URLSearchParams(location.search), repo = q.get('repo') || '/home/user/Makefun-project';
+const { loadKit } = await import(repo + '/game/src/render/kit.js');
+const names = (q.get('m') || 'smuggler,warden').split(',');
+const dist = +(q.get('d') || 3), yaw = +(q.get('yaw') || 0), h = +(q.get('h') || 1), gap = +(q.get('gap') || 1.2);
+const kit = await loadKit([repo + '/game/assets/kit.txt', repo + '/game/assets/props.txt', repo + '/game/assets/land.txt']);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight); document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#ffffff', '#667788', 1.7));
+const sun = new THREE.DirectionalLight('#fff4e0', 2.4); sun.position.set(2, 4, 3); scene.add(sun);
+const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+const boxes = (q.get('box') || '').split(',');
+names.forEach((n, i) => {
+  const b = kit.build(n, mat), x = (i - (names.length - 1) / 2) * gap; b.root.position.x = x; b.root.rotation.y = yaw; scene.add(b.root);
+  if (boxes[i]) { const [w, hh] = boxes[i].split('x').map(Number); const wire = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, hh, w)), new THREE.LineBasicMaterial({ color: '#00ff66' })); wire.position.set(x, hh / 2, 0); scene.add(wire); }
+});
+renderer.setClearColor('#93a3b8');
+const cam = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.01, 100);
+cam.position.set(0, h, dist); cam.lookAt(0, h * (q.get('look') ? +q.get('look') : 0.9), 0);
+renderer.render(scene, cam); window.done = true;
+</script></body></html>

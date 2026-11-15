@@ -1,0 +1,22 @@
+// Dev tool: drive the player's body with scripted input and check the simulation answers it.
+const root = (process.env.REPO || '/home/user/Makefun-project') + '/game/src/';
+const { createGame, stepGame } = await import(root + 'sim/step.js');
+const { TICK, WEAPONS } = await import(root + 'config.js');
+const s = createGame(5, false), a = s.actors[0], c = a.cmd;
+const run = (sec, f) => { for (let i = 0; i < sec / TICK; i++) { if (f) f(i); stepGame(s, TICK); } };
+const log = (...x) => console.log(...x);
+log('human?', a.human, 'bot?', !!a.bot, 'money', a.money, 'phase', s.match.phase, 'pos', a.x.toFixed(1), a.z.toFixed(1), 'yaw', a.yaw.toFixed(2));
+c.yaw = a.yaw; c.buy = 'jerkin'; run(0.1); log('after buy jerkin: armor', a.armor, 'money', a.money);
+c.buy = 'corsa'; run(0.1); log('buy corsa with too little money -> slot0', a.slots[0], 'money', a.money);
+a.money = 9000; c.buy = 'corsa'; run(0.1); c.buy = 'crackler'; run(0.1); c.buy = 'seafog'; run(0.1); log('rich: slot0', a.slots[0], 'mag', a.mag[0], 'nades', a.nades.join(','), 'money', a.money, 'slot', a.slot);
+const z0 = a.z; c.mz = 1; run(1); log('freeze: moved', (z0 - a.z).toFixed(2), '(should be 0)');
+run(7); log('phase', s.match.phase); const z1 = a.z; run(1); log('ran 1s forward: dz', (z1 - a.z).toFixed(2), 'speed', Math.hypot(a.vx, a.vz).toFixed(2), 'expect ~', (6.1 * WEAPONS.corsa.speed).toFixed(2));
+c.mz = 0; run(0.5); log('stopped: speed', Math.hypot(a.vx, a.vz).toFixed(3));
+c.duck = true; run(0.5); log('duck', a.duck.toFixed(2)); c.duck = false; run(0.5);
+c.jump = true; run(TICK); c.jump = false; run(0.2); log('jump: y', a.y.toFixed(2), 'ground', a.ground); run(1);
+c.fire = true; run(1); c.fire = false; log('held fire 1s: mag', a.mag[0], 'shots fired', 30 - a.mag[0], 'punchP', a.punchP.toFixed(3), 'bloom', a.bloom.toFixed(4));
+c.reload = true; run(0.1); c.reload = false; log('reloading', a.reload.toFixed(2)); run(3); log('after reload mag', a.mag[0], 'res', a.res[0]);
+c.slot = 1; run(TICK); c.slot = -1; run(0.6); c.fire = true; run(0.5); log('pistol semi-auto held 0.5s: shots', 12 - a.mag[1], '(should be 1)'); c.fire = false; run(0.1);
+c.nade = 2; c.slot = 3; run(TICK); c.slot = -1; c.nade = -1; run(0.6); log('slot', a.slot, 'nadeSel', a.nadeSel); c.pitch = 0.3; c.fire = true; run(TICK); c.fire = false; run(3);
+log('after throw: nades', a.nades.join(','), 'slot', a.slot, 'smoke live', s.nades.filter((n) => n.live && n.cloud > 0).length);
+log('alive', a.alive, 'hp', a.hp, 'round', s.match.round, 'phase', s.match.phase);

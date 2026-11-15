@@ -1,0 +1,21 @@
+// Dev tool: screenshot the start menu, the buy counter and the scoreboard.
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { chromium } = require('playwright');
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const logs = [];
+page.on('pageerror', (e) => logs.push('pageerror: ' + e.message));
+await page.goto((process.env.BASE || 'http://localhost:8124') + '/?sharp=1&seed=5', { waitUntil: 'load' });
+await page.waitForTimeout(2500);
+await page.screenshot({ path: '/root/makefun/shots/p-menu.jpg', type: 'jpeg', quality: 80 });
+await page.goto((process.env.BASE || 'http://localhost:8124') + '/?sharp=1&watch=1&seed=5', { waitUntil: 'load' });
+await page.waitForTimeout(2500);
+await page.evaluate(() => { const g = window.campanile; g.skip(2); g.state.actors[0].money = 5200; g.hud.shop.toggle(g.state); });
+await page.waitForTimeout(800);
+await page.screenshot({ path: '/root/makefun/shots/p-shop.jpg', type: 'jpeg', quality: 80 });
+await page.evaluate(() => { const g = window.campanile; g.hud.shop.toggle(g.state); g.skip(200); g.hud.board.show(true); });
+await page.waitForTimeout(800);
+await page.screenshot({ path: '/root/makefun/shots/p-board.jpg', type: 'jpeg', quality: 80 });
+console.log(JSON.stringify({ logs }));
+await browser.close();
