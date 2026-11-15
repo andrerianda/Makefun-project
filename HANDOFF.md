@@ -40,7 +40,7 @@ Aturan lengkap: `RULES.txt` di kit (`/c/threejs-fps-02/kit`).
 
 ### Anggaran byte (kritis)
 
-- Cek cepat: `node tools/budget.ts` (sisa ruang sebelum JS terakhir terpotong). Akhir sesi 2: index.html + JS = 163.579 byte, **sisa ≈186 byte**; `input.js` utuh, `style.css` hanya baris awalnya.
+- Cek cepat: `node tools/budget.ts` (sisa ruang sebelum JS terakhir terpotong). Akhir sesi 2: index.html + JS = 163.646 byte, **sisa ≈119 byte**; `input.js` utuh, `style.css` hanya baris awalnya.
 - **Setiap tambahan JS harus dibayar dengan pemangkasan.** File model di `game/assets/*.txt` adalah aset: gratis, tidak dibaca juri.
 - Ide pangkas yang belum diambil (diukur reviewer sesi 2): pindahkan batu menara campanile ke `land.txt` (-571, poros & menara runcing tetap di kode), reset berantai (-124), indentasi `index.html` (-169) dan `</td></tr>` opsional (-150). Bake tekstur kanvas ke PNG (-5,5 KB) sengaja tidak diambil: tekstur yang dilukis di kode adalah bukti "its own art" untuk juri.
 
@@ -78,18 +78,19 @@ Keseimbangan terakhir (32 pertandingan bot): penyerang 52% ronde; tim A 13, tim 
 - Review menyeluruh v2 (juri, sim, bot, klien, kualitas, byte, gate) dan perbaikannya: teleport tabrakan ke atap, lantai berkedip di atas properti, laju tembak dibulatkan, granat lahir di dalam tembok, Ctrl+W menutup tab (jongkok sekarang hanya C), kamera ikut mouse tiap frame, flash moncong nyangkut, lampu keg bikin shader recompile, bot pegang granat saat ketemu musuh, frag bot melukai tim sendiri, flash tim, pos bot di dalam rumah, douser ganti-ganti, radio berulang, campanile sekarang huruf `K` di peta (kotak 20 m), duplikasi kode dan field mati dibuang, HUD/efek tanpa alokasi per-frame.
 - `createSynth` non-ekspor; radio dibacakan `speechSynthesis` (pitch per pembicara); scope sniper: luar lensa hitam total (permintaan pemilik), reticle tipis + titik saffron + tanda jarak (CSS saja); semburan merah saat kena tembak.
 - Tombol menu beli granat pindah ke Q/F/T (Z/X/V tetap radio/kamera). Halaman HP: tombol tetap terlihat saat scope.
-- Keseimbangan (128 pertandingan bot, `FULL=1 node tools/balance.mjs 64 1` dan `64 65`): penyerang 52% ronde, tiap tim 50 menang, 28 seri (sudah di README). Tramont 640 rpm.
+- Pemeriksaan akhir (juri membaca ulang dossier + screenshot, pencari regresi atas semua diff sesi 2) dan perbaikannya: feed HUD hanya event segar, flash membutakan pelemparnya tapi tidak timnya, Wardens melempar flash ke keg sebelum retake (sebelumnya bertahan tidak pernah pakai granat), komentar yang tidak cocok dibetulkan, legenda peta dirapikan (`,`/`;` jadi `.`), menu menyebut seri 6-6.
+- Keseimbangan (192 pertandingan bot, `FULL=1 node tools/balance.mjs 64 1`, `64 65`, `64 129`): penyerang 51% ronde (sudah di README). Selisih menang antar-tim berubah-ubah per kelompok seed (uji A/B: kode lama juga 36-17 di seed 129-192), jadi itu variasi, bukan bias. Tramont 640 rpm.
 
 ## Yang masih harus dikerjakan (urut prioritas)
 
 0. Pertanyaan terbuka ke pemilik: penunjuk arah tembakan (garis merah melengkung di sekitar crosshair) mau dibiarkan, dihaluskan (CSS saja), atau dihapus.
 1. ~~**Properti kota**~~ selesai di sesi 2 (lihat atas). Catatan lama: masih model sementara yang kasar. Keluhan pemilik: "obstacle harus perfect". Butuh 27 model: lamp (dengan bone `glow`), bollard, boat, table, cypress, cart, balcony, chimney, fishcrate, barrels, awning, pipe, washing, bench, pots, nets, lobsterpots, anchor, signpost, rowboat, crates, sacks, fountain, bell, stall, hull, bunting.
    Tapak tabrakan (lebar × tinggi, m) yang harus pas: barrels 1,2×1,1; stall 1,7×1; fountain 1,9×0,7 (+ pancuran 0,5×1,9); hull 1,8×1,5; cart 1,5×1,3; table 1×0,8; nets 1,4×1; sacks 1,3×0,9; cypress berdiri di atas pot batu 1,5×0,8. Properti dinding menghadap +z. Cek pas-nya: `node tools/kitshot.mjs out.jpg "m=cart,table&box=1.5x1.3,1x0.8&d=6&h=2&gap=2.6"`.
-2. ~~**Review menyeluruh v2**~~ selesai di sesi 2. Sisa temuan kecil yang tidak diambil: bot melempar granat dengan busur rendah sehingga meleset 6-23 m (busur tinggi diuji: akurat, tapi asapnya menutup jalan tim sendiri dan penyerang turun ke 43%; titik `SMOKES` perlu dipindah dulu), bot level 2 bereaksi 80-140 ms, penyerang terakhir yang AFK tidak diburu. Catatan lama: review menyeluruh v2 lalu perbaiki: juri-rubrik atas dossier, bug sim, bot/coach, klien (render/ui/input/audio), kualitas kode, kepatuhan gate, halaman HP.
+2. ~~**Review menyeluruh v2**~~ selesai di sesi 2. Sisa temuan kecil yang tidak diambil: label jendela menara memakai sel pintu atlas (terbaca sebagai daun jendela melengkung), bot melempar granat dengan busur rendah sehingga meleset 6-23 m (busur tinggi diuji: akurat, tapi asapnya menutup jalan tim sendiri dan penyerang turun ke 43%; titik `SMOKES` perlu dipindah dulu), bot level 2 bereaksi 80-140 ms, penyerang terakhir yang AFK tidak diburu. Catatan lama: review menyeluruh v2 lalu perbaiki: juri-rubrik atas dossier, bug sim, bot/coach, klien (render/ui/input/audio), kualitas kode, kepatuhan gate, halaman HP.
 3. ~~`audio.js` mengekspor `createSynth`~~ selesai.
 4. ~~Scope sniper~~ selesai: luar lensa hitam total sesuai permintaan pemilik, tanda jarak ada.
 5. ~~Suara TTS~~ selesai (`audio.js`, radio dibacakan browser).
-6. ~~Screenshot + README~~ selesai di sesi 2. Kalau properti direvisi lagi, ambil ulang dengan `node tools/scene.mjs <out.jpg> <seed> <detik> "<predikat>" 1280 720 "<js sebelum foto>"` (predikat yang dipakai ada di log sesi 2).
+6. ~~Screenshot + README~~ selesai di sesi 2 (shot 1 dari build beberapa jam sebelum commit akhir: bedanya hanya label armour '+C' vs ' +cap' dan detail kios; shot 2-4 dari build akhir). Kalau properti direvisi lagi, ambil ulang dengan `node tools/scene.mjs <out.jpg> <seed> <detik> "<predikat>" 1280 720 "<js sebelum foto>"` (predikat yang dipakai ada di log sesi 2).
 7. Bundle transkrip → `check` → submit → cek status.
 
 ## Submit: BUKAN tugas sesi ini
