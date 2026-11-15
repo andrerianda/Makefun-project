@@ -17,19 +17,21 @@ ul { list-style: none; margin: 0; padding: 0; }
 #blind { position: absolute; inset: 0; opacity: 0; background: #fffdf2; }
 #from { position: absolute; left: 50%; top: 50%; opacity: 0; }
 #from i { position: absolute; left: -90px; top: -200px; width: 180px; height: 30px; border-top: 6px solid var(--alarm); border-radius: 50%; }
-/* The Meridian's lens fills most of the screen; outside it the world stays visible, dimmed. */
-#scope { position: absolute; inset: 0; display: none; background: radial-gradient(circle at center, transparent 0 41vh, rgba(5, 6, 12, 0.3) 45vh, rgba(5, 6, 12, 0.94) 45.6vh, rgba(5, 6, 12, 0.8) 100vh); }
-/* Heavy posts outside a fine cross: the lens of the Meridian. */
-#scope::before { content: ''; position: absolute; top: calc(50% - 2px); height: 4px; left: calc(50% - 45vh); right: calc(50% - 45vh); background: linear-gradient(90deg, #05060c 0 36%, transparent 36% 64%, #05060c 64%); }
-#scope::after { content: ''; position: absolute; left: calc(50% - 2px); width: 4px; top: 63vh; bottom: 5vh; background: #05060c; }
-#scope i { position: absolute; background: rgba(5, 6, 12, 0.9); }
-#scope i:first-child { left: 50%; top: 5vh; bottom: 5vh; width: 1px; }
-#scope i:last-child { top: 50%; left: calc(50% - 45vh); right: calc(50% - 45vh); height: 1px; }
-/* Ticks every 3vh along the fine cross (13 mrad at the Meridian's 24 degrees): a standing figure is four ticks tall at 35 m
-   and two at 70 m, so range reads off the glass. */
-#scope i::before { content: ''; position: absolute; --tick: rgba(5, 6, 12, 0.9) 0 1px, transparent 1px 3vh; }
-#scope i:first-child::before { left: -4px; width: 9px; top: 33vh; height: calc(24vh + 1px); background: repeating-linear-gradient(180deg, var(--tick)); }
-#scope i:last-child::before { top: -4px; height: 9px; left: 33vh; width: calc(24vh + 1px); background: repeating-linear-gradient(90deg, var(--tick)); }
+/* The Meridian's glass: the whole view stays clear. A hairline ring marks the lens, the world outside it is barely
+   tinted, and the reticle is a short fine cross with a gap and a saffron dot, held by four thin stubs at the rim. */
+#scope { position: absolute; inset: 0; display: none; --ink: rgba(5, 6, 12, 0.85); background: radial-gradient(circle at center, transparent 0 calc(46vh - 2px), var(--ink) calc(46vh - 2px) 46vh, rgba(5, 6, 12, 0.14) calc(46vh + 1px)); }
+#scope::before, #scope::after { content: ''; position: absolute; --stub: var(--ink) 0 7%, transparent 7% 93%, var(--ink) 93%; }
+#scope::before { top: calc(50% - 1px); height: 3px; left: calc(50% - 46vh); right: calc(50% - 46vh); background: linear-gradient(90deg, var(--stub)); }
+#scope::after { left: calc(50% - 1px); width: 3px; top: 4vh; bottom: 4vh; background: linear-gradient(180deg, var(--stub)); }
+#scope i { position: absolute; filter: drop-shadow(0 0 1px rgba(255, 244, 226, 0.7)); --gap: var(--ink) 0 calc(50% - 5px), transparent calc(50% - 5px) calc(50% + 5px), var(--ink) calc(50% + 5px); }
+#scope i:first-child { left: 50%; top: 34vh; height: 32vh; width: 1px; background: linear-gradient(180deg, var(--gap)); }
+#scope i:last-child { top: 50%; left: calc(50% - 16vh); width: 32vh; height: 1px; background: linear-gradient(90deg, var(--gap)); }
+#scope i:last-child::after { content: ''; position: absolute; left: calc(50% - 2px); top: -2px; width: 4px; height: 4px; border-radius: 50%; background: var(--run); }
+/* Ticks every 3vh (13 mrad at the Meridian's 24 degrees): a standing figure is four ticks tall at 35 m and two at
+   70 m, so range reads off the glass. */
+#scope i::before { content: ''; position: absolute; --tick: var(--ink) 0 1px, transparent 1px 3vh; }
+#scope i:first-child::before { left: -2px; width: 5px; top: 4vh; height: calc(24vh + 1px); background: repeating-linear-gradient(180deg, var(--tick)); }
+#scope i:last-child::before { top: -2px; height: 5px; left: 4vh; width: calc(24vh + 1px); background: repeating-linear-gradient(90deg, var(--tick)); }
 
 .panel, #top > *, .stat, #arms, #radar, #prompt, #banner { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; backdrop-filter: blur(3px); }
 
