@@ -78,7 +78,7 @@ function travel(state, a, b, c, dt) {
 function fight(state, a, b, c, w, tgt, dt) {
   const rng = state.rng, dx = tgt.x - a.x, dz = tgt.z - a.z, dist = Math.hypot(dx, dz), th = bodyHeight(tgt);
   // Good shots go for the head; the rest aim centre mass. Each has a wandering error that skill shrinks.
-  const aimY = tgt.y + (a.skill > 0.6 || dist < 9 ? th - 0.16 : th * 0.66) - (a.y + eyeHeight(a));
+  const aimY = tgt.y + (a.skill > 0.6 ? th - 0.16 : th * 0.66) - (a.y + eyeHeight(a));
   b.errT -= dt;
   if (b.errT <= 0) { const amp = 0.008 + (1 - a.skill) * 0.03; b.errT = 0.3; b.ex = rng.range(-amp, amp); b.ey = rng.range(-amp, amp) * 0.6; }
   const comp = 0.45 + 0.5 * a.skill, trueYaw = yawTo(a, tgt.x, tgt.z), truePitch = Math.atan2(aimY, dist);
@@ -87,7 +87,7 @@ function fight(state, a, b, c, w, tgt, dt) {
   c.pitch = turnTo(a.pitch, truePitch + b.ey - a.punchP * comp, speed);
   const onTarget = Math.abs(turnTo(0, trueYaw - a.yaw, 9)) < Math.max(0.02, 0.4 / dist) && Math.abs(truePitch - a.pitch) < 0.12;
   const near = dist < 7;
-  if (!w || w.kind === 'melee') { walkTo(a, c, tgt.x, tgt.z); c.fire = dist < 2; return; }
+  if (!w) { c.slot = a.slots[0] ? 0 : 1; return; } // a grenade in hand: draw a gun
   if (a.mag[a.slot] === 0) c.reload = true;
   else if (b.react <= 0 && onTarget) {
     if (b.pause > 0) b.pause -= dt;

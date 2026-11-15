@@ -122,7 +122,7 @@ export function siteAt(x, z) {
 
 // Callouts: the first rectangle (in cells, inclusive) that holds a point names it.
 const ZONES = [
-  ['Fish Market', 3, 1, 12, 10], ['Boathouse', 27, 1, 36, 10], ['Customs Yard', 14, 1, 25, 3], ['Bell Square', 14, 4, 25, 10],
+  ['Fish Market', 3, 1, 13, 10], ['Boathouse', 26, 1, 36, 10], ['Customs Yard', 14, 1, 25, 3], ['Bell Square', 14, 4, 25, 10],
   ["Cooper's Cut", 7, 16, 17, 17], ['Chandlery', 22, 19, 31, 20], ['Net Row', 3, 11, 6, 23], ['Bell Lane', 18, 11, 21, 23],
   ['Quay', 32, 11, 36, 23], ['Low Road', 3, 24, 36, 26],
 ];
@@ -143,9 +143,9 @@ export const HOLDS = {
 };
 /** Where attackers gather before a hit: the main door, a lurk alley, and the middle of Bell Lane. */
 export const STAGE = {
-  A: { main: at(4.4, 13.2), lurk: at(12, 16.5) },
-  B: { main: at(33.5, 13.2), lurk: at(27, 19.5) },
-  mid: at(19.4, 13.4),
+  A: { main: at(4.4, 13.2), lurk: at(12, 15.6) },
+  B: { main: at(33.5, 13.2), lurk: at(27, 18.6) },
+  mid: at(20, 12.4),
 };
 /** Smoke targets that cut the defenders' rotations into each site. */
 export const SMOKES = { A: [at(12.2, 2.5), at(12.2, 7.5)], B: [at(26.8, 2.5), at(26.8, 7.5)] };

@@ -50,7 +50,6 @@ export function stepKeg(state, dt) {
     if (k.beep <= 0) { // the fuse ticks faster as it burns down
       k.beep = Math.max(0.14, Math.min(1, k.fuse / 14));
       emit(state, 'beep', -1, -1, k.x, k.y, k.z, k.fuse);
-      noise(state, k.x, k.z, 26, -1, 'keg');
     }
     let douser = -1;
     for (const a of state.actors) {

@@ -40,15 +40,14 @@ function radio(state, c, a, text, force = false) {
 }
 const speaker = (state, c) => state.actors.find((a) => a.team === c.team && a.alive && a.bot);
 
-/** Send the team into the site: every bot takes a post inside, with a smoke, a flash or a frag to throw first. */
+/** Send the team into the site: every bot takes a post inside, two smoke the rotations and one flashes the site first. */
 function hit(state, c) {
   c.go = true;
   const holds = HOLDS[c.site], smokes = SMOKES[c.site], site = SITES[c.site];
   c.jobs.forEach((j, i) => {
     post(j, holds[i % holds.length], true, c.site);
-    if (i === 0 || i === 2) { j.nade = 2; j.nx = smokes[i >> 1].x; j.nz = smokes[i >> 1].z; }
+    if (i > 2) { j.nade = 2; j.nx = smokes[i >> 2].x; j.nz = smokes[i >> 2].z; }
     else if (i === 1) { j.nade = 1; j.nx = site.x; j.nz = site.z; }
-    else if (i === 3) { j.nade = 0; j.nx = holds[0].x; j.nz = holds[0].z; }
   });
   radio(state, c, speaker(state, c), `Hit ${SITES[c.site].name} now, smokes out`, true);
 }
@@ -145,7 +144,7 @@ export function stepCoach(state, c, dt) {
       radio(state, c, speaker(state, c), `They lit it at ${SITES[k.site].name}, retake`, true);
     }
     const a = nearestBot(state, c, k.x, k.z, true);
-    if (a && a.id !== c.douser) { c.douser = a.id; post(c.jobs[a.id % TEAM_SIZE], k, true, k.site); radio(state, c, a, 'Dousing, watch my back'); }
+    if (a && !state.actors[c.douser]?.alive) { c.douser = a.id; post(c.jobs[a.id % TEAM_SIZE], k, true, k.site); radio(state, c, a, 'Dousing, watch my back'); }
     return;
   }
   const lead = c.threat.A - c.threat.B;
