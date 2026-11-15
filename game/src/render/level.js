@@ -220,5 +220,5 @@ export function buildLevel(scene, tex, kit) {
     add(new THREE.PlaneGeometry(height * map.userData.aspect, height), new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false }), cellX(c), y, cellZ(r)).rotation.y = turn * Math.PI / 2;
   }
 
-  return (time) => afloat.forEach((boat, i) => { boat.position.y = -0.82 + Math.sin(time * 0.9 + i * 2) * 0.07; boat.rotation.z = Math.sin(time * 0.7 + i) * 0.05; });
+  return (time) => { for (let i = 0; i < afloat.length; i++) { afloat[i].position.y = -0.82 + Math.sin(time * 0.9 + i * 2) * 0.07; afloat[i].rotation.z = Math.sin(time * 0.7 + i) * 0.05; } };
 }

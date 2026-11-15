@@ -30,7 +30,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 #top { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; align-items: stretch; }
 .side { display: flex; align-items: center; gap: 10px; padding: 6px 12px; min-width: 176px; }
 .side.right { justify-content: flex-end; }
-.side .name { font-size: 12px; letter-spacing: 0.16em; }
+.side .name { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; }
 .side .score { font-size: 26px; font-family: var(--mono); }
 .pips { display: flex; gap: 3px; flex: 1; }
 .right .pips { justify-content: flex-end; }
@@ -70,7 +70,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 #banner { position: absolute; left: 50%; top: 104px; transform: translateX(-50%); padding: 10px 26px; text-align: center; opacity: 0; transition: opacity 0.4s; }
 #banner b { display: block; font-size: 22px; letter-spacing: 0.1em; }
 #banner span { color: var(--dim); }
-#watching { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); color: var(--dim); letter-spacing: 0.12em; font-size: 12px; text-shadow: 0 1px 3px #000; }
+#watching { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); white-space: nowrap; color: var(--dim); letter-spacing: 0.12em; font-size: 12px; text-shadow: 0 1px 3px #000; }
 
 #vitals { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 6px; }
 .stat { padding: 7px 13px 9px; min-width: 96px; }
@@ -78,6 +78,11 @@ ul { list-style: none; margin: 0; padding: 0; }
 .meter { display: block; height: 3px; background: var(--line); border-radius: 2px; }
 .meter i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
 #cash { color: #ffd27a; }
+#cash::before { content: '$'; }
+#ap.cap::after { content: '+C'; }
+#gun { text-transform: uppercase; }
+#gun.busy::after { content: ' · reloading'; }
+#res:not(:empty)::before { content: '/ '; }
 #kegTag { display: none; border-color: var(--run); }
 #kegTag b { color: var(--run); }
 
@@ -85,7 +90,9 @@ ul { list-style: none; margin: 0; padding: 0; }
 #ammo b { font-size: 38px; font-family: var(--mono); }
 #ammo span { font-size: 18px; color: var(--dim); font-family: var(--mono); margin-left: 6px; }
 #ammo.low b { color: var(--alarm); }
-#slots { display: flex; gap: 4px; justify-content: flex-end; }
+#slots { display: flex; gap: 4px; justify-content: flex-end; counter-reset: slot; }
+#slots i::before { counter-increment: slot; content: counter(slot) ' '; }
+#slots #slot3::before { content: counter(slot) ' Nades '; }
 #slots i { font-style: normal; font-size: 11px; padding: 2px 7px; border: 1px solid var(--line); border-radius: 3px; color: var(--dim); white-space: nowrap; }
 #slots i.on { background: var(--ink); color: #1a1c2c; font-weight: 800; }
 #slots i.none { opacity: 0.35; }

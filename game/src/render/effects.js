@@ -2,7 +2,7 @@
 // All of it comes from fixed pools made at load; a firefight allocates nothing.
 import * as THREE from 'three';
 import { NADES } from '../config.js';
-import { overShoulder } from '../sim/state.js';
+import { DROPS, overShoulder } from '../sim/state.js';
 
 const TRACERS = 36, MARKS = 96, PUFFS = 48, CLOUD = 9, BLASTS = 4;
 const NADE_TINT = ['#4c6b3a', '#e8e2d0', '#8fa3b0'];
@@ -20,8 +20,8 @@ export function buildEffects(scene, tex, actors, camera, kit) {
   const puffs = pool(PUFFS, () => sprite(THREE.NormalBlending));
   const blasts = pool(BLASTS, () => sprite(THREE.AdditiveBlending));
   const shells = pool(NADES.length * 4, (i) => new THREE.Mesh(new THREE.IcosahedronGeometry(0.07, 0), new THREE.MeshLambertMaterial({ color: NADE_TINT[i % 3] })));
-  const clouds = [];
-  const fallen = pool(8, () => new THREE.Group()), steel = new THREE.MeshLambertMaterial({ vertexColors: true }); // dropped rifles
+  const clouds = [], fading = [puffs, blasts];
+  const fallen = pool(DROPS, () => new THREE.Group()), steel = new THREE.MeshLambertMaterial({ vertexColors: true }); // dropped rifles
   const flare = new THREE.PointLight('#ffb060', 0, 22, 1.5);
   scene.add(flare);
 
@@ -81,7 +81,7 @@ export function buildEffects(scene, tex, actors, camera, kit) {
 
     update(state, dt) {
       for (const t of tracers) if (t.visible) { t.userData.t += dt; t.material.opacity = 0.75 * (1 - t.userData.t / 0.07); if (t.userData.t > 0.07) t.visible = false; }
-      for (const list of [puffs, blasts]) for (const p of list) {
+      for (const list of fading) for (const p of list) {
         if (!p.visible) continue;
         const u = p.userData, k = (u.t += dt) / u.life;
         if (k >= 1) { p.visible = false; continue; }
@@ -90,33 +90,32 @@ export function buildEffects(scene, tex, actors, camera, kit) {
       flare.intensity *= Math.max(0, 1 - dt * 9);
 
       // Grenades in the air, and a cluster of soft discs for each Seafog cloud (made the first time one bursts).
-      state.nades.forEach((n, i) => {
-        const shell = shells[i], smoking = n.live && n.cloud > 0;
+      for (let i = 0; i < state.nades.length; i++) {
+        const n = state.nades[i], shell = shells[i], smoking = n.live && n.cloud > 0;
         shell.visible = n.live && !smoking;
         if (shell.visible) { shell.position.set(n.x, n.y, n.z); shell.material.color.set(NADE_TINT[n.type]); }
         if (smoking && !clouds[i]) clouds[i] = pool(CLOUD, () => { const s = sprite(THREE.NormalBlending); s.material.color.set('#d5d9df'); return s; });
-        if (!clouds[i]) return;
-        const life = NADES[2].life, fade = smoking ? Math.min(1, (life - n.cloud) / 0.9, n.cloud / 2.5) : 0;
-        clouds[i].forEach((s, j) => {
+        if (!clouds[i]) continue;
+        const fade = smoking ? Math.min(1, (NADES[2].life - n.cloud) / 0.9, n.cloud / 2.5) : 0;
+        for (let j = 0; j < CLOUD; j++) {
+          const s = clouds[i][j], a = j * 2.4 + state.time * 0.12, r = j ? 1.7 + (j % 3) * 0.5 : 0;
           s.visible = fade > 0;
-          if (!s.visible) return;
-          const a = j * 2.4 + state.time * 0.12, r = j ? 1.7 + (j % 3) * 0.5 : 0;
           s.position.set(n.x + Math.cos(a) * r, 1.5 + (j % 4) * 0.55 + Math.sin(state.time * 0.5 + j) * 0.12, n.z + Math.sin(a) * r);
           s.scale.setScalar(4.6 + (j % 3) * 0.7); s.material.opacity = fade * 0.92; s.material.rotation = a * 0.3;
-        });
-      });
+        }
+      }
 
-      state.drops.forEach((d, i) => {
-        const g = fallen[i];
+      for (let i = 0; i < fallen.length; i++) {
+        const d = state.drops[i], g = fallen[i];
         g.visible = d.live;
-        if (!d.live) return;
+        if (!d.live) continue;
         g.position.set(d.x, 0.07, d.z);
-        if (g.name === d.id) return;
+        if (g.name === d.id) continue;
         g.name = d.id; g.clear(); // a different rifle fell here: lay its model on its side
         const gun = kit.build(`fp_${d.id}`, steel).root;
         gun.position.set(0, 0, 0); gun.rotation.set(0, i * 2.4, 1.45);
         g.add(gun);
-      });
+      }
 
       const k = state.keg;
       keg.visible = k.state === 'dropped' || k.state === 'planted' || k.state === 'doused';

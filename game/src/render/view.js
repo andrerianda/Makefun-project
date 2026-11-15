@@ -33,6 +33,13 @@ export function createView(host, state, kit, sharp) {
   const actors = buildActors(scene, state, tex, kit), effects = buildEffects(scene, tex, actors, camera, kit), gun = buildViewmodel(tex, kit);
   let cursor = state.events.seq, fov = FOV, shake = 0, aspect = 1;
 
+  /** Hand an event to the effects, and shake the camera for a blast nearby or a wound. */
+  const onEvent = (e) => {
+    const a = state.actors[state.viewId];
+    effects.event(e, state);
+    if ((e.type === 'boom' && e.n === 0) || e.type === 'kegBoom') shake = Math.max(shake, 2.5 / (1 + Math.hypot(e.x - a.x, e.z - a.z) * 0.15));
+    if (e.type === 'hurt' && e.a === state.viewId) shake = Math.max(shake, 0.25);
+  };
   const resize = () => {
     const w = host.clientWidth || window.innerWidth, h = host.clientHeight || window.innerHeight;
     renderer.setSize(w, h);
@@ -49,11 +56,7 @@ export function createView(host, state, kit, sharp) {
       slow = dt > 0.025 ? slow + dt : 0;
       if (!sharp && slow > 1.5 && ratio > 0.75) { slow = 0; ratio -= 0.25; renderer.setPixelRatio(ratio); resize(); }
       const a = st.actors[st.viewId];
-      cursor = drain(st, cursor, (e) => {
-        effects.event(e, st);
-        if ((e.type === 'boom' && e.n === 0) || e.type === 'kegBoom') shake = Math.max(shake, 2.5 / (1 + Math.hypot(e.x - a.x, e.z - a.z) * 0.15));
-        if (e.type === 'hurt' && e.a === st.viewId) shake = Math.max(shake, 0.25);
-      }, 0.15);
+      cursor = drain(st, cursor, onEvent, 0.15);
       shake = Math.max(0, shake - dt * 3);
       const w = a.slot === 3 ? null : WEAPONS[a.slots[a.slot]];
       fov += ((a.scoped && w && w.scopeFov ? w.scopeFov : FOV) - fov) * Math.min(1, dt * 14);

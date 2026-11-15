@@ -11,7 +11,9 @@ import { createShop, createBoard } from './panels.js';
 
 const $ = (q) => document.querySelector(q);
 const REASONS = { wiped: 'the other crew is down', time: 'the clock ran out', doused: 'the keg is doused', blast: 'the keg went up' };
-const clockText = (t) => `${Math.floor(Math.max(0, t) / 60)}:${String(Math.floor(Math.max(0, t) % 60)).padStart(2, '0')}`;
+const clockText = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; // from whole seconds
+const percent = (v) => `${v}%`;
+const roundText = (n) => `ROUND ${n} / ${ROUND.max}`;
 
 export function createHud(state) {
   const el = {};
@@ -19,14 +21,20 @@ export function createHud(state) {
   const sides = [0, 1].map((t) => {
     const root = $(`#side${t}`), pips = root.querySelector('.pips');
     pips.innerHTML = '<i></i>'.repeat(5);
-    return { root, name: root.querySelector('.name'), score: root.querySelector('.score'), pips: [...pips.children] };
+    return { root, name: root.querySelector('.name'), score: root.querySelector('.score'), pips: [...pips.children], side: null, alive: -1 };
   });
   const radar = createRadar($('#radar canvas')), shop = createShop($('#shop')), board = createBoard($('#board'));
-  const slotEls = [...el.slots.children], last = new Map();
-  let cursor = state.events.seq, hitT = 0, painT = 0, fromT = 0, fromX = 0, fromZ = 0, bannerEnd = 0, recap = '';
+  const slotEls = [...el.slots.children], shown = new Map();
+  let cursor = state.events.seq, hitT = 0, painT = 0, fromT = 0, fromX = 0, fromZ = 0, bannerEnd = 0, recap = '', gap = 0;
 
-  /** Write text (or a style value) only when it differs from what is on screen. */
-  const put = (node, value, prop = 'textContent') => { const key = node.id + prop; if (last.get(key) !== value) { last.set(key, value); if (prop === 'textContent') node.textContent = value; else node.style[prop] = value; } };
+  /** Write a node's text or class (or a style value) only when the value behind it changed; `text` formats it,
+   *  so a number that did not move costs a comparison and no string. */
+  const put = (node, value, prop = 'textContent', text) => {
+    const seen = shown.get(node) || shown.set(node, {}).get(node);
+    if (seen[prop] === value) return;
+    seen[prop] = value;
+    if (prop in node) node[prop] = text ? text(value) : value; else node.style[prop] = text ? text(value) : value;
+  };
   const line = (list, html, cls, keep) => {
     const li = document.createElement('li');
     li.innerHTML = html; li.className = cls;
@@ -34,11 +42,11 @@ export function createHud(state) {
     while (list.children.length > keep) list.firstChild.remove();
     setTimeout(() => { li.style.opacity = 0; setTimeout(() => li.remove(), 700); }, 7000);
   };
-  const banner = (e, title, sub, seconds = 3.5) => { el.banner.firstElementChild.textContent = title; el.banner.lastElementChild.textContent = sub; el.banner.style.opacity = 1; last.set('banneropacity', '1'); bannerEnd = e.t + seconds; };
+  const banner = (e, title, sub, seconds = 3.5) => { el.banner.firstElementChild.textContent = title; el.banner.lastElementChild.textContent = sub; put(el.banner, 1, 'opacity'); bannerEnd = e.t + seconds; };
   const named = (a) => `<em class="s${sideOf(state, a)}">${a.name}</em>`;
 
-  function onEvent(e, st) {
-    const view = st.viewId, me = st.actors[view];
+  function onEvent(e) {
+    const st = state, view = st.viewId, me = st.actors[view];
     if (e.type === 'kill') {
       const killer = e.a >= 0 ? st.actors[e.a] : null, how = WEAPONS[e.s] ? WEAPONS[e.s].name : e.s === 'keg' ? 'the keg' : 'Crackler';
       if (e.b === 0) recap = killer ? `${killer.name} got you with ${how} · ${Math.ceil(killer.hp)} hp left · ` : '';
@@ -66,59 +74,60 @@ export function createHud(state) {
       if (text) { el.menuLine.textContent = text; el.deploy.textContent = button; }
     },
     update(st, dt) {
-      cursor = drain(st, cursor, (e) => onEvent(e, st));
+      cursor = drain(st, cursor, onEvent);
       const m = st.match, a = st.actors[st.viewId], w = weaponOf(a), lit = m.phase === 'planted';
       for (let t = 0; t < 2; t++) { // your crew on the left, in the colours of the side it plays this half
-        const side = SIDES[sideOfTeam(st, t)];
-        if (last.get(`side${t}`) !== side) { last.set(`side${t}`, side); sides[t].name.textContent = side.name.toUpperCase(); sides[t].root.style.color = side.color; }
-        if (last.get(`score${t}`) !== m.score[t]) { last.set(`score${t}`, m.score[t]); sides[t].score.textContent = m.score[t]; }
+        const s = sides[t], side = SIDES[sideOfTeam(st, t)];
+        if (s.side !== side) { s.side = side; s.name.textContent = side.name; s.root.style.color = side.color; }
+        put(s.score, m.score[t]);
         let alive = 0;
         for (const o of st.actors) if (o.team === t && o.alive) alive++;
-        if (last.get(`pips${t}`) !== alive) { last.set(`pips${t}`, alive); sides[t].pips.forEach((p, i) => { p.className = i < alive ? 'up' : ''; }); }
+        if (s.alive !== alive) { s.alive = alive; for (let i = 0; i < 5; i++) s.pips[i].className = i < alive ? 'up' : ''; }
       }
-      put(el.time, clockText(m.t));
+      put(el.time, Math.max(0, Math.floor(m.t)), 'textContent', clockText);
       put(el.phase, m.phase === 'freeze' ? 'BUY TIME' : lit ? 'KEG LIT' : m.phase === 'live' ? (sideOfTeam(st, a.team) === ATT ? 'ATTACK' : 'DEFEND') : 'ROUND OVER');
       put(el.clock, lit ? 'lit' : '', 'className');
-      put(el.roundNo, `ROUND ${m.round} / ${ROUND.max}`);
+      put(el.roundNo, m.round, 'textContent', roundText);
       put(el.zone, zoneAt(a.x, a.z));
-      put(el.hp, String(Math.ceil(a.hp))); put(el.hpBar, `${a.hp}%`, 'width');
-      put(el.ap, `${Math.ceil(a.armor)}${a.helmet ? '+C' : ''}`); put(el.apBar, `${a.armor}%`, 'width');
-      put(el.cash, `$${a.money}`);
+      // The style sheet adds the units and labels around these bare numbers and names.
+      put(el.hp, Math.ceil(a.hp)); put(el.hpBar, Math.ceil(a.hp), 'width', percent);
+      put(el.ap, Math.ceil(a.armor)); put(el.ap, a.helmet ? 'cap' : '', 'className'); put(el.apBar, Math.ceil(a.armor), 'width', percent);
+      put(el.cash, a.money);
       put(el.kegTag, a.hasKeg ? 'block' : 'none', 'display');
-      put(el.gun, a.slot === 3 ? NADES[a.nadeSel].name.toUpperCase() : `${w.name.toUpperCase()}${a.reload > 0 ? ' · RELOADING' : ''}`);
-      put(el.mag, a.slot === 3 ? String(a.nades[a.nadeSel]) : w.mag ? String(a.mag[a.slot]) : '-');
-      put(el.res, a.slot === 3 || !w.mag ? '' : `/ ${a.res[a.slot]}`);
+      put(el.gun, a.slot === 3 ? NADES[a.nadeSel].name : w.name); put(el.gun, a.reload > 0 ? 'busy' : '', 'className');
+      put(el.mag, a.slot === 3 ? a.nades[a.nadeSel] : w.mag ? a.mag[a.slot] : '-');
+      put(el.res, a.slot === 3 || !w.mag ? '' : a.res[a.slot]);
       put(el.ammo, w && w.mag && a.mag[a.slot] <= w.mag * 0.25 ? 'low' : '', 'className');
       const nadeCount = a.nades[0] + a.nades[1] + a.nades[2];
-      const names = [a.slots[0] ? WEAPONS[a.slots[0]].name : 'no rifle', WEAPONS[a.slots[1]].name, 'Blade', `Nades ${nadeCount}`];
-      slotEls.forEach((s, i) => { put(s, `${i + 1} ${names[i]}`); put(s, i === a.slot ? 'on' : (i === 0 && !a.slots[0]) || (i === 3 && !nadeCount) ? 'none' : '', 'className'); });
+      put(slotEls[0], a.slots[0] ? WEAPONS[a.slots[0]].name : 'no rifle'); put(slotEls[1], WEAPONS[a.slots[1]].name); put(slotEls[3], nadeCount);
+      for (let i = 0; i < 4; i++) put(slotEls[i], i === a.slot ? 'on' : (i === 0 && !a.slots[0]) || (i === 3 && !nadeCount) ? 'none' : '', 'className');
 
       // The crosshair is the firing cone: it opens when you run, jump or hold the trigger.
-      const gap = `${(4 + inaccuracy(a, w) * 420).toFixed(1)}px`;
-      if (last.get('gap') !== gap) { last.set('gap', gap); el.cross.style.setProperty('--gap', gap); }
+      const cone = Math.round(8 + inaccuracy(a, w) * 840) / 2;
+      if (cone !== gap) { gap = cone; el.cross.style.setProperty('--gap', `${gap}px`); }
       put(el.cross, a.alive && !a.scoped ? 'block' : 'none', 'display');
       put(el.scope, a.alive && a.scoped ? 'block' : 'none', 'display');
       hitT = Math.max(0, hitT - dt); painT = Math.max(0, painT - dt * 1.5);
-      put(el.hitmark, hitT > 0 ? '1' : '0', 'opacity');
-      put(el.pain, painT.toFixed(2), 'opacity');
+      put(el.hitmark, hitT > 0 ? 1 : 0, 'opacity');
+      put(el.pain, Math.round(painT * 20) / 20, 'opacity');
       // An arc on the ring around the crosshair points at whoever just hit you.
       fromT = Math.max(0, fromT - dt);
-      put(el.from, Math.min(1, fromT * 2).toFixed(1), 'opacity');
-      if (fromT > 0) put(el.from, `rotate(${(a.yaw - Math.atan2(a.x - fromX, a.z - fromZ)).toFixed(2)}rad)`, 'transform');
-      put(el.blind, Math.min(1, a.blind / 1.2).toFixed(2), 'opacity');
-      if (st.time > bannerEnd) put(el.banner, '0', 'opacity');
+      put(el.from, Math.min(1, Math.round(fromT * 10) / 5), 'opacity');
+      if (fromT > 0) el.from.style.transform = `rotate(${(a.yaw - Math.atan2(a.x - fromX, a.z - fromZ)).toFixed(2)}rad)`;
+      put(el.blind, Math.min(1, Math.round(a.blind * 16) / 20), 'opacity');
+      if (st.time > bannerEnd) put(el.banner, 0, 'opacity');
 
       // One prompt at a time: the keg first, then the shop, then who you are watching.
       const me = st.actors[0], need = a.kit ? ROUND.douseKitTime : ROUND.douseTime;
       let prompt = '', progress = -1;
       if (a.use > 0) { prompt = a.hasKeg ? 'Lighting the keg' : 'Dousing the keg'; progress = a.use / (a.hasKeg ? ROUND.plantTime : need); }
       else if (a.alive && canPlant(st, a)) prompt = 'Hold E to light the keg here';
-      else if (a.alive && canDouse(st, a)) prompt = `Hold E to douse the keg (${need} s)`;
+      else if (a.alive && canDouse(st, a)) prompt = 'Hold E to douse the keg';
       else if (a === me && me.human && shopOpen(st, me) && !shop.open) prompt = 'B opens the Chandler\'s Counter';
       put(el.prompt, prompt ? 'block' : 'none', 'display');
       put(el.prompt.firstElementChild, prompt);
       put(el.bar, progress >= 0 ? 'block' : 'none', 'display');
-      el.bar.firstElementChild.style.width = `${Math.min(100, progress * 100)}%`;
+      if (progress >= 0) el.bar.firstElementChild.style.width = percent(Math.min(100, progress * 100));
       put(el.watching, me.alive ? '' : `${recap}${a !== me ? `WATCHING ${a.name.toUpperCase()}` : ''}`);
       radar.draw(st);
       shop.update(st); board.update(st);

@@ -42,8 +42,9 @@ export function createRadar(canvas) {
       for (const s of state.sounds) { // enemy gunfire rings for a second
         const age = state.time - s.t;
         if (s.kind !== 'shot' || s.team === me.team || age > 1) continue;
-        g.strokeStyle = `rgba(255,93,74,${1 - age})`; g.lineWidth = 1.5;
+        g.strokeStyle = '#ff5d4a'; g.lineWidth = 1.5; g.globalAlpha = 1 - age;
         g.beginPath(); g.arc(px(s.x), pz(s.z), 3 + age * 9, 0, 7); g.stroke();
+        g.globalAlpha = 1;
       }
       const k = state.keg;
       if (k.state !== 'carried' || state.actors[k.carrier].team === me.team) {
