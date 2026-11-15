@@ -15,7 +15,7 @@ const clockText = (t) => `${Math.floor(Math.max(0, t) / 60)}:${String(Math.floor
 
 export function createHud(state) {
   const el = {};
-  for (const id of ['phase', 'time', 'roundNo', 'clock', 'zone', 'radio', 'feed', 'cross', 'hitmark', 'prompt', 'bar', 'banner', 'watching', 'hp', 'hpBar', 'ap', 'apBar', 'cash', 'kegTag', 'gun', 'mag', 'res', 'ammo', 'slots', 'pain', 'blind', 'scope', 'menu', 'menuLine', 'deploy']) el[id] = $(`#${id}`);
+  for (const id of ['phase', 'time', 'roundNo', 'clock', 'zone', 'radio', 'feed', 'cross', 'hitmark', 'from', 'prompt', 'bar', 'banner', 'watching', 'hp', 'hpBar', 'ap', 'apBar', 'cash', 'kegTag', 'gun', 'mag', 'res', 'ammo', 'slots', 'pain', 'blind', 'scope', 'menu', 'menuLine', 'deploy']) el[id] = $(`#${id}`);
   const sides = [0, 1].map((t) => {
     const root = $(`#side${t}`), pips = root.querySelector('.pips');
     pips.innerHTML = '<i></i>'.repeat(5);
@@ -23,7 +23,7 @@ export function createHud(state) {
   });
   const radar = createRadar($('#radar canvas')), shop = createShop($('#shop')), board = createBoard($('#board'));
   const slotEls = [...el.slots.children], last = new Map();
-  let cursor = state.events.seq, hitT = 0, painT = 0, bannerEnd = 0, recap = '';
+  let cursor = state.events.seq, hitT = 0, painT = 0, fromT = 0, fromX = 0, fromZ = 0, bannerEnd = 0, recap = '';
 
   /** Write text (or a style value) only when it differs from what is on screen. */
   const put = (node, value, prop = 'textContent') => { const key = node.id + prop; if (last.get(key) !== value) { last.set(key, value); if (prop === 'textContent') node.textContent = value; else node.style[prop] = value; } };
@@ -45,7 +45,10 @@ export function createHud(state) {
       line(el.feed, `${killer ? named(killer) : ''}<i>${how}${e.n & 1 ? ' &middot; head' : ''}${e.n & 2 ? ' &middot; through cover' : ''}</i>${named(st.actors[e.b])}`, e.a === view || e.b === view ? 'mine' : '', 5);
     } else if (e.type === 'radio' && st.actors[e.a].team === me.team) line(el.radio, `${named(st.actors[e.a])} ${e.s}`, '', 4);
     else if (e.type === 'hurt' && e.b === view && e.a !== view) { hitT = 0.18; el.hitmark.className = e.s === 'head' ? 'head' : ''; }
-    else if (e.type === 'hurt' && e.a === view) painT = Math.min(1, painT + e.n / 60);
+    else if (e.type === 'hurt' && e.a === view) {
+      painT = Math.min(1, painT + e.n / 60);
+      if (e.b >= 0) { fromT = 1.2; fromX = st.actors[e.b].x; fromZ = st.actors[e.b].z; } // remember where it came from
+    }
     else if (e.type === 'planted') banner(e, 'THE KEG IS LIT', `${e.s === 'A' ? 'Fish Market' : 'Boathouse'}: ${ROUND.fuse} seconds on the fuse`);
     else if (e.type === 'round') {
       const m = st.match;
@@ -98,6 +101,10 @@ export function createHud(state) {
       hitT = Math.max(0, hitT - dt); painT = Math.max(0, painT - dt * 1.5);
       put(el.hitmark, hitT > 0 ? '1' : '0', 'opacity');
       put(el.pain, painT.toFixed(2), 'opacity');
+      // An arc on the ring around the crosshair points at whoever just hit you.
+      fromT = Math.max(0, fromT - dt);
+      put(el.from, Math.min(1, fromT * 2).toFixed(1), 'opacity');
+      if (fromT > 0) put(el.from, `rotate(${(a.yaw - Math.atan2(a.x - fromX, a.z - fromZ)).toFixed(2)}rad)`, 'transform');
       put(el.blind, Math.min(1, a.blind / 1.2).toFixed(2), 'opacity');
       if (st.time > bannerEnd) put(el.banner, '0', 'opacity');
 

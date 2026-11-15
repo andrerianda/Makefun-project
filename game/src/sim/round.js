@@ -1,7 +1,7 @@
 // The match: freeze, live, lit, over. Who wins a round and why, the half-time swap, and the reset between rounds.
 import { ECON, ROUND } from '../config.js';
 import { ATT, DEF, TEAM_SIZE, emit, sideOf, countAlive } from './state.js';
-import { SPAWN } from './map.js';
+import { SPAWN, STAGE } from './map.js';
 import { payRound, botShop } from './economy.js';
 import { giveKeg } from './keg.js';
 import { resetLoadout } from './loadout.js';
@@ -13,7 +13,7 @@ function spawn(state, a, index) {
   const side = sideOf(state, a), p = SPAWN[side][(index * 3 + state.match.round) % SPAWN[side].length];
   const fresh = !a.alive;
   a.alive = true; a.hp = 100; a.x = a.px = p.x; a.y = a.py = 0; a.z = a.pz = p.z; a.vx = a.vy = a.vz = 0;
-  a.yaw = a.cmd.yaw = side === ATT ? 0 : Math.PI; a.pitch = a.cmd.pitch = 0;
+  a.yaw = a.cmd.yaw = side === ATT ? Math.atan2(p.x - STAGE.mid.x, p.z - STAGE.mid.z) : Math.PI; a.pitch = a.cmd.pitch = 0; // face Bell Lane, or the square
   a.duck = 0; a.blind = 0; a.slow = 0; a.use = 0; a.hasKeg = false; a.ground = true; a.cmd.buy = null;
   if (side === ATT) a.kit = false;
   resetLoadout(a, fresh);

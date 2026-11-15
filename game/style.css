@@ -15,6 +15,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 #shade { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(12, 10, 30, 0.5) 100%); }
 #pain { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(255, 60, 40, 0.55) 100%); }
 #blind { position: absolute; inset: 0; opacity: 0; background: #fffdf2; }
+#from { position: absolute; left: 50%; top: 50%; opacity: 0; }
+#from i { position: absolute; left: -90px; top: -200px; width: 180px; height: 30px; border-top: 6px solid var(--alarm); border-radius: 50%; }
 #scope { position: absolute; inset: 0; display: none; background: radial-gradient(circle at center, transparent 0 27vh, rgba(5, 6, 12, 0.5) 33.4vh, #05060c 34.4vh); }
 /* Heavy posts outside a fine cross: the lens of the Meridian. */
 #scope::before { content: ''; position: absolute; top: calc(50% - 2px); height: 4px; left: calc(50% - 34vh); right: calc(50% - 34vh); background: linear-gradient(90deg, #05060c 0 34%, transparent 34% 66%, #05060c 66%); }
