@@ -3,7 +3,7 @@ import { GEAR, NADES, SHOP, SIDES, WEAPONS } from '../config.js';
 import { sideOfTeam } from '../sim/state.js';
 import { owns, priceOf, shopOpen } from '../sim/economy.js';
 
-export const SHOP_KEYS = [...'1234567890zxv'];
+export const SHOP_KEYS = [...'1234567890qft']; // not Z, X or V: those call the radio and turn the camera
 const describe = (id) => WEAPONS[id] || GEAR[id] || NADES.find((n) => n.id === id);
 
 export function createShop(el) {

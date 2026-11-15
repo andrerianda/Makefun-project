@@ -52,7 +52,7 @@ export const GEAR = {
   kit: { name: 'Douse Kit', hint: 'halves the douse', price: 400 },
 };
 
-// The buy menu's rows, in order; keys 1-9, 0, Z, X and V pick them.
+// The buy menu's rows, in order; keys 1-9, 0, Q, F and T pick them.
 export const SHOP = ['sparrow', 'mastiff', 'cicada', 'brine', 'corsa', 'tramont', 'meridian', 'jerkin', 'cap', 'kit', 'crackler', 'glare', 'seafog'];
 
 // A side is a job and a uniform: Smugglers attack with the keg, Wardens defend the sites. The two crews swap

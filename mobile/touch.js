@@ -23,6 +23,7 @@ const style = document.createElement('style');
 style.textContent = `
   #touch { position: fixed; inset: 0; z-index: 1; touch-action: none; user-select: none; -webkit-user-select: none; }
   #hud { z-index: 2; } /* the HUD lets touches through, except its panels: the buy counter's rows stay tappable */
+  #scope { background: radial-gradient(circle at center, transparent 0 42vh, rgba(5, 6, 12, 0.55) 46vh); } /* the buttons stay visible while scoped */
   #touch .pad { position: absolute; left: 40px; bottom: 150px; width: 190px; height: 190px; border-radius: 50%; border: 2px solid rgba(244,234,216,.35); background: rgba(22,24,38,.3); }
   #touch .nub { position: absolute; left: 60px; top: 60px; width: 70px; height: 70px; border-radius: 50%; background: rgba(244,234,216,.55); }
   #touch button { position: absolute; font: 800 15px 'Trebuchet MS', sans-serif; letter-spacing: .06em; color: #f4ead8; background: rgba(22,24,38,.62); border: 2px solid rgba(244,234,216,.4); border-radius: 12px; min-width: 76px; height: 60px; padding: 0 10px; }
@@ -55,7 +56,7 @@ const hold = (code) => [() => key('keydown', code), () => key('keyup', code)];
 
 button('FIRE', '', () => mouse('mousedown', 0), () => mouse('mouseup', 0));
 root.lastChild.className = 'fire';
-button('SCOPE', 'right:200px;bottom:150px', () => mouse('mousedown', 2), () => mouse('mouseup', 2));
+button('SCOPE', 'right:200px;bottom:150px', () => mouse('mousedown', 2), () => setTimeout(() => mouse('mouseup', 2), 60)); // held long enough for a slow frame to see it
 button('RELOAD', 'right:200px;bottom:225px', ...hold('KeyR'));
 button('JUMP', 'right:60px;bottom:330px', () => tapKey('Space', ' '));
 button('CROUCH', 'right:150px;bottom:330px', ...hold('KeyC'), 'toggle');
