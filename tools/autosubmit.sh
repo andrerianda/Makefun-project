@@ -13,7 +13,7 @@
 set -u
 set -a; . ~/.makefun/env; set +a
 W=/root/makefun-work
-K=$W/kit15/tiny-chess-01-kit
+K=$W/kit18/tiny-chess-01-kit
 LOG=$W/logs/autosubmit.log
 EVERY=${1:-120}
 say() { echo "$(date -u +'%m-%d %H:%M:%S') $*" >> "$LOG"; }

@@ -17,7 +17,7 @@ N=${1:?bundle number or auto}
 MIN=${2:-3}
 R=/home/user/Makefun-project
 W=/root/makefun-work
-K=$W/kit15/tiny-chess-01-kit
+K=$W/kit18/tiny-chess-01-kit
 BR=claude/makefun-bounty-setup-qxbrw7
 NODE26=/tmp/claude-0/-home-user/4ea90a4a-482f-5f08-8e21-c0ce40f970dd/scratchpad/node26/node-v26.13.1-linux-x64/bin
 SESSION=/root/.claude/projects/-home-user/4ea90a4a-482f-5f08-8e21-c0ce40f970dd.jsonl
@@ -39,7 +39,7 @@ while pgrep -f "tools/[c]onfirm.py" > /dev/null; do sleep 20; done      # let a 
 
 # 1. the table the real engine's games give
 cp $R/engine.py var/engine_prev_table.py
-rm -rf $B; mkdir -p $B; cp $R/engine.py $B/engine.py
+rm -rf $B; mkdir -p $B; git init -q $B; cp $R/engine.py $B/engine.py   # makefun compress works only inside a git repository
 python3 tools/varsearch.py --engine $R/engine.py --table > var/tb_new.txt 2> var/tb_new.stats || { say "table builder failed"; exit 3; }
 grep -q "^# all: scenarios 640 wins 640 " var/tb_new.stats || { say "the table does not win every scenario: $(tail -n 1 var/tb_new.stats)"; exit 3; }
 SPARE=$(sed -n 's/^# all: .* mean_spare \([0-9.]*\)$/\1/p' var/tb_new.stats)
