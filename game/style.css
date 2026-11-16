@@ -7,6 +7,8 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #14162a; color: var(--ink); font-family: var(--ui); user-select: none; }
 #game, #game canvas { position: fixed; inset: 0; display: block; }
+/* The grade: a little more colour and contrast than the renderer gives, for the dusk. */
+#game canvas { filter: saturate(1.14) contrast(1.05); }
 #hud { position: fixed; inset: 0; pointer-events: none; font-size: 14px; }
 #hud small { font-size: 10px; letter-spacing: 0.14em; color: var(--dim); }
 #hud b { font-weight: 800; }

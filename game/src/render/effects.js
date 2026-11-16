@@ -53,7 +53,7 @@ export function buildEffects(scene, tex, actors, camera, kit) {
         if (e.a === state.viewId && !overShoulder(state)) from.set(0.095, -0.12, -0.9).applyMatrix4(camera.matrixWorld); else actors.muzzle(a, from);
         const len = from.distanceTo(to);
         if (len < 1.5) return;
-        t.visible = true; t.position.copy(from).lerp(to, 0.5); t.lookAt(to); t.scale.set(0.014, 0.014, len);
+        t.visible = true; t.position.copy(from).lerp(to, 0.5); t.lookAt(to); t.scale.set(0.022, 0.022, len);
         t.userData.t = 0;
       } else if (e.type === 'impact') {
         const m = marks[markI++ % MARKS];
