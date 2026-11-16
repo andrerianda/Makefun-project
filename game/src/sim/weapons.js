@@ -1,7 +1,8 @@
 // The trigger: switching, reloading, the firing cadence, and the accuracy model that makes stopping to aim pay.
 import { MOVE, SPRAY } from '../config.js';
 import { emit, noise } from './state.js';
-import { rayActor, rayWorld, eyeHeight, hit, look } from './world.js';
+import { rayWorld, eyeHeight, hit, look } from './collision.js';
+import { rayActor } from './hitboxes.js';
 import { strike, WALLBANG } from './damage.js';
 import { throwNade } from './grenades.js';
 import { weaponOf } from './loadout.js';

@@ -3,7 +3,7 @@
 const root = (process.env.REPO || '/home/user/Makefun-project') + '/game/src/';
 const map = await import(root + 'sim/map.js');
 const { findPath, makePath } = await import(root + 'sim/nav.js');
-const { sightClear } = await import(root + 'sim/world.js');
+const { sightClear } = await import(root + 'sim/collision.js');
 const { walk, COLS, ROWS, colOf, rowOf, SPAWN, SITES, HOLDS, STAGE, SMOKES, boxes, tile } = map;
 const p = makePath();
 const dist = (a, b) => { if (!findPath(p, a.x, a.z, b.x, b.z)) return -1; let d = 0, x = a.x, z = a.z; for (let i = 0; i < p.n; i++) { d += Math.hypot(p.x[i] - x, p.z[i] - z); x = p.x[i]; z = p.z[i]; } return d; };

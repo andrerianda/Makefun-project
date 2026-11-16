@@ -3,7 +3,7 @@
 import { WEAPONS } from './config.js';
 import { drain } from './sim/state.js';
 import { zoneAt } from './sim/map.js';
-import { rayWorld } from './sim/world.js';
+import { rayWorld } from './sim/collision.js';
 
 // Per weapon kind: [loudness, body s, body Hz]
 const GUNS = { pistol: [0.3, 0.1, 2600], smg: [0.24, 0.07, 3300], rifle: [0.4, 0.14, 1900], shotgun: [0.5, 0.26, 1100], sniper: [0.6, 0.4, 900] };

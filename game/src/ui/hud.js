@@ -8,7 +8,8 @@ import { weaponOf } from '../sim/loadout.js';
 import { canPlant, canDouse, douseTime } from '../sim/keg.js';
 import { shopOpen } from '../sim/economy.js';
 import { createRadar } from './radar.js';
-import { createShop, createBoard } from './panels.js';
+import { createShop } from './buymenu.js';
+import { createBoard } from './scoreboard.js';
 
 const REASONS = { wiped: 'the other crew is down', time: 'the clock ran out', doused: 'the keg is doused', blast: 'the keg went up' };
 const clockText = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; // from whole seconds

@@ -1,6 +1,6 @@
 // Keyboard and mouse. Each fixed step, `apply` copies what is held into the player's cmd, the same record a
 // bot's brain fills in, so the simulation never knows which it is driving.
-import { SHOP_KEYS } from './ui/panels.js';
+import { SHOP_KEYS } from './ui/buymenu.js';
 
 const SENSITIVITY = 0.0023;
 const ORDERS = { z: 'A', x: 'B', g: 'me' }; // radio calls: hit or stack a site, fall in on me

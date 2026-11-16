@@ -1,4 +1,22 @@
 <!doctype html>
+<!--
+Where each part of this round-based tactical shooter lives (under src/):
+1 Game: first person, mouse look, WASD (input.js, render/view.js); nine bots that move, see and shoot back
+  (sim/bots.js); rounds end by a wipe, the clock, the blast or the douse, sides swap at half-time, first to 7
+  (sim/round.js); HUD, radar, kill feed (ui/).
+2 Gunplay: guns fire, reload and run dry; a cone that running, jumping and spraying open and a crouch
+  tightens, a recoil pattern, wall-bangs (sim/weapons.js); head, torso and leg hitboxes (sim/hitboxes.js);
+  head x4, legs x0.75, falloff, armour (sim/damage.js); acceleration, friction, crouch, jump, sliding
+  collision (sim/movement.js, sim/collision.js).
+3 Tactics: a keg to plant on site A or B and douse (sim/keg.js); pay for wins, losing streaks, kills and
+  plants, spent in the buy menu on seven guns, armour, frag, flash and smoke (sim/economy.js, ui/buymenu.js,
+  sim/grenades.js); bots path with A* (sim/nav.js), see in a cone, hear steps and shots
+  (sim/perception.js), hold posts, run plays and rotate (sim/coach.js).
+4 Look: a text map (sim/map.js) built with baked light (render/level.js), painted textures
+  (render/textures.js), models kept as data (render/kit.js).
+5 Code: a fixed 60 Hz step apart from rendering (main.js, sim/step.js); one state object (sim/state.js);
+  pooled events and shared records, so hot loops make no objects.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">

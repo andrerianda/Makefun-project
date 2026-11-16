@@ -2,7 +2,7 @@
 // A player and a bot go through the same function; only their cmd differs.
 import { MOVE } from '../config.js';
 import { emit, noise } from './state.js';
-import { moveBody } from './world.js';
+import { moveBody } from './collision.js';
 import { weaponOf } from './loadout.js';
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);

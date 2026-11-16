@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { PALETTE } from '../config.js';
 import { boxes, COLS, ROWS, CELL, cellX, cellZ, colOf, rowOf, tile, zoneAt, hash } from '../sim/map.js';
-import { rayWorld } from '../sim/world.js';
+import { rayWorld } from '../sim/collision.js';
 import { label } from './textures.js';
 import { geometry } from './kit.js';
 
@@ -173,9 +173,7 @@ export function buildLevel(scene, tex, kit) {
   // The campanile: a pale shaft over Bell Square, an open belfry with its bell, a tiled spire. Every lane sees it.
   const tower = boxes.find((b) => b.kind === 'tower'), tx0 = tower.x0 - 0.06, tx1 = tower.x1 + 0.06, tz0 = tower.z0 - 0.06, tz1 = tower.z1 + 0.06, mid = (tx0 + tx1) / 2, midZ = (tz0 + tz1) / 2, pale = colour('#f0dcb8');
   plaster.box({ x0: tx0, x1: tx1, z0: tz0, z1: tz1, y0: 0, y1: 20 }, pale, 3, stone, stoneTint, 1.6);
-  for (const [dx, dz] of [[tx0, tz0], [tx1 - 0.6, tz0], [tx0, tz1 - 0.6], [tx1 - 0.6, tz1 - 0.6]]) plaster.box({ x0: dx, x1: dx + 0.6, z0: dz, z1: dz + 0.6, y0: 20, y1: 23.2 }, pale, 3);
-  roof.box({ x0: tx0 - 0.3, x1: tx1 + 0.3, z0: tz0 - 0.3, z1: tz1 + 0.3, y0: 23.2, y1: 23.6 }, WHITE, 2.4);
-  for (const y of [0, 7.4, 13.4, 19.6]) stone.box({ x0: tx0 - 0.14, x1: tx1 + 0.14, z0: tz0 - 0.14, z1: tz1 + 0.14, y0: y, y1: y + (y ? 0.4 : 1.1) }, stoneTint, 1.6); // plinth and cornices
+  prop('campanile', mid, 0, midZ); // its stonework
   for (const y of [3.4, 9.6]) for (const s of [1, -1]) { // arched shutters up the shaft: the trim's door cells
     trim.decal(mid, y, s > 0 ? tz1 : tz0, [s, 0, 0], [0, 0, s], 0.9, 2.3, 6);
     trim.decal(s > 0 ? tx1 : tx0, y, midZ, [0, 0, -s], [s, 0, 0], 0.9, 2.3, 7);

@@ -1,5 +1,5 @@
-// Geometry queries against the map's boxes: body collision, ray casts and hitboxes. No allocation per call:
-// results come back in the module's shared records.
+// Collision with the map: a body against its boxes, and rays against them (bullets, sight lines, grenades).
+// No allocation per call: results come back in the module's shared records.
 import { MOVE } from '../config.js';
 import { boxes, CELL, COLS, ROWS } from './map.js';
 
@@ -9,7 +9,7 @@ const LIMIT_X = (COLS / 2) * CELL - 0.5, LIMIT_Z = (ROWS / 2) * CELL - 0.5;
 export const hit = { box: null, nx: 0, ny: 0, nz: 0 };
 
 /** Slab test of a ray against one box; returns the entry distance or -1, and leaves the face in `hit`. */
-function rayBox(ox, oy, oz, dx, dy, dz, b, maxT) {
+export function rayBox(ox, oy, oz, dx, dy, dz, b, maxT) {
   let t0 = 0, t1 = maxT, axis = 0, sign = 0;
   for (let i = 0; i < 3; i++) {
     const o = i === 0 ? ox : i === 1 ? oy : oz, d = i === 0 ? dx : i === 1 ? dy : dz;
@@ -87,25 +87,4 @@ export function moveBody(a, dt) {
   if (a.y <= 0) { a.y = 0; a.vy = 0; a.ground = true; }
   a.x = Math.max(-LIMIT_X, Math.min(LIMIT_X, a.x));
   a.z = Math.max(-LIMIT_Z, Math.min(LIMIT_Z, a.z));
-}
-
-// A body's three hitboxes, as fractions of its height: legs, torso, head (the head is the last 0.3 m).
-const ZONE = { t: 0, zone: 0 };
-const part = { x0: 0, y0: 0, z0: 0, x1: 0, y1: 0, z1: 0 };
-function rayPart(ox, oy, oz, dx, dy, dz, a, lo, hi, half, maxT) {
-  part.x0 = a.x - half; part.x1 = a.x + half; part.z0 = a.z - half; part.z1 = a.z + half;
-  part.y0 = a.y + lo; part.y1 = a.y + hi;
-  return rayBox(ox, oy, oz, dx, dy, dz, part, maxT);
-}
-
-/** Where a ray meets a body: returns {t, zone} with zone 0 head, 1 torso, 2 legs, or null. */
-export function rayActor(a, ox, oy, oz, dx, dy, dz, maxT) {
-  const h = bodyHeight(a), waist = h * 0.47, neck = h - 0.3;
-  let best = -1, zone = 0, t;
-  if ((t = rayPart(ox, oy, oz, dx, dy, dz, a, neck, h, 0.16, maxT)) >= 0) { best = t; zone = 0; }
-  if ((t = rayPart(ox, oy, oz, dx, dy, dz, a, waist, neck, 0.27, maxT)) >= 0 && (best < 0 || t < best)) { best = t; zone = 1; }
-  if ((t = rayPart(ox, oy, oz, dx, dy, dz, a, 0, waist, 0.22, maxT)) >= 0 && (best < 0 || t < best)) { best = t; zone = 2; }
-  if (best < 0) return null;
-  ZONE.t = best; ZONE.zone = zone;
-  return ZONE;
 }

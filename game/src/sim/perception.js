@@ -1,5 +1,5 @@
 // What a bot knows: who it can see (a view cone, walls, smoke, a flash in its eyes) and what it can hear.
-import { sightClear, eyeHeight, bodyHeight } from './world.js';
+import { sightClear, eyeHeight, bodyHeight } from './collision.js';
 import { smokeBetween } from './grenades.js';
 
 const CONE = Math.cos(1.05), FAR = 75; // a 120 degree field of view

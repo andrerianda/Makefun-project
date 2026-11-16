@@ -1,7 +1,7 @@
 // Thrown gear: a Crackler bursts, a Glare blinds whoever is looking, a Seafog hangs a cloud that blocks sight.
 import { MOVE, NADES } from '../config.js';
 import { emit, noise } from './state.js';
-import { rayWorld, sightClear, eyeHeight, hit, look } from './world.js';
+import { rayWorld, sightClear, eyeHeight, hit, look } from './collision.js';
 import { hurt } from './damage.js';
 
 const THROW = 17, CLOUD_Y = 1.4;

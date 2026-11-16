@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { weaponOf } from '../sim/loadout.js';
 import { drain, sideOf, overShoulder } from '../sim/state.js';
-import { eyeHeight, rayWorld, look } from '../sim/world.js';
+import { eyeHeight, rayWorld, look } from '../sim/collision.js';
 import { makeTextures } from './textures.js';
 import { buildLevel } from './level.js';
 import { buildSky } from './sky.js';

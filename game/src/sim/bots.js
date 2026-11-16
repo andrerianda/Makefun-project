@@ -6,7 +6,7 @@ import { report } from './coach.js';
 import { findPath, makePath } from './nav.js';
 import { weaponOf } from './loadout.js';
 import { canPlant, canDouse, douseTime } from './keg.js';
-import { sightClear, eyeHeight, bodyHeight } from './world.js';
+import { sightClear, eyeHeight, bodyHeight } from './collision.js';
 
 const TAU = Math.PI * 2;
 const turnTo = (from, to, max) => {

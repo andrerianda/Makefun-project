@@ -1,23 +1,5 @@
-// CAMPANILE: a 5v5 round-based tactical shooter in a pastel harbour town, on three.js.
-//
-// How the code is laid out (one job per module):
-//   config.js        the tables: movement, rounds, economy, the armoury, the palette
-//   sim/             the game itself, no DOM and no three.js: it runs headless in Node
-//     state.js         the one state object, its event ring and noises
-//     map.js           Porto Vesper as text: lanes, sites, posts, smoke targets
-//     world.js         collision, ray casts, hitboxes      movement.js  acceleration, crouch, jump
-//     weapons.js       cone, recoil, wall-bangs            damage.js    zones and armour
-//     grenades.js      frag, flash, smoke                  keg.js       plant and douse
-//     economy.js       pay and the buy counter             round.js     phases, wins, half-time
-//     coach.js         team plays and rotations            bots.js      one bot's eyes, ears and trigger
-//     nav.js           A* and string-pulling               step.js      one fixed step, systems in order
-//     perception.js    sight and hearing                   loadout.js   slots, dropped rifles   rng.js  seeded dice
-//   render/          view.js draws the state: baked level, painted textures, sky, actors, effects, the weapon in hand;
-//                    kit.js reads the models
-//   ui/              HUD, radar, buy counter, scoreboard   audio.js   synthesised sound   input.js  keys to cmd
-//
-// The loop below steps the simulation at a fixed 60 Hz and renders as fast as the display asks,
-// interpolating between the last two steps.
+// CAMPANILE: a 5v5 round-based tactical shooter in a harbour town (index.html opens with a map of the source).
+// The loop below steps the simulation at a fixed 60 Hz and draws between steps, interpolating the last two.
 import { TICK } from './config.js';
 import { createGame, stepGame } from './sim/step.js';
 import { startMatch } from './sim/round.js';
@@ -34,8 +16,7 @@ const view = createView(document.getElementById('game'), state, await loadKit(['
 const hud = createHud(state), audio = createAudio(state), input = createInput(view.canvas, state, hud);
 const INTRO = document.getElementById('menuLine').textContent;
 
-// For the screenshot script and for tinkering in the console: the live state and HUD, a way to skip ahead,
-// and a switch that stops the clock so a frame can be looked at.
+// For the console and the screenshot script: skip ahead, or stop the clock.
 const dev = window.campanile = { state, hud, hold: false, skip(seconds) { for (let i = 0; i < seconds / TICK; i++) stepGame(state, TICK); } };
 
 let last = performance.now(), debt = 0, encore = 0;
