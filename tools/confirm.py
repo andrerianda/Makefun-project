@@ -49,7 +49,7 @@ for k, vs in sim.items():
         if v not in real.get(k, {}):      # the quickest simulator win not replayed yet
             todo.append((have - plies, k, v, vs[v]))
             break
-todo.sort(key=lambda t: -t[0])
+todo.sort(key=lambda t: -t[0] / (t[3]["plies"] * BUDGET[run.OPPONENTS.index(t[1][0])]))   # most plies gained per second of replay first
 if a.limit:
     todo = todo[: a.limit]
 print(f"simulator wins to replay with the real engine: {len(todo)}", flush=True)

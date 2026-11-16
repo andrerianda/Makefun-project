@@ -3,12 +3,17 @@
 # then replay the new simulator bests with the real Python engine, and again.  Everything is
 # resumable from the results database, so the loop can be killed and started at any time.
 # usage: nightshift.sh [hours of sampling per cycle, default 4] [engine source, default the repository's engine.py]
+#        a third argument "confirm" starts the first cycle at the replay step
 H=${1:-4}
 E=${2:-/home/user/Makefun-project/engine.py}
+F=${3:-sample}
 cd /root/makefun-work
 while [ ! -e var/nightshift.stop ]; do
-  python3 tools/autoplan.py --fast --jobs 4 --worst 40 --hours "$H" --log logs/autoplan-fast.log >> logs/autoplan-fast.out 2>&1
-  [ -e var/nightshift.stop ] && break
+  if [ "$F" != confirm ]; then
+    python3 tools/autoplan.py --fast --jobs 4 --worst 40 --hours "$H" --log logs/autoplan-fast.log >> logs/autoplan-fast.out 2>&1
+    [ -e var/nightshift.stop ] && break
+  fi
+  F=sample
   python3 tools/confirm.py --engine "$E" --jobs 4 >> logs/confirm-loop.txt 2>&1
   echo "$(date -u +'%m-%d %H:%M') cycle done" >> logs/nightshift.log
 done
