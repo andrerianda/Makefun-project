@@ -20,5 +20,6 @@ while [ ! -e var/cycle.stop ]; do
   python3 tools/confirm.py --engine "$E" --jobs 4 >> logs/confirm-loop.txt 2>&1
   [ -e var/cycle.stop ] && break
   bash tools/refresh.sh auto "$MIN" >> logs/refresh-auto.log 2>&1
-  echo "$(date -u +'%m-%d %H:%M') cycle done, refresh exit $?" >> logs/cycle.log
+  rc=$?
+  echo "$(date -u +'%m-%d %H:%M') cycle done, refresh exit $rc" >> logs/cycle.log
 done

@@ -151,7 +151,7 @@ trials = [l.strip() for l in open('/root/makefun-work/logs/verify_table%s.txt' %
 json.dump({"commit": entry, "bundle": bundle, "title": title,
            "main_py_sha256": hashlib.sha256(open('/home/user/Makefun-project/main.py', 'rb').read()).hexdigest(),
            "main_py_bytes": int(size), "mean_spare_per_game": float(spare),
-           "verified": "every table entry is a game engine.py played and won; packed entry replayed: 3 full practice trials 8/8 and 24 changed scenarios, 0 mismatches; kit level 15 check passed; bundle free of secrets",
+           "verified": "every table entry is a game engine.py played and won; packed entry replayed: 3 full practice trials 8/8 and 24 changed scenarios, 0 mismatches; kit level 18 check passed; bundle free of secrets",
            "trials": trials, "prepared_utc": time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime()), "previous": prev},
           open('/root/makefun-work/var/ready.json', 'w'))
 EOF
