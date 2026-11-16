@@ -23,6 +23,7 @@ ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--worst", type=int, default=40)
 ap.add_argument("--stop", default="/root/makefun-work/var/autoplan.stop")
 ap.add_argument("--log", default="/root/makefun-work/logs/autoplan.log")
+ap.add_argument("--hours", type=float, default=0, help="end after this many hours (checked between rounds; 0: no limit)")
 ap.add_argument("--fast", action="store_true", help="sample with the fast simulator (tools/fast/fast.py improve) instead of the Python engine")
 ap.add_argument("--prior", default="", help="starting plies per second, e.g. depth-2=0.4,nodes-100k=1.0 (others start untried)")
 a = ap.parse_args()
@@ -43,7 +44,8 @@ def say(msg):
 
 
 pull = 0
-while not os.path.exists(a.stop) and len(done) < len(run.OPPONENTS):
+T_END = time.time() + a.hours * 3600 if a.hours else float("inf")
+while not os.path.exists(a.stop) and len(done) < len(run.OPPONENTS) and time.time() < T_END:
     live = [o for o in run.OPPONENTS if o not in done]
     fresh = [o for o in live if est[o] is None]
     stale = [o for o in live if pull - last[o] >= 16]
