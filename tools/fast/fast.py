@@ -35,7 +35,7 @@ ap.add_argument("--rounds", type=int, default=99)
 ap.add_argument("--worst", type=int, default=0)
 ap.add_argument("--scenarios", default="")
 ap.add_argument("--hours", type=float, default=99.0)
-ap.add_argument("--order", default="asc")
+ap.add_argument("--order", default="mix", help="which untried variant comes next: asc, desc, or mix (cycle through the king-distance weights 8, 5, 3, ...)")
 ap.add_argument("--node", default=os.environ.get("NODE_BIN", "node"))
 a = ap.parse_args()
 
@@ -116,6 +116,7 @@ if a.mode == "check":
 
 # ---- improve ------------------------------------------------------------------------------------
 lo, hi = (int(x) for x in a.variants.split("-"))
+MIX = [5, 3, 1, 6, 4, 2, 0]   # variant groups (v // 12) in the order "mix" visits them: weights 8, 5, 3, 8, 5, 3, 1
 only = {tuple(x.split(":")) for x in a.scenarios.split(",")} if a.scenarios else None
 
 
@@ -139,7 +140,7 @@ for rnd in range(a.rounds):
             continue
         nxt = [v for v in range(lo, hi + 1) if v != 44 and v not in tried.get(k, ())]
         if nxt:
-            todo.append((k, nxt[0] if a.order == "asc" else nxt[-1], p))
+            todo.append((k, nxt[0] if a.order == "asc" else nxt[-1] if a.order == "desc" else min(nxt, key=lambda v: (v % 12, MIX.index(v // 12))), p))
     if a.worst:
         todo = todo[: a.worst]
     if not todo or time.time() > t_end:

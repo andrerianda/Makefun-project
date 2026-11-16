@@ -3,7 +3,7 @@
 # Every sixth poll it also reads the competition record and ends if the environment, generator or
 # scorer build is no longer the one the results database was made with.
 # usage: quotawatch.sh [minutes to watch, default 115] [seconds between polls, default 300]
-# exit 0: can_submit is true; exit 3: still closed when the watch time ran out; exit 4: a build changed.
+# exit 0: can_submit is true (the detached guard tools/autosubmit.sh sends the standby package; its outcome is printed); exit 3: still closed when the watch time ran out; exit 4: a build changed.
 # The API key is read from ~/.makefun/env and never printed.
 set -u
 . ~/.makefun/env
@@ -21,7 +21,12 @@ try:
 except Exception as e:
     print("unreadable answer")' 2>/dev/null)
   if [ "$s" != "$last" ]; then echo "$(date -u +'%m-%d %H:%M') $s" | tee -a "$LOG"; last="$s"; fi
-  case "$s" in can_submit=True*) echo "QUOTA OPEN"; exit 0;; esac
+  case "$s" in can_submit=True*)
+    # the detached guard (tools/autosubmit.sh) does the sending; wait for its word, then end
+    echo "QUOTA OPEN"
+    for i in $(seq 1 80); do { [ -e /root/makefun-work/var/submitted.json ] || [ -e /root/makefun-work/var/autosubmit.failed ]; } && break; sleep 5; done
+    cat /root/makefun-work/var/submitted.json 2>/dev/null; echo; tail -n 6 /root/makefun-work/logs/autosubmit.log
+    exit 0;; esac
   if [ $(( n % 6 )) -eq 0 ]; then
     got=$(curl -sS -m 60 https://make.fun/api/competitions/tiny-chess-01 2>/dev/null | python3 -c 'import re,sys
 t=sys.stdin.read()

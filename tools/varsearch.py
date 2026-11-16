@@ -91,6 +91,8 @@ if a.table or a.stats:
         spare = sum(200 - r["plies"] for r in rs if r["outcome"] == "win")
         tmax = max((r.get("think_sum", 0) for r in rs), default=0)
         print(f"# {o:11s} scenarios {len(rs):3d}/80  win {w} draw {d} loss {len(rs) - w - d}  spare/win {spare / max(1, w):.0f}  longest game think {tmax / 1000:.0f}s", file=sys.stderr)
+    wins = [r for r in cover.values() if r["outcome"] == "win"]
+    print(f"# all: scenarios {len(cover)} wins {len(wins)} mean_spare {sum(200 - r['plies'] for r in wins) / 640:.2f}", file=sys.stderr)
     sys.exit(0)
 
 lo, hi = (int(x) for x in a.variants.split("-"))
