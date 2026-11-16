@@ -31,6 +31,9 @@ const GEN = process.env.SIM_GEN_DIR || '/root/makefun-work/var/fast';
 
 // ---- the house side: the kit's own code, up to (not including) its HTTP match server ----------
 const serverSrc = readFileSync(join(KIT, 'program/env/server.mjs'), 'utf8');
+const ENV_SHA256 = process.env.ENV_SHA256 || '958770ada08d79a7d0a9b1b963750a720dc576b3018c0f89fab4d399e3af9ffb';
+const envSha = createHash('sha256').update(serverSrc).digest('hex');
+if (envSha !== ENV_SHA256) throw new Error(`server.mjs has sha256 ${envSha}, not the build the results database was made with (${ENV_SHA256})`);
 const cut = serverSrc.indexOf('\n// src/server/match.ts');
 if (cut < 0) throw new Error('server.mjs: the match.ts marker is missing');
 const houseText = serverSrc.slice(0, cut) + '\nexport { Game, gameEnding, fastAlphabetaMove, moveUci, opponentById, BOOK, OPPONENTS };\n';
@@ -84,6 +87,7 @@ const B0 = Uint8Array.from([7, 2, 3, 5, 6, 3, 2, 7, 1, 1, 1, 1, 1, 1, 1, 1].conc
 const ABORT = new Error('search stopped');   // stands for every exception engine.py's bare except swallows
 
 let N = 0, LIM = 0, HH = null, K = null, WW = null, NM = false, HS = new Set(), J = 0, XS = 1, NZ = null, LN = 0;
+let LASTG = 0;   // the score of the last finished iteration (not used by the search)
 const TT = new Map();
 
 const keyOf = (b) => String.fromCharCode.apply(null, b);
@@ -396,6 +400,7 @@ function go(b, L, lim) {
     if (p & 15) s += p < 8 ? w[p][i] : -o[p - 8][63 - i];
   }
   let best = L[0];
+  LASTG = 0;
   HS.add(keyOf(b));
   if (L.length < 2) return best;
   try {
@@ -426,6 +431,7 @@ function go(b, L, lim) {
         lo = -I; hi = I;
       }
       g = a;
+      LASTG = a;
       if (Math.abs(a) > 19000) break;
     }
   } catch (err) {
@@ -451,7 +457,7 @@ function newGame(variant, oi) {
   XS = STYLE[Math.floor(variant / 12)];
   NZ = NOISE[String(variant)];
   if (!NZ || XS === undefined) throw new Error('no noise table for variant ' + variant);
-  LN = Number(process.env.NODES || BUDGET[oi]);
+  LN = BUDGET[oi];
 }
 
 function ourMove(ms, legal) {
@@ -491,20 +497,22 @@ function playGame(job) {
   newGame(job.variant, OPP.indexOf(job.opponent));
   const cap = job.cap || 0;
   let ourNodes = 0;
+  const scores = [];
   while (ending === null) {
     // a win in fewer than cap plies needs our mating move to be ply cap-1 at the latest
     if (cap && g.moves.length >= cap - 1) {
-      return { outcome: 'capped', reason: 'capped', plies: g.moves.length, cap, moves: g.moves.join(' '), our_nodes: ourNodes };
+      return { outcome: 'capped', reason: 'capped', plies: g.moves.length, cap, moves: g.moves.join(' '), our_nodes: ourNodes, scores };
     }
     const legal = g.position.legalMoves().map(House.moveUci);
     const u = ourMove(g.moves, legal);
     ourNodes += N;
+    scores.push(LASTG);
     if (!g.play(u)) throw new Error('our move is not legal: ' + u);
     ending = House.gameEnding(g);
     if (ending === null) house();
   }
   const pts = ending.result === '1/2-1/2' ? 0.5 : ((ending.result === '1-0') === (job.colour === 'white') ? 1 : 0);
-  return { outcome: pts === 1 ? 'win' : pts === 0 ? 'loss' : 'draw', reason: ending.reason, plies: g.moves.length, moves: g.moves.join(' '), our_nodes: ourNodes };
+  return { outcome: pts === 1 ? 'win' : pts === 0 ? 'loss' : 'draw', reason: ending.reason, plies: g.moves.length, moves: g.moves.join(' '), our_nodes: ourNodes, scores };
 }
 
 const rl = createInterface({ input: process.stdin, crlfDelay: Infinity });

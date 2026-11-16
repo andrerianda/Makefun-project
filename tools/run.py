@@ -13,7 +13,7 @@ SPEC is "trial0" / "trial1" / "trial2" (a practice instance, 6 games),
 "trial0x8" (all 8 games of the instance) or a comma list of
 "opponent:colour:opening" (e.g. nodes-2M:white:italian-game).
 """
-import argparse
+import hashlib, argparse
 import json
 import os
 import re
@@ -67,6 +67,14 @@ def elo(points_by_game, floor=0, cap=2112):
     return min(cap, max(floor, round((lo + hi) / 2)))
 
 
+# Every recorded game holds for one build of the environment (its house engines): refuse any other.
+ENV_SHA256 = os.environ.get("ENV_SHA256", "958770ada08d79a7d0a9b1b963750a720dc576b3018c0f89fab4d399e3af9ffb")
+_got = hashlib.sha256(open(SERVER, "rb").read()).hexdigest()
+if _got != ENV_SHA256:
+    raise SystemExit(f"{SERVER} has sha256 {_got}, not the build the results database was made with ({ENV_SHA256}): "
+                     "the house engines may play differently; re-check the table before going on (ENV_SHA256=... overrides)")
+
+
 def parse_games(spec):
     m = re.fullmatch(r"trial(\d)(x8)?", spec)
     if m:
@@ -108,8 +116,8 @@ def play(engine, games, py="python3", limit_ms=10000, env_extra=None, timeout=No
                 raise RuntimeError("env not ready")
             time.sleep(0.02)
         port = json.load(open(ready))["port"]
-        eenv = dict(os.environ, MAKEFUN_ENV_URL=f"http://127.0.0.1:{port}", MAKEFUN_PROMPT_FILE=prompt,
-                    MAKEFUN_TRIAL_SEED="0" * 64)
+        eenv = {k: v for k, v in os.environ.items() if k != "NODES"}   # a stray NODES must not change a recorded game
+        eenv.update(MAKEFUN_ENV_URL=f"http://127.0.0.1:{port}", MAKEFUN_PROMPT_FILE=prompt, MAKEFUN_TRIAL_SEED="0" * 64)
         eenv.update(env_extra or {})
         t1 = time.time()
         cmd = [py, "-P", "-s", engine] if "pypy" not in py else [py, engine]

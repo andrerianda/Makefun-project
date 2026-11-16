@@ -9,7 +9,7 @@ the best average; an opponent not pulled for 16 pulls is pulled anyway, so no fi
 A ply gained counts the same wherever it is gained: a final trial meets every opponent once, on
 one of its 80 scenarios, so the expected plies to spare are the sum of the opponents' means.
 
-usage: autoplan.py --engine engine.py [--jobs 4] [--worst 40] [--stop FILE] [--log FILE]
+usage: autoplan.py [--fast | --engine engine.py] [--jobs 4] [--worst 40] [--stop FILE] [--log FILE]
 It ends when the stop file exists or when no opponent has an untried variant left.
 """
 import argparse, os, re, subprocess, sys, time
@@ -18,11 +18,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import run
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--engine", required=True)
+ap.add_argument("--engine", default="/root/makefun-work/logs/engine_v9.py")
 ap.add_argument("--jobs", type=int, default=4)
 ap.add_argument("--worst", type=int, default=40)
 ap.add_argument("--stop", default="/root/makefun-work/var/autoplan.stop")
 ap.add_argument("--log", default="/root/makefun-work/logs/autoplan.log")
+ap.add_argument("--fast", action="store_true", help="sample with the fast simulator (tools/fast/fast.py improve) instead of the Python engine")
 ap.add_argument("--prior", default="", help="starting plies per second, e.g. depth-2=0.4,nodes-100k=1.0 (others start untried)")
 a = ap.parse_args()
 
@@ -48,8 +49,9 @@ while not os.path.exists(a.stop) and len(done) < len(run.OPPONENTS):
     stale = [o for o in live if pull - last[o] >= 16]
     o = fresh[0] if fresh else stale[0] if stale else max(live, key=lambda x: est[x])
     t0 = time.time()
-    cp = subprocess.run([sys.executable, os.path.join(HERE, "improve.py"), "--engine", a.engine, "--opps", o, "--rounds", "1",
-                         "--worst", str(a.worst), "--jobs", str(a.jobs)], capture_output=True, text=True)
+    tool = [os.path.join(HERE, "fast", "fast.py"), "improve"] if a.fast else [os.path.join(HERE, "improve.py"), "--engine", a.engine]
+    cp = subprocess.run([sys.executable] + tool + ["--opps", o, "--rounds", "1", "--worst", str(a.worst), "--jobs", str(a.jobs)],
+                        capture_output=True, text=True)
     out = cp.stdout
     m = LINE.search(out)
     if cp.returncode != 0:

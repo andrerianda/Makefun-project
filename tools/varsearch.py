@@ -10,7 +10,8 @@ keeps every result in a JSONL database keyed by the engine source's hash.
 usage:
   varsearch.py --engine engine.py --opps nodes-1M,nodes-2M [--variants 0-15] [--jobs 4]
                [--openings a,b | --limit N] [--colours white,black] [--db FILE] [--stop-on win|never]
-  varsearch.py --engine engine.py --table        # print the TB string the database gives
+  varsearch.py --engine engine.py --table        # print the TB string the real engine's games give
+  varsearch.py --engine engine.py --stats --with-sim    # statistics with the fast simulator's unconfirmed games too
 """
 import argparse, hashlib, json, os, re, sys, tempfile, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -32,6 +33,8 @@ ap.add_argument("--stop-on", default="win")
 ap.add_argument("--scenarios", help="explicit list: opponent:colour:opening,...")
 ap.add_argument("--table", action="store_true")
 ap.add_argument("--stats", action="store_true")
+ap.add_argument("--confirmed", action="store_true", help="(the default now) with --table/--stats: only games the real engine played count")
+ap.add_argument("--with-sim", action="store_true", help="with --table/--stats: also count the fast simulator's records (host js); never for a table that goes into an entry")
 a = ap.parse_args()
 
 SRC = open(a.engine).read()
@@ -53,6 +56,8 @@ def load():
     if os.path.exists(a.db):
         for line in open(a.db):
             r = json.loads(line)
+            if (a.table or a.stats) and not a.with_sim and r.get("host") == "js":
+                continue
             if LEGACY.get(r["engine"], r["engine"]) == EHASH and r.get("nodes") == BUDGET[run.OPPONENTS.index(r["opponent"])]:
                 out[(r["opponent"], r["colour"], r["opening"], r["variant"])] = r
     return out
@@ -84,7 +89,7 @@ if a.table or a.stats:
         w = sum(r["outcome"] == "win" for r in rs)
         d = sum(r["outcome"] == "draw" for r in rs)
         spare = sum(200 - r["plies"] for r in rs if r["outcome"] == "win")
-        tmax = max((r["think_sum"] for r in rs), default=0)
+        tmax = max((r.get("think_sum", 0) for r in rs), default=0)
         print(f"# {o:11s} scenarios {len(rs):3d}/80  win {w} draw {d} loss {len(rs) - w - d}  spare/win {spare / max(1, w):.0f}  longest game think {tmax / 1000:.0f}s", file=sys.stderr)
     sys.exit(0)
 
