@@ -155,8 +155,9 @@ for rnd in range(a.rounds):
             print(f"  ERROR {k} v{v}: {out['error'][:200]}", flush=True)
             continue
         r = {"engine": a.tag, "opponent": k[0], "colour": k[1], "opening": k[2], "variant": v, "nodes": BUDGET[run.OPPONENTS.index(k[0])],
-             "outcome": out["outcome"], "reason": out["reason"], "plies": out["plies"], "cap": cap, "moves": out["moves"],
-             "wall": round(out["ms"] / 1000, 1), "code": 0, "host": "js", "scores": out.get("scores")}
+             "outcome": out["outcome"], "reason": out["reason"], "plies": out["plies"], "cap": cap,
+             "moves": out["moves"] if out["outcome"] == "win" else "",      # only a win is ever replayed and compared
+             "wall": round(out["ms"] / 1000, 1), "code": 0, "host": "js"}
         with open(a.db, "a") as fh:
             fh.write(json.dumps(r) + "\n")
         if out["outcome"] == "win" and out["plies"] < cap:

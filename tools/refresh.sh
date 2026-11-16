@@ -5,12 +5,15 @@
 # Nothing is submitted here.  The simulator's sampling is paused while the packed file is replayed
 # (the replays run against the environment's real 10 s move limit) and resumed at the end.
 #
-# usage: refresh.sh N [MIN]
-#   N    number of the bundle file (transcriptsN.tar.gz)
+# The table is put into a copy of engine.py under var/build, packed and replayed there; the repository's
+# files change only after the replays have passed, a moment before the commits.
+#
+# usage: refresh.sh N|auto [MIN]
+#   N    number of the bundle file (transcriptsN.tar.gz); "auto": one more than the standby package's
 #   MIN  smallest gain in mean plies to spare a game, against var/ready.json, worth a new package (default 3)
 # exit: 0 new package ready, 10 gain below MIN (nothing changed), anything else: stopped, see the log
 set -uo pipefail
-N=${1:?bundle number}
+N=${1:?bundle number or auto}
 MIN=${2:-3}
 R=/home/user/Makefun-project
 W=/root/makefun-work
@@ -21,7 +24,9 @@ SESSION=/root/.claude/projects/-home-user/4ea90a4a-482f-5f08-8e21-c0ce40f970dd.j
 TITLE="Mirror-board alpha-beta, a variant for each of the 640 scenarios"
 TRAILER="Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_0142b1J9SeR4GoQ6f6YxL7Qk"
+[ "$N" = auto ] && N=$(python3 -c "import json,re;print(int(re.search(r'transcripts(\d+)',json.load(open('$W/var/ready.json'))['bundle']).group(1))+1)")
 BUNDLE=$W/transcripts$N.tar.gz
+B=$W/var/build
 say() { echo "$(date -u +'%m-%d %H:%M:%S') $*"; }
 PAT=("tools/[a]utoplan.py" "fast/[f]ast.py" "[s]im.mjs")
 resume() { for p in "${PAT[@]}"; do pkill -CONT -f "$p"; done; return 0; }
@@ -34,15 +39,16 @@ while pgrep -f "tools/[c]onfirm.py" > /dev/null; do sleep 20; done      # let a 
 
 # 1. the table the real engine's games give
 cp $R/engine.py var/engine_prev_table.py
+rm -rf $B; mkdir -p $B; cp $R/engine.py $B/engine.py
 python3 tools/varsearch.py --engine $R/engine.py --table > var/tb_new.txt 2> var/tb_new.stats || { say "table builder failed"; exit 3; }
 grep -q "^# all: scenarios 640 wins 640 " var/tb_new.stats || { say "the table does not win every scenario: $(tail -n 1 var/tb_new.stats)"; exit 3; }
 SPARE=$(sed -n 's/^# all: .* mean_spare \([0-9.]*\)$/\1/p' var/tb_new.stats)
 OLD=$(python3 -c "import json;print(json.load(open('var/ready.json'))['mean_spare_per_game'])")
 say "table: mean spare $SPARE (standby package: $OLD)"
 python3 -c "import sys;sys.exit(0 if $SPARE-$OLD>=$MIN else 1)" || { say "gain below $MIN, nothing done"; exit 10; }
-python3 - <<'EOF' || { say "table insert failed"; git -C /home/user/Makefun-project checkout -q engine.py; exit 3; }
+python3 - <<'EOF' || { say "table insert failed"; exit 3; }
 import re
-p = '/home/user/Makefun-project/engine.py'
+p = '/root/makefun-work/var/build/engine.py'
 s = open(p).read()
 new = open('/root/makefun-work/var/tb_new.txt').read().strip()
 assert len(new) == 640 and "'" not in new and "\\" not in new, len(new)
@@ -54,26 +60,30 @@ open(p, 'w').write(s2)
 EOF
 
 # 2. pack
-(cd $R && node $K/cli/makefun.mjs compress engine.py --out main.py) > logs/refresh$N.compress.txt 2>&1 || { say "compress failed"; git -C $R checkout -q engine.py main.py; exit 4; }
-BYTES=$(stat -c %s $R/main.py)
+(cd $B && node $K/cli/makefun.mjs compress engine.py --out main.py) > logs/refresh$N.compress.txt 2>&1 || { say "compress failed"; exit 4; }
+BYTES=$(stat -c %s $B/main.py)
 say "main.py $BYTES bytes"
-[ "$BYTES" -le 4096 ] || { say "main.py is over 4,096 bytes"; git -C $R checkout -q engine.py main.py; exit 5; }
+[ "$BYTES" -le 4096 ] || { say "main.py is over 4,096 bytes"; exit 5; }
 
 # 3. replay the packed file: three whole practice trials and a sample of the changed scenarios
 for p in "${PAT[@]}"; do pkill -STOP -f "$p"; done
 VP=$PATH
 [ -x $NODE26/node ] && VP=$NODE26:$PATH       # the newest Node for the replays only; packing and bundling use the system's
 say "replaying with node $(PATH=$VP node --version)"
-PATH=$VP python3 tools/verify_table.py --entry $R/main.py --engine $R/engine.py --trials --full8 --sample 24 --seed $(date +%s) \
+PATH=$VP python3 tools/verify_table.py --entry $B/main.py --engine $B/engine.py --trials --full8 --sample 24 --seed $(date +%s) \
   --changed-from var/engine_prev_table.py --jobs 3 > logs/verify_table$N.txt 2>&1
 V=$?
 resume
 grep "^==\|DIFF\|mismatches\|no database" logs/verify_table$N.txt | cut -c1-170
-[ $V -eq 0 ] || { say "replay check failed (exit $V)"; git -C $R checkout -q engine.py main.py; exit 6; }
-grep -q "wins 8/8" logs/verify_table$N.txt && ! grep "^== practice trial" logs/verify_table$N.txt | grep -qv "wins 8/8" || { say "a practice trial was not 8/8"; git -C $R checkout -q engine.py main.py; exit 6; }
+[ $V -eq 0 ] || { say "replay check failed (exit $V)"; exit 6; }
+grep -q "wins 8/8" logs/verify_table$N.txt && ! grep "^== practice trial" logs/verify_table$N.txt | grep -qv "wins 8/8" || { say "a practice trial was not 8/8"; exit 6; }
 
 # 4. commits: development state, then the entry tree (main.py without the source and the tools)
 cd $R
+[ -z "$(git status --porcelain)" ] || { say "the repository has uncommitted changes"; exit 2; }
+cp $B/engine.py engine.py
+node $K/cli/makefun.mjs compress engine.py --out main.py > $W/logs/refresh$N.compress2.txt 2>&1
+cmp -s main.py $B/main.py || { say "packing in the repository gave a different file"; git checkout -q engine.py main.py; exit 4; }
 for f in $(git ls-files tools); do [ -f "$W/$f" ] && cp "$W/$f" "$f"; done
 cp $W/tools/refresh.sh tools/refresh.sh
 cp $W/var/db.jsonl tools/var/db.jsonl
