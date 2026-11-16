@@ -6,12 +6,12 @@
 
 CAMPANILE is a 5v5 round-based tactical first-person shooter on three.js, set in a pastel harbour town at dusk. The Smugglers carry a powder keg to the Fish Market or the Boathouse and light it; the Wardens hold both sites and douse the fuse, and the two crews swap sides at half-time. Money between rounds buys rifles, armour and grenades, standing still shoots straight, and the bots run plays, rotate and call their contacts on the radio, read out in the browser's own voice.
 
-![A firefight in the Fish Market at dusk](screenshots/1-firefight.jpg)
+![A firefight in Bell Square at dusk](screenshots/1-firefight.jpg)
 
 | | |
 | --- | --- |
 | ![The Chandler's Counter at the start of a round](screenshots/2-buy-counter.jpg) | ![The keg lit on the Fish Market](screenshots/3-keg-lit.jpg) |
-| ![Over the shoulder on the quay at sunset](screenshots/4-quay.jpg) | |
+| ![A Warden douses the keg in the last round](screenshots/4-douse.jpg) | ![The optional shoulder camera, on the quay at sunset](docs/shoulder-camera.jpg) |
 
 ## Run it
 
