@@ -220,7 +220,7 @@ NZ=[0]*448
 J=0
 XS=1
 KY=bytes.fromhex('91be074e27603a3f695b15ae7254a0781649126d4f30a96481baafb897c163991c82107c3c5255a3')
-TB='4|Hyp<<948575xlllx7mll7U=5xH32030@10~X5z=0<aI=Ixlx502:4Hm<TzTx`mHx56l62lm{9<m1m<1p3mqxbKmma7xIxy11<89y08y=x5H3JTml7IAoU?H=lyHyn=0xlbWy11IlT2l04=pn1bo01I?2Vu<0x0TK0HacHJ0Wo4lyl`<5446plxxxII2nTnTK890{04Tlx3`0<04{4H2~TV6x2mll2lVL<9zI0>`<TV5T1xl1m2`aT585V?T0TI`27;2W1J5T5lmm2mWU6<3AHITlTom<mnxT0;J72:2V244>>H`lm<?c<2bV2TU0xlT=3>Vd6`=8nT0xH20X1>H{m=xH0m<><H3{lJxWUa=J0Ux<TyT24207=21HU0TVIyJWz3LlI{Hl>I0>aTNq1bmVmTYWUz63yINI>2U7T72:<4T4lTUV`UmH3:m8`<nx1ymU=l0m`Uc5<ll5Hyy4yI3HyU0lVVy1xll`3xxxWn`nmyImmmlJ;I2=212:x3TaTJIpUTTHTxlxo343`bp6:0l?5?xU5UzTH255l4a`l<m60U8zmHml0;``8T2oIa>mU0Ko6mJo4U:mT6=7HlUpT4ac8aloV7`3J2yJ:7Vnna6a>mxl1m0<>~?Ta=lpb02lbl'
+TB='4|pyp<<9{m575Il{lx7[ll7U=5xH320a0@XIlB5z=0<a{=IxlxlH2:4Hm<T?Tx`mHx56l>2lm[9<p<b<yp3eZxbKVJa7xIxW11<89y0qy=xUK3JTml7fAoU?H=@yJyn?0xlbWyy1IlTml04=pn1bo[1I}2>uxLx@TK0HZcHJ>Wo4lXlI<5446plxpxII2AIXTK890{04TlV3`c<04{lHJBTV6M2mll2lVL<ZzIp>p<TVLW@xl1m2`aT585V?VpTp`2L;2W1e5TolLm2mWU6e3AHIzlTom<mnxT0;J7L:2dop4p{H`lJc?c<2bV2TU4xlT=3aVd6`=8nT0Wp`0XmBH{m=xH0m{o<HY{lJxWUa=rUUzWTWT2420h=2|HU0TpzyJWZ3Ol?{cl>I0oacNq1bmVmTYp?z63y3NI>BU7Y72A<4T4lTUV`OmHmYm8`<nx?ymU=V0m`Uc5<lJ5Hyy4yV3HyU0lVVVaxllCT|xxqn`Ym@ImmmlJaX2=2d2:x3TamJIpbTTCTxXxW3d3`bp6Z?l?5?xUcUpTp255l4a`l<m60U8zmHml0{``8T2oIc2M20~o6pJo4UMmT6d7HTMZ|Ia~8Blo~b`3o2yJ??pOna{a>cxlWm~<X~?Ta=|pb0blbb'
 def sq(u,j):
  x=ord(u[0])-97+8*int(u[1])-8
  return 63-x if j&1 else x
