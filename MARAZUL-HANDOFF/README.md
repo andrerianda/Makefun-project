@@ -36,7 +36,7 @@ Must be fixed BEFORE telling the owner "ready to submit" (priority order; the ow
 1. NEW (owner, 12:00): traffic lights have no poles — signal heads float. See UPDATE.md last section for files and suspects.
 2. NEW (owner, 12:00): many people sitting in mid-air — sitters placed where no bench is drawn or at the wrong height. See UPDATE.md last section.
 3. Full street-level QA sweep of every district for anything floating, missing its support, or sunk (the owner keeps finding these).
-4. Firefight crew should raise their guns (judged picture 2).
+4. Judged picture 2 re-shot as a rocket-launcher hit (owner, 12:40; see UPDATE.md last section), with the firefight crew raising their guns.
 5. Dusk street lamps too faint (lamp ramp starts ~19:25; judged picture 3).
 6. Helicopter camera and keys; boat boarding at the swim platform.
 7. Car side glass too opaque; tan dust cloud around the player car.
