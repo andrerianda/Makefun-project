@@ -41,7 +41,7 @@ Must be fixed BEFORE telling the owner "ready to submit" (priority order; the ow
 6. Helicopter camera and keys; boat boarding at the swim platform.
 7. Car side glass too opaque; tan dust cloud around the player car.
 8. Low-ready armed pedestrians do not swap to grip hands; Dez's jacket colour.
-9. Re-shoot any judged picture a fix changes (each >= 85 mean luminance at 768x480, <= ~250 KB; dossier < 1.5 MiB).
+9. Do NOT re-shoot the judged pictures: the original session re-shoots all four at the end (owner, 12:50). Instead make the scenes ready: police helicopter in golden-hour chases for the cover, the rocket-launcher hit for picture 2, and a SHOTS-READY note (see UPDATE.md last two sections).
 10. The owner's 1-minute gameplay video (walk, car, chase, shooting): Playwright recordVideo on the GPU pod, convert to MP4 with ffmpeg, send.
 11. Mock judge (needs the owner's OpenRouter key).
 12. Final: `node tools/release/checkEntry.mjs` all rows pass, GitHub About (homepage + topics) set, every recording id in RECORDINGS.md — then tell the owner it is ready; the ORIGINAL session submits.

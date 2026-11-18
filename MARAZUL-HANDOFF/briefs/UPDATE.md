@@ -285,3 +285,11 @@ The owner: "fotonya lebih bagus pakai bazoka, kalau yang dinilai keseruan" (the 
 - HUD showing a mission objective, wanted stars and the minimap; armed crew raising their guns; pedestrians fleeing; street and traffic of a Barrio Hierro or port block readable behind.
 - The cover already has a burning wreck: picture 2 must not look like a repeat — fresh blast, different street, different time of day (late afternoon).
 - Same limits as the rest of the set: mean luminance >= 85 at 768x480, <= ~250 KB, real game render only (no debug text), and the fireball must look real (no flat sprites). If the shot looks worse than the current picture 2, keep the current one.
+
+## Owner: the ORIGINAL session re-shoots the judged set at the end; police helicopter on the cover (18 Nov ~12:50 UTC). Binding.
+The owner: "foto bagian lu aja, nunggu dia selesai, baru kita foto ulang dan cek mana kondisi yang paling bagus; kalau bisa ada helikopter juga di sampulnya yang mengejar selain mobil polisi."
+- The NEW session does NOT re-shoot or replace the judged pictures in screenshots/. The original session re-shoots all four after the new session's last seal, compares old and new, and keeps the best of each.
+- So the new session's job for the pictures is to make the game ready for them:
+  - Police helicopter in DAYTIME chases (golden hour): it joins at 3-4 stars, flies low enough (about 18-25 m) and close enough (about 50-80 m ahead or alongside, over the street) to read clearly in the chase camera at 768x480, silhouetted against the bright sky, rotor blur, police livery, a spotlight cone is optional by day. game/src/police/policeHelicopter.js, policeDispatchRuntime.js, policeChaseShowcase.js (has only a night variant now: add a golden-hour cover variant with cruisers + helicopter + the burning wreck).
+  - The rocket-launcher hit for picture 2 (section above) must look great in the game and have a still scene the original session can shoot.
+  - Leave a short SHOTS-READY note in MARAZUL-HANDOFF (which scenes, URLs or still-scene names, times of day) for the original session.
