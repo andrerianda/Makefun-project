@@ -21,5 +21,5 @@ sed -i \"s/'--use-angle=swiftshader',/'--use-angle=vulkan', '--enable-features=V
 node $script$args"
 # Captures use their own GPU machine (marazul-shots) during busy shifts; comment out to share marazul-bake.
 # Spread captures over both machines (odd process ids go to marazul-shots).
-if [ -z "$MARAZUL_GPU_CFG" ] && [ $(( $$ % 2 )) -eq 1 ]; then export MARAZUL_GPU_CFG=/root/.config/marazul/gpu-worker-shots.json MARAZUL_POD_NAME=marazul-shots; fi
+# (disabled between shifts) if [ -z "$MARAZUL_GPU_CFG" ] && [ $(( $$ % 2 )) -eq 1 ]; then export MARAZUL_GPU_CFG=/root/.config/marazul/gpu-worker-shots.json MARAZUL_POD_NAME=marazul-shots; fi
 exec /opt/marazul-tools/gpu-run --sync game,tools --pull nothing_to_pull --timeout 900 -- bash -c "$remote"

@@ -23,17 +23,23 @@ All in the shared generator (every person gets it when rebuilt):
 - REQUESTS.md "Added ~11:20 UTC by characters": character-runtime must hide the grips on load
   and swap hands <-> grips while a weapon is held. UNTIL THEY DO, rebuilt people show both.
 
-## State at the time of writing
-- dez_tolliver building on the GPU (log /tmp/marazul/characters/s11_build_dez.log);
-  pedestrian_casual_m + pedestrian_office_f building (s11_build_peds.log).
-- Others NOT rebuilt yet (still the old hands; their registry entries unchanged).
+## State at shift end (11:26 UTC): CONSISTENT
+- ALL 15 people rebuilt 11:15-11:23 with the new arms/hands/grips and REGISTERED (registry
+  HAND_NODES in every entry; maxDraws +3: Dez 10, Sol 10 + maxTriangles 10000, the rest 9, gang_member_street
+  and pedestrian_older_f 8). Asset tests 11:23: 479 pass / 0 fail.
+  Dez 677,300 B (9,706/3,803/2,017 counted). Pedestrians 239-252 kB, gangs/uniforms 259-300 kB, Sol 580 kB.
+- (The engine's test run once failed the two pedestrians: it ran in the seconds between the files
+  landing and my registry edit. Register IMMEDIATELY after every build.)
+- Engine checks: aim view with the swap simulated /tmp/marazul/characters/s11-aim-grip.jpg
+  (-zoom, -hand crops): smooth arm, mustard cuff, wrapped hand under the pistol. Aims sheet on
+  the preview page: /tmp/marazul/characters/s11-aims-quarter.jpg (grips not hidden there: the
+  page/run-time does not swap yet).
 
 ## Next (in order)
-1. Register what landed (nodes + maxDraws), run tests, aim capture with the swap simulated:
-   /opt/marazul-tools/gpu-capture capture --size 1280x720 --page "index.html?seed=1&quality=high" --eval "$(cat /tmp/marazul/characters/aim-grip.js)" --out /tmp/marazul/characters/aim-grip.jpg
-2. Rebuild the rest: sol_arrieta, police_officer_m/f, swat_officer, paramedic, gang_member_street,
-   circle_enforcer, corriente_stevedore, jackal_rider, remache_stripper, pedestrian_beach_m,
-   pedestrian_older_f (two at a time; register each in the shift it lands).
+1. Check that character-runtime hid the grips on load and swaps them (REQUESTS 11:20). If it
+   has not by the next seal, the grip hands show over the relaxed hands everywhere.
+2. Closer engine look at the hands (fingers spindly? the grip fits the pistol?); tune
+   finger_paths bends / grip-hand placement against the held pistol.
 3. Older items: Dez behind view (diagonal folds), Remache tank top, corriente hard hat.
 
 ## Commands (from the repository root)

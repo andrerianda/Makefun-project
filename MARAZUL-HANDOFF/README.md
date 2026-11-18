@@ -20,7 +20,7 @@ VOID (never submit): 01a1ea7c-..., 01a1ecc7-8410-769c-9cab-0ddba96b1e38.
 5. The owner asked for effort "medium" on agents and ~12 agents per shift (launch-focused).
 
 ## Tools (copy `tools/` to /opt/marazul-tools/)
-- `gpu-run` (Blender builds on a RunPod GPU), `gpu-capture capture|smoke` (hardware WebGL captures), `gpu_pod.py status|terminate`, `gpu_worker.py` (skips queued jobs whose caller stopped polling), `pod-browser-setup.sh`. RunPod key goes in /root/.config/marazul/runpod.key (mode 600; the owner has it; never print it, never give it to agents). Pods self-terminate after 30 idle min; terminate both at shift end. Balance ~$3.8 at 11:30.
+- `gpu-run` (Blender builds on a RunPod GPU), `gpu-capture capture|smoke` (hardware WebGL captures), `gpu_pod.py status|terminate`, `gpu_worker.py` (skips queued jobs whose caller stopped polling), `pod-browser-setup.sh`. RunPod balance ~$2.75 at 11:30. RunPod key goes in /root/.config/marazul/runpod.key (mode 600; the owner has it; never print it, never give it to agents). Pods self-terminate after 30 idle min; terminate both at shift end. Balance ~$3.8 at 11:30.
 - The make.fun kit: download from the competition page (/c/gta6-01/kit) and run its CLI with NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1.
 
 ## State of the game (18 Nov 11:30)

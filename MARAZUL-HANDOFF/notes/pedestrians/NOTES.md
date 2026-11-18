@@ -1,4 +1,27 @@
-# pedestrians handoff note (shift 10, ~11:03 to ~11:17 UTC, 18 Nov)
+# pedestrians handoff note (shift 10 + urgent grip-hands fix ~11:25-11:30 UTC, 18 Nov)
+
+## Grip hands fix (11:25-11:30, done)
+Rebuilt bases carry hands_lod0..2 + hand_r_grip/hand_l_grip (grips: one paint_skin primitive, no LOD
+suffix -> level 0). Before: the grips were merged into every body's lod0 draw (drawn over the relaxed
+hands on everyone) and the walker's gripHands found nothing. Now in pedestrianBodies.js:
+- sortBodyParts: grips kept OUT of the merge (body.grips, own meshes; gripHands hides them on set-up,
+  visible=false -> no draw); relaxed hands merged LAST per level (planMerge(meshes, handCount) ->
+  bodyCount = draw count without hands).
+- syncArmed (each animate, and right after walker.update): when the walker's gripHands shows the
+  grips, showMergedHands(merge, false) cuts the relaxed hands with geometry.setDrawRange(0, bodyCount)
+  on the person's own geometry (0 extra draws); unmerged relaxed hands (fallback) are hidden in
+  showLevel. Grip visibility is never touched by us (gripHands caches it); only castShadow.
+- Grips painted with the skin (paint_skin added to body.roles -> setPaint). drawsOf adds 2 when armed.
+- Test: tools/tests/pedestrians/gripHands.test.mjs (34 tests pass). Local smoke OK (smoke-15.log).
+- GPU: hands-crowd.jpg (+crop): 62 people, 0 grips visible, relaxed hands single and clean;
+  hands-armed.jpg (+crop): Los Remaches member aiming a pistol, grips shown, relaxed-hand range cut
+  (drawRange 15069 = bodyCount), two-handed hold reads. Scripts hands-crowd.js / hands-armed.js.
+- Not ours: police officers (police/officerBehaviour.js) instantiate lod:0 unmerged, so gripHands works
+  there directly. A person given holdWeapon but never aimAt stayed at weapon<0.5 -> grips not shown
+  (run-time's rule in locomotionController ~line 453).
+- pedestrianBodies.js is now 423 lines / 20 KB: next time split the merge helpers into bodyMerge.js.
+
+# (earlier) pedestrians handoff note (shift 10, ~11:03 to ~11:17 UTC, 18 Nov)
 
 Tests: `node --test "tools/tests/pedestrians/*.test.mjs"` (30 pass). Local smoke OK (smoke-14.log), no console errors.
 Earlier shifts (still true): seatedDrivers.js seats a pooled body in every traffic car / bike within 40 m
