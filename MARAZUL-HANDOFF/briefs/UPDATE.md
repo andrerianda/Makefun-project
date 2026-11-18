@@ -305,3 +305,11 @@ Fix at the source, for every character:
 - Crowd: variety in cut, print (stripes, florals, plain), colour palette tied to each district (beach, office, port, barrio), bags, hats, sunglasses; no two neighbours in the same outfit.
 - Keep the rig, grip hands, LODs and budgets working: sleeves must not clip through arms in the aim stances; check the file-count and size caps (node tools/release/checkEntry.mjs).
 - Check in the aim view, the chase view and on-foot walking at 1280x800 and 768x480, day and dusk, and compare before/after side by side.
+
+## Owner: the neck looks like it floats (18 Nov ~13:05 UTC). Binding for characters, with the clothes section above.
+The owner: "lehernya juga kelihatan ngambang" (the neck also looks like it is floating). In the dusk picture and the bat capture Dez's head sits on a thin stalk above a dark collar ring, as if detached from the shoulders.
+- The neck must be anatomically sized (about 11-13 cm across for an adult man, thicker at the base) and flow into the shoulders through the trapezius slope, front and back; no thin stalk.
+- No gap, seam, dark ring or shading break between head, neck and body at any LOD: one continuous skin, matched normals and skin tone across the join (or the head mesh welded to the body mesh).
+- The collar wraps the base of the neck closely (a real collar or crew neckline with thickness), with no void showing inside it and no dark band reading as a hole.
+- It must hold when the head turns or tilts (look-at and aim): weight the neck across neck and spine_03/upper-chest bones so no gap opens and nothing pinches.
+- Check from behind (chase and walking views, where the judge sees it most), from the side and in the aim view, at 1280x800 and 768x480.
