@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""gpu-run: run a command on the rented GPU machine in a mirror of the repository.
+
+usage: gpu-run [--sync art[,dir...]] [--pull game/assets[,dir...]] [--timeout seconds] -- <command> [args...]
+
+Run it from the repository root. The directories named by --sync (default: art) are sent to the GPU
+machine, the command runs there from the mirrored root with the same Blender Python at
+/opt/marazul-blender/bin/python, its output is streamed here, and afterwards every file the command
+wrote under the --pull directories (default: game/assets) and under /tmp/marazul/ is brought back to
+the same paths on this machine. Exit code: the command's; 75 when no GPU machine is available (run the
+command locally instead).
+"""
+import base64, io, json, os, sys, tarfile, time, urllib.request, urllib.error
+
+CFG = os.environ.get('MARAZUL_GPU_CFG', '/root/.config/marazul/gpu-worker.json')
+
+def fail(msg, code=75):
+    print('gpu-run: ' + msg, file=sys.stderr); sys.exit(code)
+
+def main():
+    args = sys.argv[1:]
+    sync, pull, timeout = ['art'], ['game/assets'], 3600
+    while args and args[0] != '--':
+        a = args.pop(0)
+        if a == '--sync': sync = [d for d in args.pop(0).split(',') if d]
+        elif a == '--pull': pull = [d for d in args.pop(0).split(',') if d]
+        elif a == '--timeout': timeout = int(args.pop(0))
+        elif a in ('-h', '--help'): print(__doc__); return 0
+        else: fail('unknown option ' + a, 2)
+    if not args or args[0] != '--' or len(args) < 2:
+        fail('usage: gpu-run [options] -- <command> [args...]', 2)
+    cmd = args[1:]
+    pinned = {}
+    def call(path, data=None, t=60):
+        # Once a job is submitted, keep talking to the machine that runs it, even if another
+        # gpu-run later rents a different machine and rewrites the config.
+        cfg = pinned or json.load(open(CFG))
+        req = urllib.request.Request(cfg['url'] + path, data=data, headers={'X-Token': cfg['token'], 'Content-Type': 'application/gzip', 'User-Agent': 'curl/8.5.0', 'Accept': '*/*'})
+        return urllib.request.urlopen(req, timeout=t).read()
+    def healthy():
+        if not os.path.exists(CFG):
+            return None
+        for _ in range(3):
+            try:
+                return json.loads(call('/health', t=30))
+            except Exception:
+                time.sleep(4)
+        return None
+    # The GPU machine shuts itself down when idle; bring one up on demand (one process at a time).
+    import fcntl, subprocess
+    os.makedirs('/tmp/marazul', exist_ok=True)
+    with open('/tmp/marazul/gpu-pod.lock' if CFG.endswith('/gpu-worker.json') else '/tmp/marazul/gpu-pod-' + os.path.basename(CFG) + '.lock', 'w') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        health = healthy()
+        if health is None:
+            print('gpu-run: no GPU machine is up; renting one (about four minutes)...', flush=True)
+            subprocess.run([sys.executable, '/opt/marazul-tools/gpu_pod.py', 'terminate'], capture_output=True)
+            made = False
+            for gpu in ('NVIDIA GeForce RTX 3090', 'NVIDIA RTX PRO 4500 Blackwell', 'NVIDIA GeForce RTX 5090'):
+                r = subprocess.run([sys.executable, '/opt/marazul-tools/gpu_pod.py', 'create', gpu], capture_output=True, text=True)
+                if 'created pod' in r.stdout:
+                    made = True; break
+            if not made:
+                fail('could not rent a GPU machine right now; run the command locally instead')
+        deadline = time.time() + 600
+        while True:
+            health = healthy()
+            if health and health.get('setup') == 'ready':
+                break
+            if health and str(health.get('setup', '')).startswith('failed'):
+                fail('the GPU machine failed to set up; run the command locally instead')
+            if time.time() > deadline:
+                fail('the GPU machine did not become ready in time; run the command locally instead')
+            time.sleep(8)
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode='w:gz') as tar:
+        for d in sync:
+            if os.path.exists(d):
+                tar.add(d, filter=lambda ti: None if ('__pycache__' in ti.name or ti.name.endswith('.pyc')) else ti)
+    q = '/run?timeout=%d&cmd=%s' % (timeout, base64.urlsafe_b64encode(json.dumps(cmd).encode()).decode())
+    pinned.update(json.load(open(CFG)))
+    job = json.loads(call(q, data=buf.getvalue(), t=120))['id']
+    print('gpu-run: job %s started on the GPU machine (%d bytes sent)' % (job, buf.tell()), flush=True)
+    offset, status = 0, {}
+    while True:
+        try:
+            status = json.loads(call('/job/%s?offset=%d' % (job, offset), t=60))
+        except Exception as e:
+            print('gpu-run: (poll failed: %s, retrying)' % (e,), flush=True); time.sleep(5); continue
+        if status.get('log'):
+            sys.stdout.write(status['log']); sys.stdout.flush()
+        offset = status.get('next_offset', offset)
+        if status.get('status') == 'done' and not status.get('log'):
+            break
+        time.sleep(2)
+    data = call('/job/%s/result' % job, t=300)
+    pulled = []
+    with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as tar:
+        for m in tar.getmembers():
+            if not m.isfile() or m.name.endswith('.lock'):
+                continue
+            kind, _, rel = m.name.partition('/')
+            rel = os.path.normpath(rel)
+            if rel.startswith('..') or os.path.isabs(rel):
+                continue
+            if kind == 'repo' and any(rel == p or rel.startswith(p.rstrip('/') + '/') for p in pull):
+                dest = rel
+            elif kind == 'tmp':
+                dest = os.path.join('/tmp/marazul', rel)
+            else:
+                continue
+            os.makedirs(os.path.dirname(dest) or '.', exist_ok=True)
+            with open(dest, 'wb') as f:
+                f.write(tar.extractfile(m).read())
+            pulled.append(dest)
+    print('gpu-run: finished in %ss with exit code %s; %d file(s) brought back' % (status.get('elapsed'), status.get('returncode'), len(pulled)))
+    for p in pulled[:60]:
+        print('  ' + p)
+    return int(status.get('returncode') or 0)
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,0 +1,2 @@
+art/blender/assets/sports_cars/_curves.py
+art/blender/assets/sports_cars/_mesh.py

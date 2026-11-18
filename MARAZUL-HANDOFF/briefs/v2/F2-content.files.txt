@@ -1,0 +1,4 @@
+game/src/catalog/cityDistricts.js
+game/src/catalog/pedestrianArchetypes.js
+game/src/catalog/storyCharacters.js
+game/src/catalog/vehicleCatalog.js

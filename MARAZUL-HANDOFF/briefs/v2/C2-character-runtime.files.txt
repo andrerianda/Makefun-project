@@ -1,0 +1,8 @@
+game/src/characters/ik/limbPosing.js
+game/src/characters/ik/twoBoneSolver.js
+game/src/characters/puppet/puppetControls.js
+game/src/characters/skeleton/bodyMeasurements.js
+game/src/characters/skeleton/forwardKinematics.js
+game/src/characters/skeleton/humanSkeleton.js
+game/src/characters/skeleton/poseBuffer.js
+game/src/characters/skeleton/quaternionMath.js

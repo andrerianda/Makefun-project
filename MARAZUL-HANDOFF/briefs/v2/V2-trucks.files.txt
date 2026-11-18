@@ -1,0 +1,2 @@
+art/blender/assets/trucks/_hull.py
+art/blender/assets/trucks/_wheels.py

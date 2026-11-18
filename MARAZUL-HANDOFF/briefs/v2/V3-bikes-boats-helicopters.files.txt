@@ -1,0 +1,2 @@
+art/blender/assets/motorcycles/_kit.py
+art/blender/assets/motorcycles/_moto.py

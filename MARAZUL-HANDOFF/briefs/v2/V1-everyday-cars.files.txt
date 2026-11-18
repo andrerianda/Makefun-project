@@ -1,0 +1,1 @@
+art/blender/assets/vehicles/_shape.py

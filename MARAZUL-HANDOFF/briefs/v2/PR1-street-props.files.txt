@@ -1,0 +1,4 @@
+art/blender/assets/props/_finishes.py
+art/blender/assets/props/_setkit.py
+art/blender/assets/props/_shapes.py
+art/blender/assets/props/set_street_lighting.py
