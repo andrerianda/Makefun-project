@@ -293,3 +293,15 @@ The owner: "foto bagian lu aja, nunggu dia selesai, baru kita foto ulang dan cek
   - Police helicopter in DAYTIME chases (golden hour): it joins at 3-4 stars, flies low enough (about 18-25 m) and close enough (about 50-80 m ahead or alongside, over the street) to read clearly in the chase camera at 768x480, silhouetted against the bright sky, rotor blur, police livery, a spotlight cone is optional by day. game/src/police/policeHelicopter.js, policeDispatchRuntime.js, policeChaseShowcase.js (has only a night variant now: add a golden-hour cover variant with cruisers + helicopter + the burning wreck).
   - The rocket-launcher hit for picture 2 (section above) must look great in the game and have a still scene the original session can shoot.
   - Leave a short SHOTS-READY note in MARAZUL-HANDOFF (which scenes, URLs or still-scene names, times of day) for the original session.
+
+## Owner: the characters' clothes still look wrong (18 Nov ~13:00 UTC). Binding for characters (art/blender/assets/characters/: _fabric.py, _outfits.py, _wardrobe.py, _person.py, dez_tolliver.py, pedestrian_*.py) and pedestrians.
+The owner: "yang masih jelek itu pakaian karakternya, aneh" (what still looks bad is the characters' clothing, it looks weird). Seen in the current dusk picture and the bat capture:
+- Dez: the mustard top reads as a flat, boxy blob — no collar, seams, zip, pockets or cuffs, a jagged/ragged hem, one saturated colour with no fabric; the hair/cap reads as a flat black block. Trousers plain and featureless.
+- Pedestrians: single-colour sack dresses and plain tees, no texture, folds or layering; several look like untextured mannequins.
+Fix at the source, for every character:
+- Real garments with construction: collars, plackets or zips, seams and topstitching, pockets, hem bands and cuffs, belts; clean hems (no ragged geometry). Fitted silhouettes (shoulder seam on the shoulder, tapered sleeves and trousers), not boxy tubes. Layering where it suits (open overshirt or light jacket over a tee).
+- Fabric per material: a tiling weave/knit/denim/linen/leather normal map and roughness, folds at elbows, armpits, waist and knees (baked normal + AO), slight colour variation; denim must read as denim. Shoes with soles and laces.
+- Dez: a modern, coherent hero outfit in muted colours that read at 768x480 against the city (e.g. a fitted light jacket or overshirt in a muted tone over a plain tee, dark slim jeans, clean sneakers); real short hair with a hairline (or a properly shaped cap with a brim). Keep his look original; no copy of any commercial game's character.
+- Crowd: variety in cut, print (stripes, florals, plain), colour palette tied to each district (beach, office, port, barrio), bags, hats, sunglasses; no two neighbours in the same outfit.
+- Keep the rig, grip hands, LODs and budgets working: sleeves must not clip through arms in the aim stances; check the file-count and size caps (node tools/release/checkEntry.mjs).
+- Check in the aim view, the chase view and on-foot walking at 1280x800 and 768x480, day and dusk, and compare before/after side by side.
