@@ -32,4 +32,17 @@ VOID (never submit): 01a1ea7c-..., 01a1ecc7-8410-769c-9cab-0ddba96b1e38.
 
 ## State of the game (18 Nov 11:30)
 Judged set installed (screenshots/, all ≥85 luminance): 1 golden-hour chase with a burning wreck, 2 Barrio Hierro firefight, 3 dusk on foot with neon, 4 sunset skyline with speedboat and news helicopter. Aim view matches the owner's reference (camera at neck height, ~27° side angle, two-handed stance, feet 0.47 m apart). Boats and helicopters drivable. New game starts 18:15 (golden hour). Own loading screen and menus.
-Open, in priority order (see REQUESTS.md tail and STATE.md): grip-pose hands + arm deformation (characters, in progress at handoff); firefight crew should raise guns; dusk street lamps faint; helicopter camera/keys, boat boarding at the swim platform; owner's 1-minute gameplay video (record with Playwright recordVideo on the GPU, convert to MP4 with ffmpeg, send); mock judge (needs the owner's OpenRouter key); final review and submit only with the owner's go-ahead.
+Must be fixed BEFORE telling the owner "ready to submit" (priority order; the owner checks by playing):
+1. NEW (owner, 12:00): traffic lights have no poles — signal heads float. See UPDATE.md last section for files and suspects.
+2. NEW (owner, 12:00): many people sitting in mid-air — sitters placed where no bench is drawn or at the wrong height. See UPDATE.md last section.
+3. Full street-level QA sweep of every district for anything floating, missing its support, or sunk (the owner keeps finding these).
+4. Firefight crew should raise their guns (judged picture 2).
+5. Dusk street lamps too faint (lamp ramp starts ~19:25; judged picture 3).
+6. Helicopter camera and keys; boat boarding at the swim platform.
+7. Car side glass too opaque; tan dust cloud around the player car.
+8. Low-ready armed pedestrians do not swap to grip hands; Dez's jacket colour.
+9. Re-shoot any judged picture a fix changes (each >= 85 mean luminance at 768x480, <= ~250 KB; dossier < 1.5 MiB).
+10. The owner's 1-minute gameplay video (walk, car, chase, shooting): Playwright recordVideo on the GPU pod, convert to MP4 with ffmpeg, send.
+11. Mock judge (needs the owner's OpenRouter key).
+12. Final: `node tools/release/checkEntry.mjs` all rows pass, GitHub About (homepage + topics) set, every recording id in RECORDINGS.md — then tell the owner it is ready; the ORIGINAL session submits.
+Done at handoff: grip-pose hands and arm deformation (shift 10).
